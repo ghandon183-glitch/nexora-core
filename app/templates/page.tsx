@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 
 import Navbar from "@/components/navigation/navbar";
-import Sidebar from "@/components/navigation/sidebar";
 import FloatingDock from "@/components/navigation/floating-dock";
 
 import Section from "@/components/ui/section";
@@ -93,7 +92,6 @@ export default function TemplatesPage() {
   return (
     <>
       <Navbar />
-      <Sidebar />
       <FloatingDock />
 
       <Section>

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import Navbar from "@/components/navigation/navbar";
-import Sidebar from "@/components/navigation/sidebar";
 import FloatingDock from "@/components/navigation/floating-dock";
 
 import Container from "@/components/ui/container";
@@ -35,7 +34,6 @@ export default async function TemplateDetailsPage({
   return (
     <>
       <Navbar />
-      <Sidebar />
       <FloatingDock />
 
       <main className="pt-28">
