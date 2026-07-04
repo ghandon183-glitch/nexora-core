@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050816;
+  --foreground: #f8fafc;
+
+  --card: rgba(15, 23, 42, 0.65);
+  --card-border: rgba(255,255,255,.08);
+
+  --primary: #06b6d4;
+  --primary-hover: #0891b2;
+
+  --muted: #94a3b8;
+
+  --radius: 24px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+*,
+*::before,
+*::after{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+
+  background:
+  radial-gradient(circle at top left,#0f172a 0%,transparent 40%),
+  radial-gradient(circle at top right,#0b1120 0%,transparent 35%),
+  linear-gradient(180deg,#050816 0%,#0b1120 100%);
+
+  color:var(--foreground);
+
+  font-family:var(--font-geist-sans),Arial,sans-serif;
+}
+
+img{
+  display:block;
+  max-width:100%;
+}
+
+button{
+  cursor:pointer;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+::selection{
+  background:#06b6d4;
+  color:#000;
+}
