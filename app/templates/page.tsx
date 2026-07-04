@@ -11,10 +11,13 @@ import Section from "@/components/ui/section";
 import TemplatesHeader from "@/components/templates/templates-header";
 import TemplatesGrid from "@/components/templates/templates-grid";
 import SortFilter from "@/components/templates/sort-filter";
+import Pagination from "@/components/templates/pagination";
 
 import FilterSidebar from "@/components/filters/filter-sidebar";
 
 import { SearchQuery } from "@/lib/queries/search.query";
+
+const ITEMS_PER_PAGE = 6;
 
 export default function TemplatesPage() {
   const [keyword, setKeyword] = useState("");
@@ -27,7 +30,9 @@ export default function TemplatesPage() {
 
   const [sort, setSort] = useState("Newest");
 
-  const templates = useMemo(() => {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filteredTemplates = useMemo(() => {
     let data = SearchQuery.search(keyword);
 
     data = data.filter((item) => {
@@ -65,6 +70,26 @@ export default function TemplatesPage() {
     sort,
   ]);
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredTemplates.length / ITEMS_PER_PAGE)
+  );
+
+  const safePage = Math.min(currentPage, totalPages);
+
+  const templates = useMemo(() => {
+    const start = (safePage - 1) * ITEMS_PER_PAGE;
+
+    return filteredTemplates.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredTemplates, safePage]);
+
+  function handleFilterChange<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      setter(value);
+      setCurrentPage(1);
+    };
+  }
+
   return (
     <>
       <Navbar />
@@ -76,7 +101,7 @@ export default function TemplatesPage() {
 
           <TemplatesHeader
             value={keyword}
-            onSearch={setKeyword}
+            onSearch={handleFilterChange(setKeyword)}
           />
 
           <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
@@ -85,9 +110,9 @@ export default function TemplatesPage() {
               category={category}
               framework={framework}
               price={price}
-              onCategoryChange={setCategory}
-              onFrameworkChange={setFramework}
-              onPriceChange={setPrice}
+              onCategoryChange={handleFilterChange(setCategory)}
+              onFrameworkChange={handleFilterChange(setFramework)}
+              onPriceChange={handleFilterChange(setPrice)}
             />
 
             <div>
@@ -101,6 +126,12 @@ export default function TemplatesPage() {
 
               <TemplatesGrid
                 templates={templates}
+              />
+
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
               />
 
             </div>
