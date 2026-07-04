@@ -36,7 +36,7 @@ export default async function TemplateDetailsPage({
       <Navbar />
       <FloatingDock />
 
-      <main className="pt-28">
+      <main className="pt-36">
 
         <Container className="pb-24">
 

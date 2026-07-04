@@ -11,7 +11,7 @@ export default function Section({
 }: SectionProps) {
   return (
     <section
-      className={`relative py-24 lg:py-32 ${className}`}
+      className={`relative pt-36 pb-24 lg:pb-32 ${className}`}
       {...props}
     >
       {children}

@@ -9,7 +9,7 @@ export default function PurchaseCard({
   price,
 }: PurchaseCardProps) {
   return (
-    <aside className="xl:sticky xl:top-32 xl:self-start">
+    <aside className="xl:sticky xl:top-40 xl:self-start">
       <Card className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-xl">
 
         <div className="space-y-8">
