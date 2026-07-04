@@ -22,7 +22,7 @@ export default function ProductReviews() {
           </div>
 
           <p className="leading-8 text-slate-300">
-            One of the cleanest templates I've purchased.
+            One of the cleanest templates I&apos;ve purchased.
             The codebase is extremely organized and easy to customize.
           </p>
 

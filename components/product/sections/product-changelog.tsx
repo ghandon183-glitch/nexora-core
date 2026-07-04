@@ -23,7 +23,7 @@ export default function ProductChangelog({
         </h2>
 
         <p className="mt-3 text-lg text-slate-400">
-          See what's new in every release.
+          See what&apos;s new in every release.
         </p>
 
       </div>

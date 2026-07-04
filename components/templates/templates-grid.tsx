@@ -1,7 +1,8 @@
 import TemplateCard from "@/components/ui/template-card";
+import type { Template } from "@/lib/data/templates";
 
 interface Props {
-  templates: any[];
+  templates: Template[];
 }
 
 export default function TemplatesGrid({
