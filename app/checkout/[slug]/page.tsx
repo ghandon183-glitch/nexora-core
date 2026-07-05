@@ -66,6 +66,21 @@ export default function CheckoutPage() {
   function handleConfirmPayment() {
     setConfirming(true);
 
+    fetch("/api/notify-purchase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        templateTitle: template!.title,
+        templateSlug: template!.slug,
+        price: template!.price,
+        buyerName: user!.name,
+        buyerEmail: user!.email,
+      }),
+    }).catch((error) => {
+      // Never let a notification failure block the customer's flow.
+      console.error("Failed to send purchase notification:", error);
+    });
+
     setTimeout(() => {
       addPurchase({
         slug: template!.slug,
