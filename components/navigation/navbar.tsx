@@ -8,10 +8,10 @@ import { useAuth } from "@/lib/context/auth-context";
 
 const links = [
   { label: "Home", href: "/" },
-  { label: "Components", href: "#", disabled: true },
+  { label: "Components", href: "/components" },
   { label: "Templates", href: "/templates" },
-  { label: "Pricing", href: "#", disabled: true },
-  { label: "Docs", href: "#", disabled: true },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Docs", href: "/docs" },
 ];
 
 export default function Navbar() {
@@ -51,25 +51,15 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">
-          {links.map((item) =>
-            item.disabled ? (
-              <span
-                key={item.label}
-                title="Coming soon"
-                className="cursor-not-allowed text-sm text-slate-600"
-              >
-                {item.label}
-              </span>
-            ) : (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-sm text-slate-300 transition hover:text-cyan-400"
-              >
-                {item.label}
-              </Link>
-            )
-          )}
+          {links.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="text-sm text-slate-300 transition hover:text-cyan-400"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         {loading ? (
