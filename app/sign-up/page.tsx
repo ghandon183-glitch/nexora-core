@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 import AuthCard from "@/components/auth/auth-card";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
+import { useAuth } from "@/lib/context/auth-context";
 
 export default function SignUpPage() {
   const [name, setName] = useState("");
@@ -17,7 +19,9 @@ export default function SignUpPage() {
 
   const [error, setError] = useState("");
 
-  const [submitted, setSubmitted] = useState(false);
+  const { signIn } = useAuth();
+
+  const router = useRouter();
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -43,7 +47,9 @@ export default function SignUpPage() {
     }
 
     setError("");
-    setSubmitted(true);
+
+    signIn({ name, email });
+    router.push("/dashboard");
   }
 
   return (
@@ -54,83 +60,80 @@ export default function SignUpPage() {
       footerLinkText="Sign in"
       footerLinkHref="/sign-in"
     >
-      {submitted ? (
-        <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4 text-sm text-cyan-300">
-          This is a UI preview — there is no backend connected yet, so
-          accounts aren&apos;t saved. Once a database is added, this form
-          will create a real account.
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        <div>
+          <label className="mb-2 block text-sm text-slate-300">
+            Full name
+          </label>
+
+          <Input
+            type="text"
+            placeholder="Jane Doe"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
+
+        <div>
+          <label className="mb-2 block text-sm text-slate-300">
+            Email
+          </label>
+
+          <Input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm text-slate-300">
+            Password
+          </label>
+
+          <Input
+            type="password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm text-slate-300">
+            Confirm password
+          </label>
+
+          <Input
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-400">
+            {error}
+          </p>
+        )}
+
+        <p className="text-xs text-slate-500">
+          There is no backend connected yet, so this creates a local
+          session on this device only.
+        </p>
+
+        <Button
+          type="submit"
+          className="w-full"
         >
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Full name
-            </label>
-
-            <Input
-              type="text"
-              placeholder="Jane Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Email
-            </label>
-
-            <Input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Password
-            </label>
-
-            <Input
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Confirm password
-            </label>
-
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-400">
-              {error}
-            </p>
-          )}
-
-          <Button
-            type="submit"
-            className="w-full"
-          >
-            Create Account
-          </Button>
-        </form>
-      )}
+          Create Account
+        </Button>
+      </form>
     </AuthCard>
   );
 }

@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { useAuth } from "@/lib/context/auth-context";
 
 const links = [
   { label: "Home", href: "/" },
@@ -11,6 +15,18 @@ const links = [
 ];
 
 export default function Navbar() {
+  const { user, loading, signOut } = useAuth();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const router = useRouter();
+
+  function handleSignOut() {
+    signOut();
+    setMenuOpen(false);
+    router.push("/");
+  }
+
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="mx-auto mt-5 flex h-16 w-[94%] max-w-7xl items-center justify-between rounded-2xl border border-white/10 bg-slate-950/80 px-6 backdrop-blur-2xl">
@@ -56,23 +72,65 @@ export default function Navbar() {
           )}
         </nav>
 
-        <div className="flex items-center gap-3">
+        {loading ? (
+          <div className="h-10 w-10" />
+        ) : user ? (
+          <div className="relative">
 
-          <Link
-            href="/sign-in"
-            className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white transition hover:border-cyan-400 hover:bg-white/5"
-          >
-            Login
-          </Link>
+            <button
+              onClick={() => setMenuOpen((open) => !open)}
+              className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2 transition hover:border-cyan-400 hover:bg-white/5"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-black">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
 
-          <Link
-            href="/sign-up"
-            className="rounded-xl bg-cyan-500 px-5 py-2 text-sm font-bold text-black transition hover:scale-105"
-          >
-            Get Started
-          </Link>
+              <span className="text-sm text-white">
+                {user.name}
+              </span>
+            </button>
 
-        </div>
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-slate-950 p-2 shadow-xl">
+
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  Dashboard
+                </Link>
+
+                <button
+                  onClick={handleSignOut}
+                  className="block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  Sign Out
+                </button>
+
+              </div>
+            )}
+
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+
+            <Link
+              href="/sign-in"
+              className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white transition hover:border-cyan-400 hover:bg-white/5"
+            >
+              Login
+            </Link>
+
+            <Link
+              href="/sign-up"
+              className="rounded-xl bg-cyan-500 px-5 py-2 text-sm font-bold text-black transition hover:scale-105"
+            >
+              Get Started
+            </Link>
+
+          </div>
+        )}
 
       </div>
     </header>

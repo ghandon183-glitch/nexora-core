@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 import AuthCard from "@/components/auth/auth-card";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
+import { useAuth } from "@/lib/context/auth-context";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +15,9 @@ export default function SignInPage() {
 
   const [error, setError] = useState("");
 
-  const [submitted, setSubmitted] = useState(false);
+  const { signIn } = useAuth();
+
+  const router = useRouter();
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -29,7 +33,11 @@ export default function SignInPage() {
     }
 
     setError("");
-    setSubmitted(true);
+
+    const name = email.split("@")[0];
+
+    signIn({ name, email });
+    router.push("/dashboard");
   }
 
   return (
@@ -40,57 +48,54 @@ export default function SignInPage() {
       footerLinkText="Sign up"
       footerLinkHref="/sign-up"
     >
-      {submitted ? (
-        <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4 text-sm text-cyan-300">
-          This is a UI preview — there is no backend connected yet, so
-          accounts aren&apos;t saved. Once a database is added, this form
-          will sign you in for real.
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        <div>
+          <label className="mb-2 block text-sm text-slate-300">
+            Email
+          </label>
+
+          <Input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
+
+        <div>
+          <label className="mb-2 block text-sm text-slate-300">
+            Password
+          </label>
+
+          <Input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-400">
+            {error}
+          </p>
+        )}
+
+        <p className="text-xs text-slate-500">
+          There is no backend connected yet, so this signs you in
+          locally on this device only.
+        </p>
+
+        <Button
+          type="submit"
+          className="w-full"
         >
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Email
-            </label>
-
-            <Input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Password
-            </label>
-
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-400">
-              {error}
-            </p>
-          )}
-
-          <Button
-            type="submit"
-            className="w-full"
-          >
-            Sign In
-          </Button>
-        </form>
-      )}
+          Sign In
+        </Button>
+      </form>
     </AuthCard>
   );
 }
