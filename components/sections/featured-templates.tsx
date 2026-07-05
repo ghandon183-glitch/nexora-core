@@ -1,6 +1,9 @@
 import TemplateCard from "@/components/ui/template-card";
+import { templates } from "@/lib/data/templates";
 
 export default function FeaturedTemplates() {
+  const featured = templates.slice(0, 3);
+
   return (
     <section className="relative py-32">
       <div className="mx-auto max-w-7xl px-8">
@@ -28,32 +31,17 @@ export default function FeaturedTemplates() {
         {/* Grid */}
         <div className="grid gap-8 lg:grid-cols-3">
 
-          <TemplateCard
-            slug="ai-saas"
-            title="SaaS Landing"
-            description="Modern landing page focused on conversion, speed and premium user experience."
-            image="/templates/ai-saas.jpg"
-            badge="Popular"
-            price={49}
-          />
-
-          <TemplateCard
-            slug="startup-dashboard"
-            title="Startup Dashboard"
-            description="Professional dashboard with analytics, charts, tables and management pages."
-            image="/templates/dashboard.jpg"
-            badge="New"
-            price={69}
-          />
-
-          <TemplateCard
-            slug="creative-agency"
-            title="Agency Website"
-            description="Elegant multipage template for creative agencies and digital studios."
-            image="/templates/agency.jpg"
-            badge="Premium"
-            price={59}
-          />
+          {featured.map((template) => (
+            <TemplateCard
+              key={template.slug}
+              slug={template.slug}
+              title={template.title}
+              description={template.description}
+              image={template.image}
+              badge={template.badge}
+              price={template.price}
+            />
+          ))}
 
         </div>
 
