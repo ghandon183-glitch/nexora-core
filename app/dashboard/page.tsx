@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/auth-context";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
+import Navbar from "@/components/navigation/navbar";
+import FloatingDock from "@/components/navigation/floating-dock";
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
@@ -34,7 +36,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#060B18] px-6 pt-36 pb-20">
+    <>
+      <Navbar />
+      <FloatingDock />
+
+      <main className="min-h-screen bg-[#060B18] px-6 pt-36 pb-20">
 
       <div className="mx-auto max-w-5xl">
 
@@ -117,6 +123,7 @@ export default function DashboardPage() {
 
       </div>
 
-    </main>
+      </main>
+    </>
   );
 }
