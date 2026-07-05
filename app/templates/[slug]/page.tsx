@@ -72,6 +72,7 @@ export default async function TemplateDetailsPage({
             <div className="mt-10 w-full xl:mt-0 xl:w-[380px] xl:flex-shrink-0">
 
               <PurchaseCard
+                slug={template.slug}
                 price={template.price}
               />
 

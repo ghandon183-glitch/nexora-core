@@ -1,11 +1,15 @@
+import Link from "next/link";
+
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
 
 interface PurchaseCardProps {
+  slug: string;
   price: number;
 }
 
 export default function PurchaseCard({
+  slug,
   price,
 }: PurchaseCardProps) {
   return (
@@ -40,9 +44,11 @@ export default function PurchaseCard({
 
           <div className="space-y-4">
 
-            <Button className="w-full">
-              Purchase Now
-            </Button>
+            <Link href={`/checkout/${slug}`}>
+              <Button className="w-full">
+                Purchase Now
+              </Button>
+            </Link>
 
             <Button
               variant="outline"

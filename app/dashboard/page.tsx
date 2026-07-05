@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { useAuth } from "@/lib/context/auth-context";
+import { usePurchases } from "@/lib/context/purchases-context";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Navbar from "@/components/navigation/navbar";
@@ -11,6 +13,8 @@ import FloatingDock from "@/components/navigation/floating-dock";
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
+
+  const { purchases } = usePurchases();
 
   const router = useRouter();
 
@@ -34,6 +38,11 @@ export default function DashboardPage() {
     signOut();
     router.push("/");
   }
+
+  const totalSpent = purchases.reduce(
+    (sum, purchase) => sum + purchase.price,
+    0
+  );
 
   return (
     <>
@@ -73,7 +82,7 @@ export default function DashboardPage() {
             </p>
 
             <p className="mt-3 text-3xl font-black text-white">
-              0
+              {purchases.length}
             </p>
           </Card>
 
@@ -83,7 +92,7 @@ export default function DashboardPage() {
             </p>
 
             <p className="mt-3 text-3xl font-black text-white">
-              $0
+              ${totalSpent}
             </p>
           </Card>
 
@@ -105,19 +114,49 @@ export default function DashboardPage() {
             My Purchases
           </h2>
 
-          <Card className="mt-6 flex flex-col items-center justify-center gap-4 p-16 text-center hover:-translate-y-0 hover:border-white/10">
+          {purchases.length === 0 ? (
+            <Card className="mt-6 flex flex-col items-center justify-center gap-4 p-16 text-center hover:-translate-y-0 hover:border-white/10">
 
-            <p className="text-slate-400">
-              You haven&apos;t purchased any templates yet.
-            </p>
+              <p className="text-slate-400">
+                You haven&apos;t purchased any templates yet.
+              </p>
 
-            <Button
-              onClick={() => router.push("/templates")}
-            >
-              Browse Templates
-            </Button>
+              <Button
+                onClick={() => router.push("/templates")}
+              >
+                Browse Templates
+              </Button>
 
-          </Card>
+            </Card>
+          ) : (
+            <div className="mt-6 space-y-4">
+
+              {purchases.map((purchase) => (
+                <Card
+                  key={purchase.slug}
+                  className="flex items-center justify-between p-6 hover:-translate-y-0 hover:border-white/10"
+                >
+                  <div>
+                    <p className="font-bold text-white">
+                      {purchase.title}
+                    </p>
+
+                    <p className="mt-1 text-sm text-slate-400">
+                      Purchased on{" "}
+                      {new Date(purchase.purchasedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <Link href={`/templates/${purchase.slug}`}>
+                    <Button variant="outline">
+                      View Template
+                    </Button>
+                  </Link>
+                </Card>
+              ))}
+
+            </div>
+          )}
 
         </div>
 
