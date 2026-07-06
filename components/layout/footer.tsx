@@ -1,3 +1,58 @@
+import Link from "next/link";
+
+const productLinks = [
+  { label: "Templates", href: "/templates" },
+  { label: "Components", href: "/components" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Dashboard", href: "/dashboard" },
+];
+
+const resourceLinks: { label: string; href?: string; disabled?: boolean }[] = [
+  { label: "Documentation", href: "/docs" },
+  { label: "Guides", disabled: true },
+  { label: "Blog", disabled: true },
+  { label: "Support", href: "/contact" },
+];
+
+const companyLinks = [
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+];
+
+function FooterLink({
+  label,
+  href,
+  disabled,
+}: {
+  label: string;
+  href?: string;
+  disabled?: boolean;
+}) {
+  if (disabled || !href) {
+    return (
+      <li
+        title="Coming soon"
+        className="cursor-not-allowed text-slate-600"
+      >
+        {label}
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <Link
+        href={href}
+        className="transition hover:text-cyan-400"
+      >
+        {label}
+      </Link>
+    </li>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-[#040812]">
@@ -40,10 +95,9 @@ export default function Footer() {
             </h3>
 
             <ul className="space-y-3 text-gray-400">
-              <li>Templates</li>
-              <li>Components</li>
-              <li>Pricing</li>
-              <li>Dashboard</li>
+              {productLinks.map((link) => (
+                <FooterLink key={link.label} {...link} />
+              ))}
             </ul>
 
           </div>
@@ -55,10 +109,9 @@ export default function Footer() {
             </h3>
 
             <ul className="space-y-3 text-gray-400">
-              <li>Documentation</li>
-              <li>Guides</li>
-              <li>Blog</li>
-              <li>Support</li>
+              {resourceLinks.map((link) => (
+                <FooterLink key={link.label} {...link} />
+              ))}
             </ul>
 
           </div>
@@ -70,10 +123,9 @@ export default function Footer() {
             </h3>
 
             <ul className="space-y-3 text-gray-400">
-              <li>About</li>
-              <li>Careers</li>
-              <li>Contact</li>
-              <li>Privacy</li>
+              {companyLinks.map((link) => (
+                <FooterLink key={link.label} {...link} />
+              ))}
             </ul>
 
           </div>
