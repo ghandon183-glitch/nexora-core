@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { sendCustomerEmail } from "@/lib/mailer";
 
 interface NotifyPurchaseBody {
   templateTitle: string;
@@ -31,45 +32,74 @@ export async function POST(request: Request) {
     );
   }
 
+  let ownerEmailSent = false;
+  let customerEmailSent = false;
+
+  // 1. Notify the site owner (via Resend — works today because the owner's
+  // own address is the Resend account's verified address).
   const apiKey = process.env.RESEND_API_KEY;
   const notifyEmail = process.env.NOTIFY_EMAIL;
 
-  // If email isn't configured yet, don't fail the checkout flow — just log
-  // it on the server so local/demo usage keeps working without setup.
-  if (!apiKey || !notifyEmail) {
+  if (apiKey && notifyEmail) {
+    try {
+      const resend = new Resend(apiKey);
+
+      await resend.emails.send({
+        from: "Nexora Core <onboarding@resend.dev>",
+        to: notifyEmail,
+        subject: `New payment confirmation: ${templateTitle} ($${price})`,
+        html: `
+          <h2>A customer says they've completed a payment</h2>
+          <p><strong>Template:</strong> ${templateTitle} (${templateSlug})</p>
+          <p><strong>Price:</strong> $${price}</p>
+          <p><strong>Paid with:</strong> ${currency || "not specified"}</p>
+          <p><strong>Buyer name:</strong> ${buyerName}</p>
+          <p><strong>Buyer email:</strong> ${buyerEmail}</p>
+          <p>Check the wallet for a matching incoming transaction before
+          delivering the template.</p>
+        `,
+      });
+
+      ownerEmailSent = true;
+    } catch (error) {
+      console.error("[notify-purchase] Failed to email owner:", error);
+    }
+  } else {
     console.log(
-      "[notify-purchase] Email not configured. Purchase details:",
+      "[notify-purchase] Resend not configured. Purchase details:",
       { templateTitle, templateSlug, price, buyerName, buyerEmail, currency }
     );
-
-    return NextResponse.json({ ok: true, emailSent: false });
   }
 
-  try {
-    const resend = new Resend(apiKey);
+  // 2. Confirm receipt to the customer (via Gmail SMTP — can send to any
+  // recipient, unlike the Resend test address).
+  const siteUrl = process.env.SITE_URL;
 
-    await resend.emails.send({
-      from: "Nexora Core <onboarding@resend.dev>",
-      to: notifyEmail,
-      subject: `New payment confirmation: ${templateTitle} ($${price})`,
-      html: `
-        <h2>A customer says they've completed a payment</h2>
-        <p><strong>Template:</strong> ${templateTitle} (${templateSlug})</p>
-        <p><strong>Price:</strong> $${price}</p>
-        <p><strong>Paid with:</strong> ${currency || "not specified"}</p>
-        <p><strong>Buyer name:</strong> ${buyerName}</p>
-        <p><strong>Buyer email:</strong> ${buyerEmail}</p>
-        <p>Check the wallet for a matching incoming transaction before
-        delivering the template.</p>
-      `,
-    });
+  const dashboardLine = siteUrl
+    ? `We'll make the download available in your <a href="${siteUrl}/dashboard">dashboard</a> shortly.`
+    : `We'll make the download available in your dashboard shortly.`;
 
-    return NextResponse.json({ ok: true, emailSent: true });
-  } catch (error) {
-    console.error("[notify-purchase] Failed to send email:", error);
+  const customerResult = await sendCustomerEmail({
+    to: buyerEmail,
+    subject: `We've received your payment confirmation for ${templateTitle}`,
+    html: `
+      <h2>Thanks, ${buyerName}!</h2>
+      <p>We've received your confirmation that you sent payment for
+      <strong>${templateTitle}</strong> ($${price}${currency ? ` in ${currency}` : ""}).</p>
+      <p>Purchases are verified manually, so this isn't an automatic
+      unlock — we're checking the wallet for a matching transaction.
+      ${dashboardLine}
+      If you have any questions in the meantime, just reply to this email
+      or use the contact page.</p>
+      <p>— Nexora Core</p>
+    `,
+  });
 
-    // Still return ok so the customer's checkout flow isn't blocked by an
-    // email provider hiccup — the purchase is already recorded locally.
-    return NextResponse.json({ ok: true, emailSent: false });
-  }
+  customerEmailSent = customerResult.sent;
+
+  return NextResponse.json({
+    ok: true,
+    ownerEmailSent,
+    customerEmailSent,
+  });
 }
