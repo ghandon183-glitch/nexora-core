@@ -11,6 +11,13 @@ import Button from "@/components/ui/button";
 import Navbar from "@/components/navigation/navbar";
 import FloatingDock from "@/components/navigation/floating-dock";
 
+// Templates with a real, downloadable source-code package. Templates not
+// listed here don't have a build yet — customers still see their purchase,
+// but get a "coming soon" note instead of a broken download link.
+const DOWNLOADS: Record<string, string> = {
+  "modern-saas": "/downloads/modern-saas.zip",
+};
+
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
 
@@ -131,29 +138,50 @@ export default function DashboardPage() {
           ) : (
             <div className="mt-6 space-y-4">
 
-              {purchases.map((purchase) => (
-                <Card
-                  key={purchase.slug}
-                  className="flex items-center justify-between p-6 hover:-translate-y-0 hover:border-white/10"
-                >
-                  <div>
-                    <p className="font-bold text-white">
-                      {purchase.title}
-                    </p>
+              {purchases.map((purchase) => {
+                const downloadUrl = DOWNLOADS[purchase.slug];
 
-                    <p className="mt-1 text-sm text-slate-400">
-                      Purchased on{" "}
-                      {new Date(purchase.purchasedAt).toLocaleDateString()}
-                    </p>
-                  </div>
+                return (
+                  <Card
+                    key={purchase.slug}
+                    className="flex flex-col gap-4 p-6 hover:-translate-y-0 hover:border-white/10 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <p className="font-bold text-white">
+                        {purchase.title}
+                      </p>
 
-                  <Link href={`/templates/${purchase.slug}`}>
-                    <Button variant="outline">
-                      View Template
-                    </Button>
-                  </Link>
-                </Card>
-              ))}
+                      <p className="mt-1 text-sm text-slate-400">
+                        Purchased on{" "}
+                        {new Date(purchase.purchasedAt).toLocaleDateString()}
+                      </p>
+
+                      {!downloadUrl && (
+                        <p className="mt-1 text-xs text-amber-400">
+                          Source files are still being finalized — we&apos;ll
+                          email you as soon as they&apos;re ready.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex shrink-0 gap-3">
+                      <Link href={`/templates/${purchase.slug}`}>
+                        <Button variant="outline">
+                          View Template
+                        </Button>
+                      </Link>
+
+                      {downloadUrl && (
+                        <a href={downloadUrl} download>
+                          <Button>
+                            Download Source Code
+                          </Button>
+                        </a>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
 
             </div>
           )}
