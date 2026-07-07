@@ -7,6 +7,7 @@ interface NotifyPurchaseBody {
   price: number;
   buyerName: string;
   buyerEmail: string;
+  currency?: string;
 }
 
 export async function POST(request: Request) {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { templateTitle, templateSlug, price, buyerName, buyerEmail } = body;
+  const { templateTitle, templateSlug, price, buyerName, buyerEmail, currency } = body;
 
   if (!templateTitle || !templateSlug || !price || !buyerEmail) {
     return NextResponse.json(
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
   if (!apiKey || !notifyEmail) {
     console.log(
       "[notify-purchase] Email not configured. Purchase details:",
-      { templateTitle, templateSlug, price, buyerName, buyerEmail }
+      { templateTitle, templateSlug, price, buyerName, buyerEmail, currency }
     );
 
     return NextResponse.json({ ok: true, emailSent: false });
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
         <h2>A customer says they've completed a payment</h2>
         <p><strong>Template:</strong> ${templateTitle} (${templateSlug})</p>
         <p><strong>Price:</strong> $${price}</p>
+        <p><strong>Paid with:</strong> ${currency || "not specified"}</p>
         <p><strong>Buyer name:</strong> ${buyerName}</p>
         <p><strong>Buyer email:</strong> ${buyerEmail}</p>
         <p>Check the wallet for a matching incoming transaction before
