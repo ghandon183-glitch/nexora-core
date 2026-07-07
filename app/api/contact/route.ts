@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 interface ContactBody {
   name: string;
@@ -8,6 +9,26 @@ interface ContactBody {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+
+  const { allowed, retryAfterSeconds } = checkRateLimit(`contact:${ip}`, {
+    max: 5,
+    windowMs: 10 * 60 * 1000, // 5 messages per 10 minutes per IP
+  });
+
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Too many messages sent. Please try again shortly.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(retryAfterSeconds ?? 60) },
+      }
+    );
+  }
+
   let body: ContactBody;
 
   try {

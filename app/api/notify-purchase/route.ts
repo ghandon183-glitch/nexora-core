@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { sendCustomerEmail } from "@/lib/mailer";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 interface NotifyPurchaseBody {
   templateTitle: string;
@@ -12,6 +13,23 @@ interface NotifyPurchaseBody {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+
+  const { allowed, retryAfterSeconds } = checkRateLimit(
+    `notify-purchase:${ip}`,
+    { max: 10, windowMs: 10 * 60 * 1000 } // 10 confirmations per 10 minutes per IP
+  );
+
+  if (!allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Too many requests. Please try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(retryAfterSeconds ?? 60) },
+      }
+    );
+  }
+
   let body: NotifyPurchaseBody;
 
   try {
