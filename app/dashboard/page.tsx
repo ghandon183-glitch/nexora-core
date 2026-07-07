@@ -16,6 +16,7 @@ import FloatingDock from "@/components/navigation/floating-dock";
 // but get a "coming soon" note instead of a broken download link.
 const DOWNLOADS: Record<string, string> = {
   "modern-saas": "/downloads/modern-saas.zip",
+  "admin-dashboard": "/downloads/admin-dashboard.zip",
 };
 
 export default function DashboardPage() {
