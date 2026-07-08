@@ -74,6 +74,7 @@ export default async function TemplateDetailsPage({
               <PurchaseCard
                 slug={template.slug}
                 price={template.price}
+                demoUrl={template.demoUrl}
               />
 
             </div>

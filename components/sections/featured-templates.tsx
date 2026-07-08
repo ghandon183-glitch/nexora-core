@@ -40,6 +40,7 @@ export default function FeaturedTemplates() {
               image={template.image}
               badge={template.badge}
               price={template.price}
+              demoUrl={template.demoUrl}
             />
           ))}
 

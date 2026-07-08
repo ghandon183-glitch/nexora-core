@@ -6,12 +6,15 @@ import Card from "@/components/ui/card";
 interface PurchaseCardProps {
   slug: string;
   price: number;
+  demoUrl: string;
 }
 
 export default function PurchaseCard({
   slug,
   price,
+  demoUrl,
 }: PurchaseCardProps) {
+  const hasDemo = demoUrl && demoUrl !== "#";
   return (
     <aside className="xl:sticky xl:top-40 xl:self-start">
       <Card className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-xl">
@@ -50,12 +53,22 @@ export default function PurchaseCard({
               </Button>
             </Link>
 
-            <Button
-              variant="outline"
-              className="w-full"
-            >
-              Live Preview
-            </Button>
+            {hasDemo ? (
+              <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="w-full">
+                  Live Preview
+                </Button>
+              </a>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full cursor-not-allowed opacity-50"
+                disabled
+                title="Live preview coming soon"
+              >
+                Live Preview (Coming Soon)
+              </Button>
+            )}
 
           </div>
 

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Static, pre-built demo bundles served as-is — not source we own.
+    "public/demo/**",
   ]),
 ]);
 

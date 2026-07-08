@@ -31,6 +31,7 @@ export default function RelatedTemplates() {
             image={template.image}
             badge={template.badge}
             price={template.price}
+              demoUrl={template.demoUrl}
           />
 
         ))}

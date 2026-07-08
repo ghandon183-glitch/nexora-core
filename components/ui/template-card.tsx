@@ -11,6 +11,7 @@ interface TemplateCardProps {
   image: string;
   price: number;
   badge?: string;
+  demoUrl?: string;
 }
 
 export default function TemplateCard({
@@ -20,7 +21,9 @@ export default function TemplateCard({
   image,
   price,
   badge,
+  demoUrl,
 }: TemplateCardProps) {
+  const hasDemo = demoUrl && demoUrl !== "#";
   return (
     <Card className="group overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/60 p-0 transition-all duration-500 hover:-translate-y-2 hover:border-cyan-500/40 hover:shadow-[0_25px_60px_rgba(6,182,212,.18)]">
 
@@ -125,12 +128,27 @@ export default function TemplateCard({
             </Button>
           </Link>
 
-          <Button
-            variant="outline"
-            className="flex-1"
-          >
-            Live Preview
-          </Button>
+          {hasDemo ? (
+            <a
+              href={demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button variant="outline" className="w-full">
+                Live Preview
+              </Button>
+            </a>
+          ) : (
+            <Button
+              variant="outline"
+              className="flex-1 cursor-not-allowed opacity-50"
+              disabled
+              title="Live preview coming soon"
+            >
+              Coming Soon
+            </Button>
+          )}
 
         </div>
 

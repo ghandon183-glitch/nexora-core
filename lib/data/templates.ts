@@ -76,7 +76,7 @@ export const templates: Template[] = [
 
     price: 49,
 
-    demoUrl: "#",
+    demoUrl: "/demo/modern-saas/index.html",
 
     purchaseUrl: "#",
 
@@ -156,7 +156,7 @@ export const templates: Template[] = [
 
     price: 69,
 
-    demoUrl: "#",
+    demoUrl: "/demo/admin-dashboard/index.html",
 
     purchaseUrl: "#",
 
