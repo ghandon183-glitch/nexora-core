@@ -17,6 +17,7 @@ import FloatingDock from "@/components/navigation/floating-dock";
 const DOWNLOADS: Record<string, string> = {
   "modern-saas": "/downloads/modern-saas.zip",
   "admin-dashboard": "/downloads/admin-dashboard.zip",
+  "creative-agency": "/downloads/creative-agency.zip",
 };
 
 export default function DashboardPage() {

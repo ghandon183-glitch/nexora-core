@@ -225,7 +225,7 @@ export const templates: Template[] = [
 
     price: 59,
 
-    demoUrl: "#",
+    demoUrl: "/demo/creative-agency/index.html",
 
     purchaseUrl: "#",
 
