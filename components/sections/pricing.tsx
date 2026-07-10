@@ -6,12 +6,12 @@ import { templates } from "@/lib/data/templates";
 
 export default function Pricing() {
   return (
-    <section className="bg-[#060B18] py-32">
+    <section className="py-32">
       <div className="mx-auto max-w-7xl px-8">
 
         <Reveal className="text-center">
 
-          <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-300">
+          <span className="rounded-full border border-amber-400/30 bg-gradient-to-r from-amber-400/10 to-orange-500/10 px-5 py-2 text-sm text-amber-300">
             Pricing
           </span>
 
@@ -37,13 +37,13 @@ export default function Pricing() {
                 <div
                   className={`rounded-3xl border p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 ${
                     popular
-                      ? "border-cyan-400 bg-cyan-500/10"
+                      ? "border-amber-400/50 bg-gradient-to-br from-amber-400/10 to-orange-500/5 shadow-lg shadow-amber-500/10"
                       : "border-white/10 bg-white/5"
                   }`}
                 >
 
                   {popular && (
-                    <div className="mb-6 inline-block rounded-full bg-cyan-500 px-4 py-2 text-sm font-semibold text-black">
+                    <div className="mb-6 inline-block rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-sm font-semibold text-black">
                       Best Value
                     </div>
                   )}
@@ -84,7 +84,7 @@ export default function Pricing() {
 
                   <Link href={`/templates/${template.slug}`} className="mt-10 block">
                     <Button
-                      variant={popular ? "primary" : "outline"}
+                      variant={popular ? "gradient" : "outline"}
                       className="w-full"
                     >
                       View {template.title}

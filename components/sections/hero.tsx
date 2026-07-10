@@ -5,16 +5,18 @@ import { templates } from "@/lib/data/templates";
 export default function Hero() {
   const templateCount = templates.length;
   return (
-    <section className="relative overflow-hidden bg-[#060B18] pt-36 pb-28">
+    <section className="relative overflow-hidden pt-36 pb-28">
 
       {/* Background */}
       <div className="absolute inset-0">
 
-        <div className="absolute left-0 top-0 h-[550px] w-[550px] rounded-full bg-cyan-500/10 blur-[140px]" />
+        <div className="absolute left-0 top-0 h-[550px] w-[550px] rounded-full bg-violet-500/15 blur-[140px]" />
 
-        <div className="absolute right-0 top-32 h-[600px] w-[600px] rounded-full bg-violet-500/10 blur-[180px]" />
+        <div className="absolute right-0 top-32 h-[600px] w-[600px] rounded-full bg-cyan-500/15 blur-[180px]" />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,.08),transparent_45%)]" />
+        <div className="absolute bottom-0 left-1/3 h-[450px] w-[450px] rounded-full bg-amber-400/10 blur-[160px]" />
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,.08),transparent_45%)]" />
 
       </div>
 
@@ -23,7 +25,7 @@ export default function Hero() {
         {/* Left */}
         <Reveal y={20}>
 
-          <span className="inline-flex rounded-full border border-cyan-500/20 bg-cyan-500/10 px-5 py-2 text-sm font-medium text-cyan-300">
+          <span className="inline-flex rounded-full border border-violet-400/30 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 px-5 py-2 text-sm font-medium text-violet-200">
             ✨ Premium Next.js UI Kit
           </span>
 
@@ -57,7 +59,7 @@ export default function Hero() {
 
             <div>
 
-              <h3 className="text-4xl font-bold text-white">
+              <h3 className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-4xl font-bold text-transparent">
                 {templateCount}
               </h3>
 
@@ -69,7 +71,7 @@ export default function Hero() {
 
             <div>
 
-              <h3 className="text-4xl font-bold text-white">
+              <h3 className="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-4xl font-bold text-transparent">
                 $0
               </h3>
 
@@ -81,7 +83,7 @@ export default function Hero() {
 
             <div>
 
-              <h3 className="text-4xl font-bold text-white">
+              <h3 className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-4xl font-bold text-transparent">
                 100%
               </h3>
 

@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
 
-type Variant = "primary" | "outline" | "ghost";
+type Variant = "primary" | "outline" | "ghost" | "gradient";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -18,10 +18,13 @@ export default function Button({
 
   const variants = {
     primary:
-      "bg-cyan-500 text-black hover:scale-105 hover:bg-cyan-400",
+      "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/25 hover:scale-105 hover:shadow-fuchsia-500/40",
+
+    gradient:
+      "bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-lg shadow-amber-500/25 hover:scale-105 hover:shadow-amber-500/40",
 
     outline:
-      "border border-white/20 bg-transparent text-white hover:bg-white/10",
+      "border border-white/20 bg-transparent text-white hover:bg-white/10 hover:border-white/40",
 
     ghost:
       "bg-white/5 text-white hover:bg-white/10",

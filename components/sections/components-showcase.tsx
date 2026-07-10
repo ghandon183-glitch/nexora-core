@@ -8,7 +8,7 @@ import Reveal from "@/components/ui/reveal";
 
 export default function ComponentsShowcase() {
   return (
-    <section className="bg-[#060B18] py-32">
+    <section className="py-32">
       <div className="mx-auto max-w-7xl px-8">
 
         <Reveal className="text-center">

@@ -1,28 +1,32 @@
 import Reveal from "@/components/ui/reveal";
+import Card from "@/components/ui/card";
 
 export default function Testimonials() {
   const reasons = [
     {
       title: "Real, Working Code",
       text: "Every template ships as a complete Next.js project you can clone and run locally in minutes — not a static mockup.",
+      glow: "violet" as const,
     },
     {
       title: "One-Time Payment",
       text: "No subscriptions, no recurring fees. Pay once via crypto and the template is yours to keep, forever.",
+      glow: "amber" as const,
     },
     {
       title: "Actively Maintained",
       text: "Nexora Core is a small, independently run marketplace — built and maintained by someone who actually uses these templates.",
+      glow: "cyan" as const,
     },
   ];
 
   return (
-    <section className="bg-[#060B18] py-32">
+    <section className="py-32">
       <div className="mx-auto max-w-7xl px-8">
 
         <Reveal className="text-center">
 
-          <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-300">
+          <span className="rounded-full border border-violet-400/30 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 px-5 py-2 text-sm text-violet-200">
             Why Nexora Core
           </span>
 
@@ -41,7 +45,7 @@ export default function Testimonials() {
 
           {reasons.map((item, i) => (
             <Reveal key={item.title} delay={i * 0.1}>
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition hover:-translate-y-2">
+              <Card glow={item.glow} className="p-8">
 
                 <h3 className="text-xl font-bold text-white">
                   {item.title}
@@ -51,7 +55,7 @@ export default function Testimonials() {
                   {item.text}
                 </p>
 
-              </div>
+              </Card>
             </Reveal>
           ))}
 

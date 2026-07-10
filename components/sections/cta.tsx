@@ -1,34 +1,43 @@
 import Reveal from "@/components/ui/reveal";
+import Button from "@/components/ui/button";
 
 export default function CTA() {
   return (
-    <section className="bg-[#060B18] py-32">
+    <section className="py-32">
       <div className="mx-auto max-w-6xl px-8">
 
-        <Reveal className="rounded-[40px] border border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 p-16 text-center backdrop-blur-xl">
+        <Reveal className="relative overflow-hidden rounded-[40px] border border-white/10 bg-gradient-to-br from-violet-500/15 via-fuchsia-500/10 to-amber-400/10 p-16 text-center backdrop-blur-xl">
 
-          <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-300">
-            Ready to build?
-          </span>
+          <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-violet-500/20 blur-[100px]" />
 
-          <h2 className="mt-8 text-5xl font-black text-white">
-            Start Building Faster Today
-          </h2>
+          <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-amber-400/15 blur-[100px]" />
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-400">
-            Get a real, working Next.js codebase for your next project —
-            one-time payment, no subscriptions, ready to launch today.
-          </p>
+          <div className="relative">
 
-          <div className="mt-10 flex flex-wrap justify-center gap-6">
+            <span className="rounded-full border border-fuchsia-400/30 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 px-5 py-2 text-sm text-fuchsia-200">
+              Ready to build?
+            </span>
 
-            <button className="rounded-xl bg-cyan-500 px-8 py-4 font-bold text-black transition hover:scale-105">
-              Explore Templates
-            </button>
+            <h2 className="mt-8 text-5xl font-black text-white">
+              Start Building Faster Today
+            </h2>
 
-            <button className="rounded-xl border border-white/20 px-8 py-4 font-bold text-white transition hover:bg-white/10">
-              View Components
-            </button>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-300">
+              Get a real, working Next.js codebase for your next project —
+              one-time payment, no subscriptions, ready to launch today.
+            </p>
+
+            <div className="mt-10 flex flex-wrap justify-center gap-6">
+
+              <Button variant="gradient" className="px-8 py-4 text-base">
+                Explore Templates
+              </Button>
+
+              <Button variant="outline" className="px-8 py-4 text-base">
+                View Components
+              </Button>
+
+            </div>
 
           </div>
 

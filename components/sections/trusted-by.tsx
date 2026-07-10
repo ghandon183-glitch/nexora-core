@@ -11,7 +11,7 @@ const stack = [
 
 export default function TrustedBy() {
   return (
-    <section className="relative border-y border-white/5 bg-[#070D1C] py-16">
+    <section className="relative border-y border-white/5 py-16">
       <div className="mx-auto max-w-7xl px-8">
 
         <Reveal>
