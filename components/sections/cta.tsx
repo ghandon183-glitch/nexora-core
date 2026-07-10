@@ -16,8 +16,8 @@ export default function CTA() {
           </h2>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-400">
-            Join thousands of developers using Nexora to build beautiful
-            websites, SaaS platforms and premium user interfaces.
+            Get a real, working Next.js codebase for your next project —
+            one-time payment, no subscriptions, ready to launch today.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-6">

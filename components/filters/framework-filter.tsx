@@ -8,8 +8,6 @@ interface Props {
 const frameworks = [
   "All",
   "Next.js",
-  "React",
-  "Vue",
 ];
 
 export default function FrameworkFilter({

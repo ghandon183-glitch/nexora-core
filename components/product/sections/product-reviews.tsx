@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import Card from "@/components/ui/card";
 
 export default function ProductReviews() {
@@ -10,76 +12,27 @@ export default function ProductReviews() {
         </h2>
 
         <p className="mt-3 text-lg text-slate-400">
-          Developers and agencies using this template.
+          See what buyers think after using this template.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <Card className="flex flex-col items-center gap-3 p-16 text-center">
 
-        <Card className="p-8">
-          <div className="mb-4 flex text-xl text-cyan-400">
-            ★★★★★
-          </div>
+        <p className="text-lg font-semibold text-white">
+          No reviews yet
+        </p>
 
-          <p className="leading-8 text-slate-300">
-            One of the cleanest templates I&apos;ve purchased.
-            The codebase is extremely organized and easy to customize.
-          </p>
+        <p className="max-w-md text-slate-400">
+          Nexora Core is an early-stage marketplace, so this template
+          doesn&apos;t have reviews yet. Buy it and be the first to leave
+          one — reach out on the{" "}
+          <Link href="/contact" className="text-cyan-400 hover:underline">
+            contact page
+          </Link>{" "}
+          after you&apos;ve tried it.
+        </p>
 
-          <div className="mt-8">
-            <h4 className="font-semibold text-white">
-              Michael Ross
-            </h4>
-
-            <p className="text-sm text-slate-500">
-              Frontend Developer
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-8">
-          <div className="mb-4 flex text-xl text-cyan-400">
-            ★★★★★
-          </div>
-
-          <p className="leading-8 text-slate-300">
-            Beautiful animations, modern design and excellent
-            performance. Highly recommended.
-          </p>
-
-          <div className="mt-8">
-            <h4 className="font-semibold text-white">
-              Sarah Johnson
-            </h4>
-
-            <p className="text-sm text-slate-500">
-              UI Designer
-            </p>
-          </div>
-        </Card>
-
-        <Card className="p-8">
-          <div className="mb-4 flex text-xl text-cyan-400">
-            ★★★★★
-          </div>
-
-          <p className="leading-8 text-slate-300">
-            Saved us weeks of development time.
-            Everything feels premium.
-          </p>
-
-          <div className="mt-8">
-            <h4 className="font-semibold text-white">
-              Daniel Cooper
-            </h4>
-
-            <p className="text-sm text-slate-500">
-              Startup Founder
-            </p>
-          </div>
-        </Card>
-
-      </div>
+      </Card>
 
     </section>
   );
