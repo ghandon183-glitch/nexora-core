@@ -12,6 +12,7 @@ interface TemplateCardProps {
   price: number;
   badge?: string;
   demoUrl?: string;
+  components?: number;
 }
 
 export default function TemplateCard({
@@ -22,6 +23,7 @@ export default function TemplateCard({
   price,
   badge,
   demoUrl,
+  components,
 }: TemplateCardProps) {
   const hasDemo = demoUrl && demoUrl !== "#";
   return (
@@ -110,7 +112,7 @@ export default function TemplateCard({
             </p>
 
             <p className="mt-1 text-sm font-semibold text-white">
-              120+
+              {components ?? "—"}+
             </p>
 
           </div>

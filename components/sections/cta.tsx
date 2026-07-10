@@ -1,9 +1,11 @@
+import Reveal from "@/components/ui/reveal";
+
 export default function CTA() {
   return (
     <section className="bg-[#060B18] py-32">
       <div className="mx-auto max-w-6xl px-8">
 
-        <div className="rounded-[40px] border border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 p-16 text-center backdrop-blur-xl">
+        <Reveal className="rounded-[40px] border border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 p-16 text-center backdrop-blur-xl">
 
           <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-300">
             Ready to build?
@@ -30,7 +32,7 @@ export default function CTA() {
 
           </div>
 
-        </div>
+        </Reveal>
 
       </div>
     </section>

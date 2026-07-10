@@ -37,6 +37,7 @@ export default function TemplatesGrid({
           badge={template.badge}
           price={template.price}
               demoUrl={template.demoUrl}
+              components={template.components}
         />
       ))}
 

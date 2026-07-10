@@ -1,4 +1,5 @@
 import TemplateCard from "@/components/ui/template-card";
+import Reveal from "@/components/ui/reveal";
 import { templates } from "@/lib/data/templates";
 
 export default function FeaturedTemplates() {
@@ -9,7 +10,7 @@ export default function FeaturedTemplates() {
       <div className="mx-auto max-w-7xl px-8">
 
         {/* Header */}
-        <div className="mx-auto mb-20 max-w-3xl text-center">
+        <Reveal className="mx-auto mb-20 max-w-3xl text-center">
 
           <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
             Premium Collection
@@ -26,22 +27,24 @@ export default function FeaturedTemplates() {
             SaaS products, agencies and modern web applications.
           </p>
 
-        </div>
+        </Reveal>
 
         {/* Grid */}
         <div className="grid gap-8 lg:grid-cols-3">
 
-          {featured.map((template) => (
-            <TemplateCard
-              key={template.slug}
-              slug={template.slug}
-              title={template.title}
-              description={template.description}
-              image={template.image}
-              badge={template.badge}
-              price={template.price}
-              demoUrl={template.demoUrl}
-            />
+          {featured.map((template, i) => (
+            <Reveal key={template.slug} delay={i * 0.1}>
+              <TemplateCard
+                slug={template.slug}
+                title={template.title}
+                description={template.description}
+                image={template.image}
+                badge={template.badge}
+                price={template.price}
+                demoUrl={template.demoUrl}
+                components={template.components}
+              />
+            </Reveal>
           ))}
 
         </div>

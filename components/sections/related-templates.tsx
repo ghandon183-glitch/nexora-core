@@ -32,6 +32,7 @@ export default function RelatedTemplates() {
             badge={template.badge}
             price={template.price}
               demoUrl={template.demoUrl}
+              components={template.components}
           />
 
         ))}

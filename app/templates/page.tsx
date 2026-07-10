@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 
 import Navbar from "@/components/navigation/navbar";
-import FloatingDock from "@/components/navigation/floating-dock";
 
 import Section from "@/components/ui/section";
 
@@ -92,7 +91,6 @@ export default function TemplatesPage() {
   return (
     <>
       <Navbar />
-      <FloatingDock />
 
       <Section>
         <div className="mx-auto max-w-7xl">

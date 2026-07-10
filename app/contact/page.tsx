@@ -3,7 +3,6 @@
 import { FormEvent, useState } from "react";
 
 import Navbar from "@/components/navigation/navbar";
-import FloatingDock from "@/components/navigation/floating-dock";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
@@ -51,7 +50,6 @@ export default function ContactPage() {
   return (
     <>
       <Navbar />
-      <FloatingDock />
 
       <Section>
         <div className="mx-auto max-w-2xl">

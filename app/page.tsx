@@ -1,5 +1,4 @@
 import Navbar from "@/components/navigation/navbar";
-import FloatingDock from "@/components/navigation/floating-dock";
 
 import Hero from "@/components/sections/hero";
 import TrustedBy from "@/components/sections/trusted-by";
@@ -17,7 +16,6 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <FloatingDock />
 
       <main>
         <Hero />

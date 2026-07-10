@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import Button from "@/components/ui/button";
+import Reveal from "@/components/ui/reveal";
 import { templates } from "@/lib/data/templates";
 
 export default function Pricing() {
@@ -8,7 +9,7 @@ export default function Pricing() {
     <section className="bg-[#060B18] py-32">
       <div className="mx-auto max-w-7xl px-8">
 
-        <div className="text-center">
+        <Reveal className="text-center">
 
           <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-300">
             Pricing
@@ -24,79 +25,80 @@ export default function Pricing() {
             ever.
           </p>
 
-        </div>
+        </Reveal>
 
         <div className="mt-20 grid gap-8 lg:grid-cols-3">
 
-          {templates.map((template) => {
+          {templates.map((template, i) => {
             const popular = template.badge === "Popular";
 
             return (
-              <div
-                key={template.slug}
-                className={`rounded-3xl border p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 ${
-                  popular
-                    ? "border-cyan-400 bg-cyan-500/10"
-                    : "border-white/10 bg-white/5"
-                }`}
-              >
+              <Reveal key={template.slug} delay={i * 0.1}>
+                <div
+                  className={`rounded-3xl border p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 ${
+                    popular
+                      ? "border-cyan-400 bg-cyan-500/10"
+                      : "border-white/10 bg-white/5"
+                  }`}
+                >
 
-                {popular && (
-                  <div className="mb-6 inline-block rounded-full bg-cyan-500 px-4 py-2 text-sm font-semibold text-black">
-                    Best Value
+                  {popular && (
+                    <div className="mb-6 inline-block rounded-full bg-cyan-500 px-4 py-2 text-sm font-semibold text-black">
+                      Best Value
+                    </div>
+                  )}
+
+                  <h3 className="text-3xl font-bold text-white">
+                    {template.title}
+                  </h3>
+
+                  <div className="mt-6 text-5xl font-black text-white">
+                    ${template.price}
+                    <span className="ml-2 text-base font-normal text-gray-500">
+                      one-time
+                    </span>
                   </div>
-                )}
 
-                <h3 className="text-3xl font-bold text-white">
-                  {template.title}
-                </h3>
+                  <p className="mt-4 text-gray-400">
+                    {template.description}
+                  </p>
 
-                <div className="mt-6 text-5xl font-black text-white">
-                  ${template.price}
-                  <span className="ml-2 text-base font-normal text-gray-500">
-                    one-time
-                  </span>
+                  <ul className="mt-8 space-y-4">
+
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <span className="text-cyan-400">✓</span>
+                      {template.components}+ Components
+                    </li>
+
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <span className="text-cyan-400">✓</span>
+                      Lifetime Updates
+                    </li>
+
+                    <li className="flex items-center gap-3 text-gray-300">
+                      <span className="text-cyan-400">✓</span>
+                      Commercial License
+                    </li>
+
+                  </ul>
+
+                  <Link href={`/templates/${template.slug}`} className="mt-10 block">
+                    <Button
+                      variant={popular ? "primary" : "outline"}
+                      className="w-full"
+                    >
+                      View {template.title}
+                    </Button>
+                  </Link>
+
                 </div>
-
-                <p className="mt-4 text-gray-400">
-                  {template.description}
-                </p>
-
-                <ul className="mt-8 space-y-4">
-
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <span className="text-cyan-400">✓</span>
-                    {template.components}+ Components
-                  </li>
-
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <span className="text-cyan-400">✓</span>
-                    Lifetime Updates
-                  </li>
-
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <span className="text-cyan-400">✓</span>
-                    Commercial License
-                  </li>
-
-                </ul>
-
-                <Link href={`/templates/${template.slug}`} className="mt-10 block">
-                  <Button
-                    variant={popular ? "primary" : "outline"}
-                    className="w-full"
-                  >
-                    View {template.title}
-                  </Button>
-                </Link>
-
-              </div>
+              </Reveal>
             );
           })}
 
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-6 rounded-3xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur-xl md:flex-row md:text-left">
+        <Reveal className="mt-10 flex flex-col items-center justify-between gap-6 rounded-3xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur-xl md:flex-row md:text-left">
 
           <div>
             <h3 className="text-xl font-bold text-white">
@@ -115,7 +117,7 @@ export default function Pricing() {
             </Button>
           </Link>
 
-        </div>
+        </Reveal>
 
       </div>
     </section>

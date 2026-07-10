@@ -9,7 +9,6 @@ import { usePurchases } from "@/lib/context/purchases-context";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Navbar from "@/components/navigation/navbar";
-import FloatingDock from "@/components/navigation/floating-dock";
 
 // Templates with a real, downloadable source-code package. Templates not
 // listed here don't have a build yet — customers still see their purchase,
@@ -56,7 +55,6 @@ export default function DashboardPage() {
   return (
     <>
       <Navbar />
-      <FloatingDock />
 
       <main className="min-h-screen bg-[#060B18] px-6 pt-36 pb-20">
 

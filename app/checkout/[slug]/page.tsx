@@ -8,7 +8,6 @@ import { getTemplate } from "@/lib/data/get-template";
 import { useAuth } from "@/lib/context/auth-context";
 import { usePurchases } from "@/lib/context/purchases-context";
 import Navbar from "@/components/navigation/navbar";
-import FloatingDock from "@/components/navigation/floating-dock";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 
@@ -111,7 +110,6 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <FloatingDock />
 
       <main className="min-h-screen bg-[#060B18] px-6 pt-36 pb-20">
 

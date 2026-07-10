@@ -1,6 +1,9 @@
 import HeroPreview from "@/components/ui/hero-preview";
+import Reveal from "@/components/ui/reveal";
+import { templates } from "@/lib/data/templates";
 
 export default function Hero() {
+  const templateCount = templates.length;
   return (
     <section className="relative overflow-hidden bg-[#060B18] pt-36 pb-28">
 
@@ -18,7 +21,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-20 px-8 lg:grid-cols-2">
 
         {/* Left */}
-        <div>
+        <Reveal y={20}>
 
           <span className="inline-flex rounded-full border border-cyan-500/20 bg-cyan-500/10 px-5 py-2 text-sm font-medium text-cyan-300">
             ✨ Premium Next.js UI Kit
@@ -55,11 +58,11 @@ export default function Hero() {
             <div>
 
               <h3 className="text-4xl font-bold text-white">
-                50+
+                {templateCount}
               </h3>
 
               <p className="mt-2 text-slate-400">
-                Premium Templates
+                Production-Ready Templates
               </p>
 
             </div>
@@ -67,11 +70,11 @@ export default function Hero() {
             <div>
 
               <h3 className="text-4xl font-bold text-white">
-                250+
+                $0
               </h3>
 
               <p className="mt-2 text-slate-400">
-                UI Components
+                Recurring Fees, Ever
               </p>
 
             </div>
@@ -90,11 +93,13 @@ export default function Hero() {
 
           </div>
 
-        </div>
+        </Reveal>
 
         {/* Right */}
 
-        <HeroPreview />
+        <Reveal x={40} y={0} delay={0.15}>
+          <HeroPreview />
+        </Reveal>
 
       </div>
 

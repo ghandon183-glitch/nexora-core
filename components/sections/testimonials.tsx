@@ -1,3 +1,5 @@
+import Reveal from "@/components/ui/reveal";
+
 export default function Testimonials() {
   const testimonials = [
     {
@@ -21,7 +23,7 @@ export default function Testimonials() {
     <section className="bg-[#060B18] py-32">
       <div className="mx-auto max-w-7xl px-8">
 
-        <div className="text-center">
+        <Reveal className="text-center">
 
           <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-5 py-2 text-sm text-cyan-300">
             Testimonials
@@ -35,36 +37,35 @@ export default function Testimonials() {
             Thousands of creators build faster using Nexora.
           </p>
 
-        </div>
+        </Reveal>
 
         <div className="mt-20 grid gap-8 lg:grid-cols-3">
 
-          {testimonials.map((item) => (
-            <div
-              key={item.name}
-              className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition hover:-translate-y-2"
-            >
-              <div className="mb-6 flex gap-1 text-cyan-400">
-                ★★★★★
-              </div>
+          {testimonials.map((item, i) => (
+            <Reveal key={item.name} delay={i * 0.1}>
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition hover:-translate-y-2">
+                <div className="mb-6 flex gap-1 text-cyan-400">
+                  ★★★★★
+                </div>
 
-              <p className="leading-8 text-gray-300">
-                &quot;{item.text}&quot;
-              </p>
-
-              <div className="mt-8">
-
-                <h3 className="font-bold text-white">
-                  {item.name}
-                </h3>
-
-                <p className="text-sm text-gray-400">
-                  {item.role}
+                <p className="leading-8 text-gray-300">
+                  &quot;{item.text}&quot;
                 </p>
 
-              </div>
+                <div className="mt-8">
 
-            </div>
+                  <h3 className="font-bold text-white">
+                    {item.name}
+                  </h3>
+
+                  <p className="text-sm text-gray-400">
+                    {item.role}
+                  </p>
+
+                </div>
+
+              </div>
+            </Reveal>
           ))}
 
         </div>
