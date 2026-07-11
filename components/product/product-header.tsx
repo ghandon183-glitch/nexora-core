@@ -5,19 +5,21 @@ interface ProductHeaderProps {
   description: string;
   badge?: string;
   price: number;
+  headingFontClassName?: string;
 }
 
 export default function ProductHeader({
   title,
   description,
   badge,
+  headingFontClassName = "",
 }: ProductHeaderProps) {
   return (
     <div className="space-y-12">
       {badge && <Badge>{badge}</Badge>}
 
       <div className="space-y-6">
-        <h1 className="text-5xl font-black leading-tight tracking-tight text-white xl:text-6xl">
+        <h1 className={`text-5xl font-black leading-tight tracking-tight text-white xl:text-6xl ${headingFontClassName}`}>
           {title}
         </h1>
 

@@ -12,6 +12,7 @@ import PurchaseCard from "@/components/product/purchase-card";
 import RelatedTemplates from "@/components/sections/related-templates";
 
 import { getTemplate } from "@/lib/data/get-template";
+import { getHeadingFontClass } from "@/lib/fonts";
 
 interface PageProps {
   params: Promise<{
@@ -51,6 +52,7 @@ export default async function TemplateDetailsPage({
                 description={template.description}
                 badge={template.badge}
                 price={template.price}
+                headingFontClassName={getHeadingFontClass(template.slug)}
               />
 
               <ProductTabs

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Button from "@/components/ui/button";
 import Reveal from "@/components/ui/reveal";
 import { templates } from "@/lib/data/templates";
+import { getHeadingFontClass } from "@/lib/fonts";
 
 export default function Pricing() {
   return (
@@ -48,7 +49,7 @@ export default function Pricing() {
                     </div>
                   )}
 
-                  <h3 className="text-3xl font-bold text-white">
+                  <h3 className={`text-3xl font-bold text-white ${getHeadingFontClass(template.slug)}`}>
                     {template.title}
                   </h3>
 

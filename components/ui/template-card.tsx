@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import Card from "./card";
 import Button from "./button";
+import { getHeadingFontClass } from "@/lib/fonts";
 
 interface TemplateCardProps {
   slug: string;
@@ -69,7 +70,7 @@ export default function TemplateCard({
 
         <div>
 
-          <h3 className="text-2xl font-bold text-white transition-colors duration-300 group-hover:text-cyan-400">
+          <h3 className={`text-2xl font-bold text-white transition-colors duration-300 group-hover:text-cyan-400 ${getHeadingFontClass(slug)}`}>
             {title}
           </h3>
 
