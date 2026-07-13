@@ -17,6 +17,7 @@ const DOWNLOADS: Record<string, string> = {
   "modern-saas": "/downloads/modern-saas.zip",
   "admin-dashboard": "/downloads/admin-dashboard.zip",
   "creative-agency": "/downloads/creative-agency.zip",
+  "kiln-estates": "/downloads/kiln-estates.zip",
 };
 
 export default function DashboardPage() {

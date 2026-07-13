@@ -252,4 +252,73 @@ export const templates: Template[] = [
       },
     ],
   },
+
+  {
+    slug: "kiln-estates",
+
+    title: "Kiln Estates",
+
+    description:
+      "A boutique real estate template for architect-designed and heritage homes, built with Next.js 16 and Tailwind CSS.",
+
+    image: "/templates/kiln-estates.jpg",
+
+    gallery: [
+      "/templates/gallery/kiln-estates/1.jpg",
+      "/templates/gallery/kiln-estates/2.jpg",
+      "/templates/gallery/kiln-estates/3.jpg",
+      "/templates/gallery/kiln-estates/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "Real Estate",
+
+    tags: [
+      "Real Estate",
+      "Property",
+      "Editorial",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 20,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-07-12",
+
+    price: 55,
+
+    demoUrl: "/demo/kiln-estates/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Listings Grid",
+      "Property Detail Pages",
+      "Material Swatch Component",
+      "Editorial Typography System",
+      "Warm Custom Color Theme",
+      "Responsive Layout",
+      "Contact Form UI",
+      "Static Generation",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-07-12",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
 ];
