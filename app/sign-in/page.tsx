@@ -50,11 +50,12 @@ function SignInForm() {
       className="space-y-5"
     >
       <div>
-        <label className="mb-2 block text-sm text-slate-300">
+        <label htmlFor="signin-email" className="mb-2 block text-sm text-slate-300">
           Email
         </label>
 
         <Input
+          id="signin-email"
           type="email"
           placeholder="you@example.com"
           value={email}
@@ -63,11 +64,12 @@ function SignInForm() {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm text-slate-300">
+        <label htmlFor="signin-password" className="mb-2 block text-sm text-slate-300">
           Password
         </label>
 
         <Input
+          id="signin-password"
           type="password"
           placeholder="••••••••"
           value={password}

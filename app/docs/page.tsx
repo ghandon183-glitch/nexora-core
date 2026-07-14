@@ -4,6 +4,7 @@ import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
+import PageGlow from "@/components/ui/page-glow";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 
@@ -66,6 +67,7 @@ export default function DocsPage() {
       <Navbar />
 
       <Section>
+        <PageGlow variant="emerald" />
         <div className="mx-auto max-w-5xl">
 
           <Heading
@@ -73,6 +75,7 @@ export default function DocsPage() {
             title="Getting started"
             description="Everything you need to go from purchase to a running, customized site."
             align="center"
+            accent="emerald"
           />
 
           <div className="mt-16 space-y-6">

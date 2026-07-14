@@ -63,7 +63,7 @@ export default function ComponentsShowcase() {
                 Styled focus rings and placeholder states.
               </p>
               <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-6">
-                <Input placeholder="you@example.com" />
+                <Input aria-label="Example email input" placeholder="you@example.com" />
               </div>
             </div>
           </Reveal>

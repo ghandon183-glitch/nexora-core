@@ -4,6 +4,7 @@ import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
+import PageGlow from "@/components/ui/page-glow";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
@@ -43,6 +44,7 @@ export default function ComponentsPage() {
       <Navbar />
 
       <Section>
+        <PageGlow variant="violet" />
         <div className="mx-auto max-w-7xl">
 
           <Heading
@@ -50,6 +52,7 @@ export default function ComponentsPage() {
             title="Built with these components"
             description="A live look at the UI primitives that power every Nexora Core template — the same Button, Card, and form components you'll get in the code."
             align="center"
+            accent="violet"
           />
 
           <div className="mt-16 grid gap-8 lg:grid-cols-2">
@@ -76,7 +79,7 @@ export default function ComponentsPage() {
               title="Input"
               description="Form input with focus ring and placeholder styling."
             >
-              <Input placeholder="you@example.com" className="max-w-xs" />
+              <Input aria-label="Example email input" placeholder="you@example.com" className="max-w-xs" />
             </Showcase>
 
             <Showcase

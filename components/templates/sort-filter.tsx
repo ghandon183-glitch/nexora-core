@@ -13,6 +13,7 @@ export default function SortFilter({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-label="Sort templates by"
       className="
         rounded-xl
         border

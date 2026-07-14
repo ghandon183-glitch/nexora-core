@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
+import PageGlow from "@/components/ui/page-glow";
 
 import TemplatesHeader from "@/components/templates/templates-header";
 import TemplatesGrid from "@/components/templates/templates-grid";
@@ -93,6 +94,7 @@ export default function TemplatesPage() {
       <Navbar />
 
       <Section>
+        <PageGlow variant="cyan" />
         <div className="mx-auto max-w-7xl">
 
           <TemplatesHeader

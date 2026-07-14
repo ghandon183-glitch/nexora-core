@@ -6,6 +6,7 @@ import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
+import PageGlow from "@/components/ui/page-glow";
 import Card from "@/components/ui/card";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
@@ -52,6 +53,7 @@ export default function ContactPage() {
       <Navbar />
 
       <Section>
+        <PageGlow variant="violet" />
         <div className="mx-auto max-w-2xl">
 
           <Heading
@@ -59,6 +61,7 @@ export default function ContactPage() {
             title="Get in touch"
             description="Questions about a template, a purchase, or anything else? Send a message and you'll hear back by email."
             align="center"
+            accent="violet"
           />
 
           <Card className="mt-12 p-8 hover:-translate-y-0 hover:border-white/10">
@@ -77,11 +80,12 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
 
                 <div>
-                  <label className="mb-2 block text-sm text-slate-300">
+                  <label htmlFor="contact-name" className="mb-2 block text-sm text-slate-300">
                     Name
                   </label>
 
                   <Input
+                    id="contact-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Jane Doe"
@@ -90,11 +94,12 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-slate-300">
+                  <label htmlFor="contact-email" className="mb-2 block text-sm text-slate-300">
                     Email
                   </label>
 
                   <Input
+                    id="contact-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -104,11 +109,12 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-slate-300">
+                  <label htmlFor="contact-message" className="mb-2 block text-sm text-slate-300">
                     Message
                   </label>
 
                   <textarea
+                    id="contact-message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="How can we help?"

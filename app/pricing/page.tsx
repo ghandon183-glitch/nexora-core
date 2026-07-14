@@ -4,11 +4,13 @@ import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
+import PageGlow from "@/components/ui/page-glow";
 import Card from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 
 import { templates } from "@/lib/data/templates";
+import { getHeadingFontClass } from "@/lib/fonts";
 
 export default function PricingPage() {
   return (
@@ -16,6 +18,7 @@ export default function PricingPage() {
       <Navbar />
 
       <Section>
+        <PageGlow variant="amber" />
         <div className="mx-auto max-w-7xl">
 
           <Heading
@@ -23,80 +26,88 @@ export default function PricingPage() {
             title="One template, one price"
             description="No subscriptions and no hidden tiers. Pick a template, pay once, and it's yours — with lifetime updates and a commercial license included."
             align="center"
+            accent="amber"
           />
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
 
-            {templates.map((template) => (
-              <Card
-                key={template.slug}
-                className="flex h-full flex-col p-8"
-              >
+            {templates.map((template) => {
+              const popular = template.badge === "Popular";
 
-                <Badge>
-                  {template.badge}
-                </Badge>
-
-                <h3 className="mt-6 text-2xl font-bold text-white">
-                  {template.title}
-                </h3>
-
-                <p className="mt-3 text-sm text-slate-400">
-                  {template.description}
-                </p>
-
-                <div className="mt-8 text-5xl font-black text-white">
-                  ${template.price}
-                  <span className="ml-2 text-base font-normal text-slate-500">
-                    one-time
-                  </span>
-                </div>
-
-                <ul className="mt-8 flex-1 space-y-3 text-sm text-slate-300">
-
-                  <li className="flex items-center gap-3">
-                    <span className="text-cyan-400">✓</span>
-                    {template.components}+ components
-                  </li>
-
-                  <li className="flex items-center gap-3">
-                    <span className="text-cyan-400">✓</span>
-                    Built with {template.framework}
-                  </li>
-
-                  {template.features.slice(0, 3).map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center gap-3"
-                    >
-                      <span className="text-cyan-400">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-
-                  <li className="flex items-center gap-3">
-                    <span className="text-cyan-400">✓</span>
-                    Lifetime updates
-                  </li>
-
-                  <li className="flex items-center gap-3">
-                    <span className="text-cyan-400">✓</span>
-                    Commercial license
-                  </li>
-
-                </ul>
-
-                <Link
-                  href={`/templates/${template.slug}`}
-                  className="mt-8 block"
+              return (
+                <Card
+                  key={template.slug}
+                  glow={popular ? "amber" : "cyan"}
+                  className={`flex h-full flex-col p-8 ${
+                    popular ? "border-amber-400/40 bg-gradient-to-br from-amber-400/10 to-orange-500/5" : ""
+                  }`}
                 >
-                  <Button className="w-full">
-                    View {template.title}
-                  </Button>
-                </Link>
+
+                  <Badge>
+                    {template.badge}
+                  </Badge>
+
+                  <h3 className={`mt-6 text-2xl font-bold text-white ${getHeadingFontClass(template.slug)}`}>
+                    {template.title}
+                  </h3>
+
+                  <p className="mt-3 text-sm text-slate-400">
+                    {template.description}
+                  </p>
+
+                  <div className="mt-8 text-5xl font-black text-white">
+                    ${template.price}
+                    <span className="ml-2 text-base font-normal text-slate-500">
+                      one-time
+                    </span>
+                  </div>
+
+                  <ul className="mt-8 flex-1 space-y-3 text-sm text-slate-300">
+
+                    <li className="flex items-center gap-3">
+                      <span className="text-cyan-400">✓</span>
+                      {template.components}+ components
+                    </li>
+
+                    <li className="flex items-center gap-3">
+                      <span className="text-cyan-400">✓</span>
+                      Built with {template.framework}
+                    </li>
+
+                    {template.features.slice(0, 3).map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-center gap-3"
+                      >
+                        <span className="text-cyan-400">✓</span>
+                        {feature}
+                      </li>
+                    ))}
+
+                    <li className="flex items-center gap-3">
+                      <span className="text-cyan-400">✓</span>
+                      Lifetime updates
+                    </li>
+
+                    <li className="flex items-center gap-3">
+                      <span className="text-cyan-400">✓</span>
+                      Commercial license
+                    </li>
+
+                  </ul>
+
+                  <Link
+                    href={`/templates/${template.slug}`}
+                    className="mt-8 block"
+                  >
+                    <Button className="w-full">
+                      View {template.title}
+                    </Button>
+                  </Link>
 
               </Card>
-            ))}
+              );
+            })}
 
           </div>
 

@@ -12,6 +12,8 @@ export default function SearchBar({
   return (
     <div className="w-full">
       <input
+        type="search"
+        aria-label="Search templates"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search templates..."

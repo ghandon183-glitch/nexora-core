@@ -22,6 +22,8 @@ export default function PriceSlider({
         max={100}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
+        aria-label="Maximum price"
+        aria-valuetext={`$${value}`}
         className="w-full accent-cyan-400"
       />
 

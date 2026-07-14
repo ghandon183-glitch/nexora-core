@@ -2,6 +2,7 @@ import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
+import PageGlow from "@/components/ui/page-glow";
 import Card from "@/components/ui/card";
 
 export default function AboutPage() {
@@ -10,6 +11,7 @@ export default function AboutPage() {
       <Navbar />
 
       <Section>
+        <PageGlow variant="fuchsia" />
         <div className="mx-auto max-w-3xl">
 
           <Heading
@@ -17,6 +19,7 @@ export default function AboutPage() {
             title="Building templates we'd actually want to use"
             description="Nexora Core is a small marketplace of premium Next.js templates and UI components."
             align="center"
+            accent="fuchsia"
           />
 
           <div className="mt-16 space-y-6">

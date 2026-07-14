@@ -65,11 +65,12 @@ export default function SignUpPage() {
         className="space-y-5"
       >
         <div>
-          <label className="mb-2 block text-sm text-slate-300">
+          <label htmlFor="signup-name" className="mb-2 block text-sm text-slate-300">
             Full name
           </label>
 
           <Input
+            id="signup-name"
             type="text"
             placeholder="Jane Doe"
             value={name}
@@ -78,11 +79,12 @@ export default function SignUpPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-slate-300">
+          <label htmlFor="signup-email" className="mb-2 block text-sm text-slate-300">
             Email
           </label>
 
           <Input
+            id="signup-email"
             type="email"
             placeholder="you@example.com"
             value={email}
@@ -91,11 +93,12 @@ export default function SignUpPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-slate-300">
+          <label htmlFor="signup-password" className="mb-2 block text-sm text-slate-300">
             Password
           </label>
 
           <Input
+            id="signup-password"
             type="password"
             placeholder="At least 8 characters"
             value={password}
@@ -104,11 +107,12 @@ export default function SignUpPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-slate-300">
+          <label htmlFor="signup-confirm-password" className="mb-2 block text-sm text-slate-300">
             Confirm password
           </label>
 
           <Input
+            id="signup-confirm-password"
             type="password"
             placeholder="••••••••"
             value={confirmPassword}
