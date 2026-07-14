@@ -18,6 +18,7 @@ const DOWNLOADS: Record<string, string> = {
   "admin-dashboard": "/downloads/admin-dashboard.zip",
   "creative-agency": "/downloads/creative-agency.zip",
   "kiln-estates": "/downloads/kiln-estates.zip",
+  "nexi-ai": "/downloads/nexi-ai.zip",
 };
 
 export default function DashboardPage() {

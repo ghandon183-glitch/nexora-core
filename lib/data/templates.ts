@@ -321,4 +321,72 @@ export const templates: Template[] = [
       },
     ],
   },
+  {
+    slug: "nexi-ai",
+
+    title: "Nexi AI",
+
+    description:
+      "A high-converting landing page template for AI agent, chatbot, and automation products, with a live agent chat mockup and visible reasoning trace.",
+
+    image: "/templates/nexi-ai.jpg",
+
+    gallery: [
+      "/templates/gallery/nexi-ai/1.jpg",
+      "/templates/gallery/nexi-ai/2.jpg",
+      "/templates/gallery/nexi-ai/3.jpg",
+      "/templates/gallery/nexi-ai/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "AI Product",
+
+    tags: [
+      "AI",
+      "SaaS",
+      "Landing Page",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 24,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-07-14",
+
+    price: 65,
+
+    demoUrl: "/demo/nexi-ai/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Live Agent Chat Mockup",
+      "Visible Reasoning Trace",
+      "Bento Grid Features",
+      "4-Step How It Works",
+      "Testimonials",
+      "3-Tier Pricing",
+      "Accordion FAQ",
+      "Framer Motion Animations",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-07-14",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
 ];

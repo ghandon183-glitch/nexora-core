@@ -1,5 +1,7 @@
 "use client";
 
+import { templates } from "@/lib/data/templates";
+
 interface Props {
   value: string;
   onChange: (value: string) => void;
@@ -7,9 +9,7 @@ interface Props {
 
 const categories = [
   "All",
-  "Landing Page",
-  "Dashboard",
-  "Agency",
+  ...Array.from(new Set(templates.map((t) => t.category))),
 ];
 
 export default function CategoryFilter({
