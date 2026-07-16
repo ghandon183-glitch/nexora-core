@@ -1,21 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 
 import { useAuth } from "@/lib/context/auth-context";
-
-const links = [
-  { label: "Home", href: "/" },
-  { label: "Components", href: "/components" },
-  { label: "Templates", href: "/templates" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Docs", href: "/docs" },
-];
+import LanguageSwitcher from "@/components/navigation/language-switcher";
 
 export default function Navbar() {
+  const t = useTranslations("Nav");
   const { user, loading, signOut } = useAuth();
+
+  const links = [
+    { label: t("home"), href: "/" },
+    { label: t("components"), href: "/components" },
+    { label: t("templates"), href: "/templates" },
+    { label: t("pricing"), href: "/pricing" },
+    { label: t("docs"), href: "/docs" },
+  ];
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -45,7 +47,7 @@ export default function Navbar() {
             </h2>
 
             <p className="-mt-1 text-xs text-slate-400">
-              Premium UI Kit
+              {t("tagline")}
             </p>
           </div>
         </Link>
@@ -63,60 +65,68 @@ export default function Navbar() {
         </nav>
 
         {loading ? (
-          <div className="h-10 w-10" />
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <div className="h-10 w-10" />
+          </div>
         ) : user ? (
-          <div className="relative">
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
 
-            <button
-              onClick={() => setMenuOpen((open) => !open)}
-              className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2 transition hover:border-cyan-400 hover:bg-white/5"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-black">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+            <div className="relative">
 
-              <span className="text-sm text-white">
-                {user.name}
-              </span>
-            </button>
+              <button
+                onClick={() => setMenuOpen((open) => !open)}
+                className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2 transition hover:border-cyan-400 hover:bg-white/5"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-black">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
 
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-slate-950 p-2 shadow-xl">
+                <span className="text-sm text-white">
+                  {user.name}
+                </span>
+              </button>
 
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMenuOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                >
-                  Dashboard
-                </Link>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-slate-950 p-2 shadow-xl">
 
-                <button
-                  onClick={handleSignOut}
-                  className="block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                >
-                  Sign Out
-                </button>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                  >
+                    {t("dashboard")}
+                  </Link>
 
-              </div>
-            )}
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                  >
+                    {t("signOut")}
+                  </button>
 
+                </div>
+              )}
+
+            </div>
           </div>
         ) : (
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
 
             <Link
               href="/sign-in"
               className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white transition hover:border-cyan-400 hover:bg-white/5"
             >
-              Login
+              {t("login")}
             </Link>
 
             <Link
               href="/sign-up"
               className="rounded-xl bg-cyan-500 px-5 py-2 text-sm font-bold text-black transition hover:scale-105"
             >
-              Get Started
+              {t("getStarted")}
             </Link>
 
           </div>

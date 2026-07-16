@@ -1,0 +1,101 @@
+{
+  "Nav": {
+    "home": "Ana Sayfa",
+    "components": "Bileşenler",
+    "templates": "Şablonlar",
+    "pricing": "Fiyatlandırma",
+    "docs": "Dokümanlar",
+    "login": "Giriş Yap",
+    "getStarted": "Başla",
+    "dashboard": "Panel",
+    "signOut": "Çıkış Yap",
+    "tagline": "Premium UI Kiti"
+  },
+  "LanguageSwitcher": {
+    "label": "Dil"
+  },
+  "Hero": {
+    "badge": "✨ Premium Next.js UI Kiti",
+    "titleLine1": "Güzel dijital ürünleri",
+    "titleLine2": "daha hızlı",
+    "titleLine3": "oluşturun.",
+    "description": "Girişimler, SaaS ürünleri ve modern web uygulamaları için hazırlanmış, büyümeye devam eden premium şablon, panel, açılış sayfası ve yeniden kullanılabilir UI bileşenleri koleksiyonu.",
+    "exploreTemplates": "Şablonlara Göz At",
+    "browseComponents": "Bileşenlere Göz At",
+    "statTemplates": "Üretime Hazır Şablon",
+    "statFees": "Tekrarlayan Ücret Yok, Asla",
+    "statStack": "Next.js ve Tailwind"
+  },
+  "TrustedBy": {
+    "heading": "Modern, Üretim Seviyesinde Araçlarla Geliştirildi"
+  },
+  "FeaturedTemplates": {
+    "badge": "Premium Koleksiyon",
+    "titleLine1": "Yayına Hazır",
+    "titleLine2": "Premium Şablonlar",
+    "description": "Girişimler, SaaS ürünleri, ajanslar ve modern web uygulamaları için özenle hazırlanmış Next.js şablonları."
+  },
+  "DashboardPreview": {
+    "eyebrow": "Panel Önizlemesi",
+    "title": "Analitik Genel Bakış",
+    "live": "Canlı",
+    "revenue": "Gelir",
+    "users": "Kullanıcılar",
+    "sales": "Satışlar",
+    "orders": "Siparişler",
+    "conversion": "Dönüşüm"
+  },
+  "Pricing": {
+    "badge": "Fiyatlandırma",
+    "title": "Tek Seferlik Ödeme. Abonelik Yok.",
+    "description": "Bir şablon seçin, tek seferlik ödeyin, sonsuza kadar sizin olsun — ömür boyu güncelleme ve ticari lisans dahil, asla tekrarlayan ücret yok.",
+    "bestValue": "En İyi Değer",
+    "oneTime": "tek seferlik",
+    "view": "Görüntüle",
+    "componentsSuffix": "Bileşen",
+    "lifetimeUpdates": "Ömür Boyu Güncelleme",
+    "commercialLicense": "Ticari Lisans",
+    "noSubscriptionsTitle": "Abonelik yok. Gizli katman yok. Asla.",
+    "noSubscriptionsText": "Her şablon, kripto ile yapılan tek seferlik bir ödemedir — fiyatlandırma modelinin tamamı budur.",
+    "seeFullPricing": "Tüm Fiyatları Gör"
+  },
+  "Testimonials": {
+    "badge": "Neden Nexora Core",
+    "title": "Küçük ve Dürüst Bir Alternatif",
+    "description": "Şişirilmiş abonelik planları ve sahte müşteri sayıları yok — sadece gerçek şablonlar ve net, tek seferlik bir fiyat.",
+    "reason1Title": "Gerçek, Çalışan Kod",
+    "reason1Text": "Her şablon, dakikalar içinde klonlayıp yerel olarak çalıştırabileceğiniz eksiksiz bir Next.js projesi olarak sunulur — statik bir maket değil.",
+    "reason2Title": "Tek Seferlik Ödeme",
+    "reason2Text": "Abonelik yok, tekrarlayan ücret yok. Kripto ile bir kez ödeyin, şablon sonsuza kadar sizin olsun.",
+    "reason3Title": "Aktif Olarak Güncelleniyor",
+    "reason3Text": "Nexora Core, bu şablonları gerçekten kullanan biri tarafından oluşturulan ve sürdürülen küçük, bağımsız bir pazar yeridir."
+  },
+  "CTA": {
+    "badge": "Oluşturmaya hazır mısınız?",
+    "title": "Bugün Daha Hızlı Üretmeye Başlayın",
+    "description": "Bir sonraki projeniz için gerçek, çalışan bir Next.js kod tabanı edinin — tek seferlik ödeme, abonelik yok, bugün yayına hazır.",
+    "exploreTemplates": "Şablonlara Göz At",
+    "viewComponents": "Bileşenleri Görüntüle"
+  },
+  "Footer": {
+    "tagline": "Premium UI Kiti",
+    "description": "Girişimler, SaaS şirketleri ve modern web uygulamaları için hazırlanmış premium Next.js şablonları ve yeniden kullanılabilir UI bileşenleri.",
+    "product": "Ürün",
+    "resources": "Kaynaklar",
+    "company": "Şirket",
+    "templates": "Şablonlar",
+    "components": "Bileşenler",
+    "pricing": "Fiyatlandırma",
+    "dashboard": "Panel",
+    "documentation": "Dokümantasyon",
+    "guides": "Rehberler",
+    "blog": "Blog",
+    "support": "Destek",
+    "about": "Hakkımızda",
+    "contact": "İletişim",
+    "privacy": "Gizlilik",
+    "terms": "Şartlar",
+    "copyright": "© 2026 Nexora. Tüm hakları saklıdır.",
+    "builtWith": "Next.js ve Tailwind CSS ile ❤️ tasarlandı"
+  }
+}

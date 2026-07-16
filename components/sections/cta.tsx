@@ -1,7 +1,9 @@
+import { useTranslations } from "next-intl";
 import Reveal from "@/components/ui/reveal";
 import Button from "@/components/ui/button";
 
 export default function CTA() {
+  const t = useTranslations("CTA");
   return (
     <section className="py-32">
       <div className="mx-auto max-w-6xl px-8">
@@ -15,26 +17,25 @@ export default function CTA() {
           <div className="relative">
 
             <span className="rounded-full border border-fuchsia-400/30 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 px-5 py-2 text-sm text-fuchsia-200">
-              Ready to build?
+              {t("badge")}
             </span>
 
             <h2 className="mt-8 text-5xl font-black text-white">
-              Start Building Faster Today
+              {t("title")}
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-300">
-              Get a real, working Next.js codebase for your next project —
-              one-time payment, no subscriptions, ready to launch today.
+              {t("description")}
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-6">
 
               <Button variant="gradient" className="px-8 py-4 text-base">
-                Explore Templates
+                {t("exploreTemplates")}
               </Button>
 
               <Button variant="outline" className="px-8 py-4 text-base">
-                View Components
+                {t("viewComponents")}
               </Button>
 
             </div>

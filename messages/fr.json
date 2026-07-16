@@ -1,0 +1,101 @@
+{
+  "Nav": {
+    "home": "Accueil",
+    "components": "Composants",
+    "templates": "Modèles",
+    "pricing": "Tarifs",
+    "docs": "Docs",
+    "login": "Connexion",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de bord",
+    "signOut": "Déconnexion",
+    "tagline": "Kit UI Premium"
+  },
+  "LanguageSwitcher": {
+    "label": "Langue"
+  },
+  "Hero": {
+    "badge": "✨ Kit UI Premium pour Next.js",
+    "titleLine1": "Créez de beaux produits",
+    "titleLine2": "numériques",
+    "titleLine3": "plus vite.",
+    "description": "Une collection croissante de modèles premium, tableaux de bord, pages d'atterrissage et composants UI réutilisables, conçus pour les startups, produits SaaS et applications web modernes.",
+    "exploreTemplates": "Explorer les modèles",
+    "browseComponents": "Voir les composants",
+    "statTemplates": "Modèles prêts pour la production",
+    "statFees": "Aucun frais récurrent, jamais",
+    "statStack": "Next.js & Tailwind"
+  },
+  "TrustedBy": {
+    "heading": "Construit avec des outils modernes de niveau production"
+  },
+  "FeaturedTemplates": {
+    "badge": "Collection Premium",
+    "titleLine1": "Modèles premium",
+    "titleLine2": "prêts à lancer",
+    "description": "Des modèles Next.js soigneusement conçus pour les startups, produits SaaS, agences et applications web modernes."
+  },
+  "DashboardPreview": {
+    "eyebrow": "Aperçu du tableau de bord",
+    "title": "Vue d'ensemble analytique",
+    "live": "En direct",
+    "revenue": "Revenus",
+    "users": "Utilisateurs",
+    "sales": "Ventes",
+    "orders": "Commandes",
+    "conversion": "Conversion"
+  },
+  "Pricing": {
+    "badge": "Tarifs",
+    "title": "Paiement unique. Sans abonnement.",
+    "description": "Choisissez un modèle, payez une seule fois, et il est à vous pour toujours — mises à jour à vie et licence commerciale incluses, sans frais récurrents.",
+    "bestValue": "Meilleur choix",
+    "oneTime": "paiement unique",
+    "view": "Voir",
+    "componentsSuffix": "Composants",
+    "lifetimeUpdates": "Mises à jour à vie",
+    "commercialLicense": "Licence commerciale",
+    "noSubscriptionsTitle": "Sans abonnement. Sans palier caché. Jamais.",
+    "noSubscriptionsText": "Chaque modèle est un paiement unique en crypto — c'est tout le modèle tarifaire.",
+    "seeFullPricing": "Voir tous les tarifs"
+  },
+  "Testimonials": {
+    "badge": "Pourquoi Nexora Core",
+    "title": "Une alternative petite et honnête",
+    "description": "Pas de formules d'abonnement gonflées ni de faux compteurs de clients — juste de vrais modèles à un prix unique et transparent.",
+    "reason1Title": "Du vrai code fonctionnel",
+    "reason1Text": "Chaque modèle est livré comme un projet Next.js complet que vous pouvez cloner et exécuter localement en quelques minutes — pas une simple maquette statique.",
+    "reason2Title": "Paiement unique",
+    "reason2Text": "Pas d'abonnement, pas de frais récurrents. Payez une fois en crypto et le modèle est à vous pour toujours.",
+    "reason3Title": "Activement maintenu",
+    "reason3Text": "Nexora Core est une petite marketplace indépendante, créée et maintenue par quelqu'un qui utilise réellement ces modèles."
+  },
+  "CTA": {
+    "badge": "Prêt à créer ?",
+    "title": "Construisez plus vite dès aujourd'hui",
+    "description": "Obtenez une base de code Next.js réelle et fonctionnelle pour votre prochain projet — paiement unique, sans abonnement, prête à lancer aujourd'hui.",
+    "exploreTemplates": "Explorer les modèles",
+    "viewComponents": "Voir les composants"
+  },
+  "Footer": {
+    "tagline": "Kit UI Premium",
+    "description": "Modèles Next.js premium et composants UI réutilisables, conçus pour les startups, entreprises SaaS et applications web modernes.",
+    "product": "Produit",
+    "resources": "Ressources",
+    "company": "Entreprise",
+    "templates": "Modèles",
+    "components": "Composants",
+    "pricing": "Tarifs",
+    "dashboard": "Tableau de bord",
+    "documentation": "Documentation",
+    "guides": "Guides",
+    "blog": "Blog",
+    "support": "Support",
+    "about": "À propos",
+    "contact": "Contact",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "copyright": "© 2026 Nexora. Tous droits réservés.",
+    "builtWith": "Conçu avec ❤️ avec Next.js & Tailwind CSS"
+  }
+}

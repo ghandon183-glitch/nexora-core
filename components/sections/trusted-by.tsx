@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Reveal from "@/components/ui/reveal";
 
 const stack = [
@@ -10,13 +11,14 @@ const stack = [
 ];
 
 export default function TrustedBy() {
+  const t = useTranslations("TrustedBy");
   return (
     <section className="relative border-y border-white/5 py-16">
       <div className="mx-auto max-w-7xl px-8">
 
         <Reveal>
           <p className="text-center text-sm font-medium uppercase tracking-[0.35em] text-slate-500">
-            Built With Modern, Production-Grade Tools
+            {t("heading")}
           </p>
         </Reveal>
 

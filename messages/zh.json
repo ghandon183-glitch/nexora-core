@@ -1,0 +1,101 @@
+{
+  "Nav": {
+    "home": "首页",
+    "components": "组件",
+    "templates": "模板",
+    "pricing": "定价",
+    "docs": "文档",
+    "login": "登录",
+    "getStarted": "开始使用",
+    "dashboard": "控制台",
+    "signOut": "退出登录",
+    "tagline": "高级 UI 套件"
+  },
+  "LanguageSwitcher": {
+    "label": "语言"
+  },
+  "Hero": {
+    "badge": "✨ 高级 Next.js UI 套件",
+    "titleLine1": "更快地构建",
+    "titleLine2": "精美的",
+    "titleLine3": "数字产品。",
+    "description": "为初创公司、SaaS 产品和现代 Web 应用打造的高级模板、仪表盘、落地页和可复用 UI 组件,持续更新中。",
+    "exploreTemplates": "浏览模板",
+    "browseComponents": "浏览组件",
+    "statTemplates": "生产就绪模板",
+    "statFees": "从无重复收费",
+    "statStack": "Next.js 与 Tailwind"
+  },
+  "TrustedBy": {
+    "heading": "采用现代化生产级工具构建"
+  },
+  "FeaturedTemplates": {
+    "badge": "高级合集",
+    "titleLine1": "随时可上线的",
+    "titleLine2": "高级模板",
+    "description": "为初创公司、SaaS 产品、代理机构和现代 Web 应用精心打造的 Next.js 模板。"
+  },
+  "DashboardPreview": {
+    "eyebrow": "仪表盘预览",
+    "title": "数据分析概览",
+    "live": "实时",
+    "revenue": "收入",
+    "users": "用户",
+    "sales": "销售额",
+    "orders": "订单",
+    "conversion": "转化率"
+  },
+  "Pricing": {
+    "badge": "定价",
+    "title": "一次性付费,无需订阅。",
+    "description": "选择一个模板,一次性付费,即可永久拥有 —— 包含终身更新和商业授权,绝无重复收费。",
+    "bestValue": "最超值",
+    "oneTime": "一次性",
+    "view": "查看",
+    "componentsSuffix": "个组件",
+    "lifetimeUpdates": "终身更新",
+    "commercialLicense": "商业授权",
+    "noSubscriptionsTitle": "无订阅,无隐藏套餐,永远如此。",
+    "noSubscriptionsText": "每个模板都只需通过加密货币一次性付款 —— 这就是全部的定价模式。",
+    "seeFullPricing": "查看完整定价详情"
+  },
+  "Testimonials": {
+    "badge": "为什么选择 Nexora Core",
+    "title": "小而诚实的另一种选择",
+    "description": "没有臃肿的订阅方案,也没有虚假的客户数量 —— 只有真实的模板和简单直接的一次性价格。",
+    "reason1Title": "真实可运行的代码",
+    "reason1Text": "每个模板都是完整的 Next.js 项目,几分钟内即可克隆并在本地运行 —— 而非静态原型图。",
+    "reason2Title": "一次性付费",
+    "reason2Text": "无需订阅,无重复收费。使用加密货币支付一次,模板即永久归你所有。",
+    "reason3Title": "持续维护",
+    "reason3Text": "Nexora Core 是一个小型独立运营的市场平台,由真正使用这些模板的人构建和维护。"
+  },
+  "CTA": {
+    "badge": "准备好开始构建了吗?",
+    "title": "今天就开始更快地构建",
+    "description": "为你的下一个项目获取真实可运行的 Next.js 代码库 —— 一次性付费,无需订阅,今天即可上线。",
+    "exploreTemplates": "浏览模板",
+    "viewComponents": "查看组件"
+  },
+  "Footer": {
+    "tagline": "高级 UI 套件",
+    "description": "为初创公司、SaaS 企业和现代 Web 应用打造的高级 Next.js 模板和可复用 UI 组件。",
+    "product": "产品",
+    "resources": "资源",
+    "company": "公司",
+    "templates": "模板",
+    "components": "组件",
+    "pricing": "定价",
+    "dashboard": "控制台",
+    "documentation": "文档",
+    "guides": "指南",
+    "blog": "博客",
+    "support": "支持",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "copyright": "© 2026 Nexora. 保留所有权利。",
+    "builtWith": "使用 Next.js 和 Tailwind CSS ❤️ 精心打造"
+  }
+}

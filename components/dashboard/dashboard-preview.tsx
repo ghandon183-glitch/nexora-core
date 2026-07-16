@@ -1,6 +1,8 @@
+import { useTranslations } from "next-intl";
 import Reveal from "@/components/ui/reveal";
 
 export default function DashboardPreview() {
+  const t = useTranslations("DashboardPreview");
   return (
     <section className="relative mx-auto mt-10 max-w-7xl px-8 pb-24">
 
@@ -14,16 +16,16 @@ export default function DashboardPreview() {
 
             <div>
               <p className="text-sm text-slate-400">
-                Dashboard Preview
+                {t("eyebrow")}
               </p>
 
               <h2 className="mt-1 text-3xl font-bold text-white">
-                Analytics Overview
+                {t("title")}
               </h2>
             </div>
 
             <div className="rounded-full bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-300">
-              ● Live
+              ● {t("live")}
             </div>
 
           </div>
@@ -40,7 +42,7 @@ export default function DashboardPreview() {
 
                   <div>
                     <p className="text-sm text-slate-400">
-                      Revenue
+                      {t("revenue")}
                     </p>
 
                     <h3 className="mt-2 text-4xl font-bold text-white">
@@ -74,10 +76,10 @@ export default function DashboardPreview() {
             <div className="space-y-5">
 
               {[
-                ["Users","24.8K","+12%"],
-                ["Sales","1,284","+8%"],
-                ["Orders","684","+15%"],
-                ["Conversion","8.2%","+2.1%"],
+                [t("users"),"24.8K","+12%"],
+                [t("sales"),"1,284","+8%"],
+                [t("orders"),"684","+15%"],
+                [t("conversion"),"8.2%","+2.1%"],
               ].map(([title,value,growth])=>(
                 <div
                   key={title}

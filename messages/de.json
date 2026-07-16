@@ -1,0 +1,101 @@
+{
+  "Nav": {
+    "home": "Start",
+    "components": "Komponenten",
+    "templates": "Vorlagen",
+    "pricing": "Preise",
+    "docs": "Dokumentation",
+    "login": "Anmelden",
+    "getStarted": "Loslegen",
+    "dashboard": "Dashboard",
+    "signOut": "Abmelden",
+    "tagline": "Premium UI-Kit"
+  },
+  "LanguageSwitcher": {
+    "label": "Sprache"
+  },
+  "Hero": {
+    "badge": "✨ Premium Next.js UI-Kit",
+    "titleLine1": "Schönere digitale",
+    "titleLine2": "Produkte",
+    "titleLine3": "schneller bauen.",
+    "description": "Eine wachsende Sammlung von Premium-Vorlagen, Dashboards, Landingpages und wiederverwendbaren UI-Komponenten für Startups, SaaS-Produkte und moderne Webanwendungen.",
+    "exploreTemplates": "Vorlagen entdecken",
+    "browseComponents": "Komponenten ansehen",
+    "statTemplates": "Produktionsreife Vorlagen",
+    "statFees": "Keine laufenden Gebühren, nie",
+    "statStack": "Next.js & Tailwind"
+  },
+  "TrustedBy": {
+    "heading": "Gebaut mit modernen, produktionsreifen Tools"
+  },
+  "FeaturedTemplates": {
+    "badge": "Premium-Kollektion",
+    "titleLine1": "Startklare",
+    "titleLine2": "Premium-Vorlagen",
+    "description": "Sorgfältig gestaltete Next.js-Vorlagen für Startups, SaaS-Produkte, Agenturen und moderne Webanwendungen."
+  },
+  "DashboardPreview": {
+    "eyebrow": "Dashboard-Vorschau",
+    "title": "Analytics-Übersicht",
+    "live": "Live",
+    "revenue": "Umsatz",
+    "users": "Nutzer",
+    "sales": "Verkäufe",
+    "orders": "Bestellungen",
+    "conversion": "Konversion"
+  },
+  "Pricing": {
+    "badge": "Preise",
+    "title": "Einmalzahlung. Keine Abos.",
+    "description": "Wähle eine Vorlage, zahle einmal, und sie gehört dir für immer — mit lebenslangen Updates und kommerzieller Lizenz, ohne wiederkehrende Kosten.",
+    "bestValue": "Bester Wert",
+    "oneTime": "einmalig",
+    "view": "Ansehen",
+    "componentsSuffix": "Komponenten",
+    "lifetimeUpdates": "Lebenslange Updates",
+    "commercialLicense": "Kommerzielle Lizenz",
+    "noSubscriptionsTitle": "Keine Abos. Keine versteckten Stufen. Nie.",
+    "noSubscriptionsText": "Jede Vorlage ist eine einmalige Zahlung per Krypto — das ist das gesamte Preismodell.",
+    "seeFullPricing": "Alle Preise ansehen"
+  },
+  "Testimonials": {
+    "badge": "Warum Nexora Core",
+    "title": "Eine kleine, ehrliche Alternative",
+    "description": "Keine aufgeblähten Abo-Modelle und keine gefälschten Kundenzahlen — nur echte Vorlagen zu einem einfachen, einmaligen Preis.",
+    "reason1Title": "Echter, funktionierender Code",
+    "reason1Text": "Jede Vorlage wird als vollständiges Next.js-Projekt geliefert, das du in wenigen Minuten klonen und lokal ausführen kannst — kein statisches Mockup.",
+    "reason2Title": "Einmalzahlung",
+    "reason2Text": "Keine Abos, keine wiederkehrenden Gebühren. Einmal per Krypto bezahlen, und die Vorlage gehört dir für immer.",
+    "reason3Title": "Aktiv gepflegt",
+    "reason3Text": "Nexora Core ist ein kleiner, unabhängig betriebener Marktplatz — gebaut und gepflegt von jemandem, der diese Vorlagen selbst nutzt."
+  },
+  "CTA": {
+    "badge": "Bereit loszulegen?",
+    "title": "Heute schneller bauen",
+    "description": "Hol dir eine echte, funktionierende Next.js-Codebasis für dein nächstes Projekt — Einmalzahlung, keine Abos, heute startklar.",
+    "exploreTemplates": "Vorlagen entdecken",
+    "viewComponents": "Komponenten ansehen"
+  },
+  "Footer": {
+    "tagline": "Premium UI-Kit",
+    "description": "Premium Next.js-Vorlagen und wiederverwendbare UI-Komponenten für Startups, SaaS-Unternehmen und moderne Webanwendungen.",
+    "product": "Produkt",
+    "resources": "Ressourcen",
+    "company": "Unternehmen",
+    "templates": "Vorlagen",
+    "components": "Komponenten",
+    "pricing": "Preise",
+    "dashboard": "Dashboard",
+    "documentation": "Dokumentation",
+    "guides": "Anleitungen",
+    "blog": "Blog",
+    "support": "Support",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "copyright": "© 2026 Nexora. Alle Rechte vorbehalten.",
+    "builtWith": "Gestaltet mit ❤️ mit Next.js & Tailwind CSS"
+  }
+}

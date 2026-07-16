@@ -1,8 +1,10 @@
+import { useTranslations } from "next-intl";
 import HeroPreview from "@/components/ui/hero-preview";
 import Reveal from "@/components/ui/reveal";
 import { templates } from "@/lib/data/templates";
 
 export default function Hero() {
+  const t = useTranslations("Hero");
   const templateCount = templates.length;
   return (
     <section className="relative overflow-hidden pt-36 pb-28">
@@ -26,31 +28,29 @@ export default function Hero() {
         <Reveal y={20}>
 
           <span className="inline-flex rounded-full border border-violet-400/30 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 px-5 py-2 text-sm font-medium text-violet-200">
-            ✨ Premium Next.js UI Kit
+            {t("badge")}
           </span>
 
           <h1 className="mt-8 text-5xl font-black leading-[0.95] tracking-tight text-white md:text-6xl xl:text-7xl">
-            Build Beautiful
+            {t("titleLine1")}
             <br />
-            Digital Products
+            {t("titleLine2")}
             <br />
-            Faster.
+            {t("titleLine3")}
           </h1>
 
           <p className="mt-8 max-w-xl text-xl leading-9 text-slate-300">
-            A growing collection of premium templates, dashboards,
-            landing pages and reusable UI components crafted for
-            startups, SaaS products and modern web applications.
+            {t("description")}
           </p>
 
           <div className="mt-10 flex flex-wrap gap-5">
 
             <button className="rounded-xl bg-cyan-500 px-8 py-4 font-bold text-black transition duration-300 hover:scale-105">
-              Explore Templates
+              {t("exploreTemplates")}
             </button>
 
             <button className="rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-white transition duration-300 hover:bg-white/10">
-              Browse Components
+              {t("browseComponents")}
             </button>
 
           </div>
@@ -64,7 +64,7 @@ export default function Hero() {
               </h3>
 
               <p className="mt-2 text-slate-400">
-                Production-Ready Templates
+                {t("statTemplates")}
               </p>
 
             </div>
@@ -76,7 +76,7 @@ export default function Hero() {
               </h3>
 
               <p className="mt-2 text-slate-400">
-                Recurring Fees, Ever
+                {t("statFees")}
               </p>
 
             </div>
@@ -88,7 +88,7 @@ export default function Hero() {
               </h3>
 
               <p className="mt-2 text-slate-400">
-                Next.js & Tailwind
+                {t("statStack")}
               </p>
 
             </div>

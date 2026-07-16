@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 import Button from "@/components/ui/button";
 import Reveal from "@/components/ui/reveal";
@@ -6,6 +7,12 @@ import { templates } from "@/lib/data/templates";
 import { getHeadingFontClass } from "@/lib/fonts";
 
 export default function Pricing() {
+  const t = useTranslations("Pricing");
+  // Only tease 3 templates here — the full catalog (now 5+) lives on
+  // the dedicated /pricing page via the "See Full Pricing Details" link
+  // below, so this section doesn't keep growing into an awkward grid.
+  const featured = templates.slice(0, 3);
+
   return (
     <section className="py-32">
       <div className="mx-auto max-w-7xl px-8">
@@ -13,24 +20,22 @@ export default function Pricing() {
         <Reveal className="text-center">
 
           <span className="rounded-full border border-amber-400/30 bg-gradient-to-r from-amber-400/10 to-orange-500/10 px-5 py-2 text-sm text-amber-300">
-            Pricing
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 text-5xl font-black text-white">
-            One-Time Payment. No Subscriptions.
+            {t("title")}
           </h2>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-400">
-            Pick a template, pay once, and it&apos;s yours for good — lifetime
-            updates and a commercial license included, no recurring charges
-            ever.
+            {t("description")}
           </p>
 
         </Reveal>
 
         <div className="mt-20 grid gap-8 lg:grid-cols-3">
 
-          {templates.map((template, i) => {
+          {featured.map((template, i) => {
             const popular = template.badge === "Popular";
 
             return (
@@ -45,7 +50,7 @@ export default function Pricing() {
 
                   {popular && (
                     <div className="mb-6 inline-block rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2 text-sm font-semibold text-black">
-                      Best Value
+                      {t("bestValue")}
                     </div>
                   )}
 
@@ -56,7 +61,7 @@ export default function Pricing() {
                   <div className="mt-6 text-5xl font-black text-white">
                     ${template.price}
                     <span className="ml-2 text-base font-normal text-gray-500">
-                      one-time
+                      {t("oneTime")}
                     </span>
                   </div>
 
@@ -68,17 +73,17 @@ export default function Pricing() {
 
                     <li className="flex items-center gap-3 text-gray-300">
                       <span className="text-cyan-400">✓</span>
-                      {template.components}+ Components
+                      {template.components}+ {t("componentsSuffix")}
                     </li>
 
                     <li className="flex items-center gap-3 text-gray-300">
                       <span className="text-cyan-400">✓</span>
-                      Lifetime Updates
+                      {t("lifetimeUpdates")}
                     </li>
 
                     <li className="flex items-center gap-3 text-gray-300">
                       <span className="text-cyan-400">✓</span>
-                      Commercial License
+                      {t("commercialLicense")}
                     </li>
 
                   </ul>
@@ -88,7 +93,7 @@ export default function Pricing() {
                       variant={popular ? "gradient" : "outline"}
                       className="w-full"
                     >
-                      View {template.title}
+                      {t("view")} {template.title}
                     </Button>
                   </Link>
 
@@ -103,18 +108,17 @@ export default function Pricing() {
 
           <div>
             <h3 className="text-xl font-bold text-white">
-              No subscriptions. No hidden tiers. Ever.
+              {t("noSubscriptionsTitle")}
             </h3>
 
             <p className="mt-2 max-w-2xl text-sm text-gray-400">
-              Every template is a single, one-time payment via crypto —
-              that&apos;s the whole pricing model.
+              {t("noSubscriptionsText")}
             </p>
           </div>
 
           <Link href="/pricing">
             <Button variant="outline" className="whitespace-nowrap">
-              See Full Pricing Details
+              {t("seeFullPricing")}
             </Button>
           </Link>
 

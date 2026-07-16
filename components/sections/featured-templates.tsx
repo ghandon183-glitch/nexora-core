@@ -1,8 +1,10 @@
+import { useTranslations } from "next-intl";
 import TemplateCard from "@/components/ui/template-card";
 import Reveal from "@/components/ui/reveal";
 import { templates } from "@/lib/data/templates";
 
 export default function FeaturedTemplates() {
+  const t = useTranslations("FeaturedTemplates");
   const featured = templates.slice(0, 3);
 
   return (
@@ -13,18 +15,17 @@ export default function FeaturedTemplates() {
         <Reveal className="mx-auto mb-20 max-w-3xl text-center">
 
           <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
-            Premium Collection
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 text-5xl font-black text-white">
-            Ready To Launch
+            {t("titleLine1")}
             <br />
-            Premium Templates
+            {t("titleLine2")}
           </h2>
 
           <p className="mt-6 text-lg leading-8 text-gray-400">
-            Carefully crafted Next.js templates designed for startups,
-            SaaS products, agencies and modern web applications.
+            {t("description")}
           </p>
 
         </Reveal>

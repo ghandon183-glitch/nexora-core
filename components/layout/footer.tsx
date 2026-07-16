@@ -1,25 +1,5 @@
-import Link from "next/link";
-
-const productLinks = [
-  { label: "Templates", href: "/templates" },
-  { label: "Components", href: "/components" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Dashboard", href: "/dashboard" },
-];
-
-const resourceLinks: { label: string; href?: string; disabled?: boolean }[] = [
-  { label: "Documentation", href: "/docs" },
-  { label: "Guides", disabled: true },
-  { label: "Blog", disabled: true },
-  { label: "Support", href: "/contact" },
-];
-
-const companyLinks = [
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Terms", href: "/terms" },
-];
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 function FooterLink({
   label,
@@ -54,6 +34,29 @@ function FooterLink({
 }
 
 export default function Footer() {
+  const t = useTranslations("Footer");
+
+  const productLinks = [
+    { label: t("templates"), href: "/templates" },
+    { label: t("components"), href: "/components" },
+    { label: t("pricing"), href: "/pricing" },
+    { label: t("dashboard"), href: "/dashboard" },
+  ];
+
+  const resourceLinks: { label: string; href?: string; disabled?: boolean }[] = [
+    { label: t("documentation"), href: "/docs" },
+    { label: t("guides"), disabled: true },
+    { label: t("blog"), disabled: true },
+    { label: t("support"), href: "/contact" },
+  ];
+
+  const companyLinks = [
+    { label: t("about"), href: "/about" },
+    { label: t("contact"), href: "/contact" },
+    { label: t("privacy"), href: "/privacy" },
+    { label: t("terms"), href: "/terms" },
+  ];
+
   return (
     <footer className="border-t border-white/10 bg-[#040812]">
       <div className="mx-auto max-w-7xl px-8 py-20">
@@ -74,16 +77,14 @@ export default function Footer() {
                 </h2>
 
                 <p className="text-sm text-gray-500">
-                  Premium UI Kit
+                  {t("tagline")}
                 </p>
               </div>
 
             </div>
 
             <p className="mt-6 max-w-md leading-8 text-gray-400">
-              Premium Next.js templates and reusable UI components
-              crafted for startups, SaaS businesses and modern web
-              applications.
+              {t("description")}
             </p>
 
           </div>
@@ -91,7 +92,7 @@ export default function Footer() {
           <div>
 
             <h3 className="mb-5 font-semibold text-white">
-              Product
+              {t("product")}
             </h3>
 
             <ul className="space-y-3 text-gray-400">
@@ -105,7 +106,7 @@ export default function Footer() {
           <div>
 
             <h3 className="mb-5 font-semibold text-white">
-              Resources
+              {t("resources")}
             </h3>
 
             <ul className="space-y-3 text-gray-400">
@@ -119,7 +120,7 @@ export default function Footer() {
           <div>
 
             <h3 className="mb-5 font-semibold text-white">
-              Company
+              {t("company")}
             </h3>
 
             <ul className="space-y-3 text-gray-400">
@@ -135,11 +136,11 @@ export default function Footer() {
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-sm text-gray-500 md:flex-row">
 
           <p>
-            © 2026 Nexora. All rights reserved.
+            {t("copyright")}
           </p>
 
           <p>
-            Designed with ❤️ using Next.js & Tailwind CSS
+            {t("builtWith")}
           </p>
 
         </div>

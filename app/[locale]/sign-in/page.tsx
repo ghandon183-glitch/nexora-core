@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, FormEvent, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 import AuthCard from "@/components/auth/auth-card";
 import Input from "@/components/ui/input";

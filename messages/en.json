@@ -1,0 +1,101 @@
+{
+  "Nav": {
+    "home": "Home",
+    "components": "Components",
+    "templates": "Templates",
+    "pricing": "Pricing",
+    "docs": "Docs",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard",
+    "signOut": "Sign Out",
+    "tagline": "Premium UI Kit"
+  },
+  "LanguageSwitcher": {
+    "label": "Language"
+  },
+  "Hero": {
+    "badge": "✨ Premium Next.js UI Kit",
+    "titleLine1": "Build Beautiful",
+    "titleLine2": "Digital Products",
+    "titleLine3": "Faster.",
+    "description": "A growing collection of premium templates, dashboards, landing pages and reusable UI components crafted for startups, SaaS products and modern web applications.",
+    "exploreTemplates": "Explore Templates",
+    "browseComponents": "Browse Components",
+    "statTemplates": "Production-Ready Templates",
+    "statFees": "Recurring Fees, Ever",
+    "statStack": "Next.js & Tailwind"
+  },
+  "TrustedBy": {
+    "heading": "Built With Modern, Production-Grade Tools"
+  },
+  "FeaturedTemplates": {
+    "badge": "Premium Collection",
+    "titleLine1": "Ready To Launch",
+    "titleLine2": "Premium Templates",
+    "description": "Carefully crafted Next.js templates designed for startups, SaaS products, agencies and modern web applications."
+  },
+  "DashboardPreview": {
+    "eyebrow": "Dashboard Preview",
+    "title": "Analytics Overview",
+    "live": "Live",
+    "revenue": "Revenue",
+    "users": "Users",
+    "sales": "Sales",
+    "orders": "Orders",
+    "conversion": "Conversion"
+  },
+  "Pricing": {
+    "badge": "Pricing",
+    "title": "One-Time Payment. No Subscriptions.",
+    "description": "Pick a template, pay once, and it's yours for good — lifetime updates and a commercial license included, no recurring charges ever.",
+    "bestValue": "Best Value",
+    "oneTime": "one-time",
+    "view": "View",
+    "componentsSuffix": "Components",
+    "lifetimeUpdates": "Lifetime Updates",
+    "commercialLicense": "Commercial License",
+    "noSubscriptionsTitle": "No subscriptions. No hidden tiers. Ever.",
+    "noSubscriptionsText": "Every template is a single, one-time payment via crypto — that's the whole pricing model.",
+    "seeFullPricing": "See Full Pricing Details"
+  },
+  "Testimonials": {
+    "badge": "Why Nexora Core",
+    "title": "A Small, Honest Alternative",
+    "description": "No bloated subscription plans and no fake customer counts — just real templates and a straightforward, one-time price.",
+    "reason1Title": "Real, Working Code",
+    "reason1Text": "Every template ships as a complete Next.js project you can clone and run locally in minutes — not a static mockup.",
+    "reason2Title": "One-Time Payment",
+    "reason2Text": "No subscriptions, no recurring fees. Pay once via crypto and the template is yours to keep, forever.",
+    "reason3Title": "Actively Maintained",
+    "reason3Text": "Nexora Core is a small, independently run marketplace — built and maintained by someone who actually uses these templates."
+  },
+  "CTA": {
+    "badge": "Ready to build?",
+    "title": "Start Building Faster Today",
+    "description": "Get a real, working Next.js codebase for your next project — one-time payment, no subscriptions, ready to launch today.",
+    "exploreTemplates": "Explore Templates",
+    "viewComponents": "View Components"
+  },
+  "Footer": {
+    "tagline": "Premium UI Kit",
+    "description": "Premium Next.js templates and reusable UI components crafted for startups, SaaS businesses and modern web applications.",
+    "product": "Product",
+    "resources": "Resources",
+    "company": "Company",
+    "templates": "Templates",
+    "components": "Components",
+    "pricing": "Pricing",
+    "dashboard": "Dashboard",
+    "documentation": "Documentation",
+    "guides": "Guides",
+    "blog": "Blog",
+    "support": "Support",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "copyright": "© 2026 Nexora. All rights reserved.",
+    "builtWith": "Designed with ❤️ using Next.js & Tailwind CSS"
+  }
+}

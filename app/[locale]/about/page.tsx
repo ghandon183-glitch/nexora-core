@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
@@ -60,9 +61,9 @@ export default function AboutPage() {
                 Nexora Core is an early-stage, independently run project. The
                 template catalog and component library are actively growing.
                 If you run into an issue or have feedback, the{" "}
-                <a href="/contact" className="text-cyan-400 hover:underline">
+                <Link href="/contact" className="text-cyan-400 hover:underline">
                   contact page
-                </a>{" "}
+                </Link>{" "}
                 is the fastest way to reach us.
               </p>
             </Card>

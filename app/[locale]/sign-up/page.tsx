@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 import AuthCard from "@/components/auth/auth-card";
 import Input from "@/components/ui/input";
