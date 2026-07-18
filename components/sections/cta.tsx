@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import Reveal from "@/components/ui/reveal";
 import Button from "@/components/ui/button";
 
@@ -30,13 +31,17 @@ export default function CTA() {
 
             <div className="mt-10 flex flex-wrap justify-center gap-6">
 
-              <Button variant="gradient" className="px-8 py-4 text-base">
-                {t("exploreTemplates")}
-              </Button>
+              <Link href="/templates">
+                <Button variant="gradient" className="px-8 py-4 text-base">
+                  {t("exploreTemplates")}
+                </Button>
+              </Link>
 
-              <Button variant="outline" className="px-8 py-4 text-base">
-                {t("viewComponents")}
-              </Button>
+              <Link href="/components">
+                <Button variant="outline" className="px-8 py-4 text-base">
+                  {t("viewComponents")}
+                </Button>
+              </Link>
 
             </div>
 

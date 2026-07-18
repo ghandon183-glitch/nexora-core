@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import HeroPreview from "@/components/ui/hero-preview";
 import Reveal from "@/components/ui/reveal";
 import { templates } from "@/lib/data/templates";
@@ -45,13 +46,19 @@ export default function Hero() {
 
           <div className="mt-10 flex flex-wrap gap-5">
 
-            <button className="rounded-xl bg-cyan-500 px-8 py-4 font-bold text-black transition duration-300 hover:scale-105">
+            <Link
+              href="/templates"
+              className="rounded-xl bg-cyan-500 px-8 py-4 font-bold text-black transition duration-300 hover:scale-105"
+            >
               {t("exploreTemplates")}
-            </button>
+            </Link>
 
-            <button className="rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-white transition duration-300 hover:bg-white/10">
+            <Link
+              href="/components"
+              className="rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-white transition duration-300 hover:bg-white/10"
+            >
               {t("browseComponents")}
-            </button>
+            </Link>
 
           </div>
 
