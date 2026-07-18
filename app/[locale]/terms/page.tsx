@@ -1,41 +1,23 @@
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
 import Heading from "@/components/ui/heading";
 import Card from "@/components/ui/card";
 
-const sections = [
-  {
-    title: "1. What you're buying",
-    body: "Each purchase gives you a license to use the purchased template's source code in your own personal or commercial projects, including projects built for clients. You may modify the code freely.",
-  },
-  {
-    title: "2. What you can't do",
-    body: "You may not resell, redistribute, or sublicense a template's source code as a standalone product or template — for example, uploading it to another template marketplace. You may not claim authorship of the original template design.",
-  },
-  {
-    title: "3. Payment",
-    body: "Payment is currently accepted as a one-time cryptocurrency payment sent to the wallet address shown at checkout. Purchases are verified manually rather than automatically, so there may be a short delay between payment and confirmation.",
-  },
-  {
-    title: "4. Refunds",
-    body: "Because templates are digital goods delivered as source code, all sales are final once a purchase is confirmed and delivered. If a template doesn't work as described, reach out through the contact page and we'll do our best to resolve it.",
-  },
-  {
-    title: "5. Updates",
-    body: "Purchased templates include free access to future updates released for that template, for as long as the template remains part of the catalog.",
-  },
-  {
-    title: "6. No warranty",
-    body: "Templates are provided \"as is,\" without warranty of any kind. We aren't liable for damages arising from the use of a purchased template.",
-  },
-  {
-    title: "7. Changes to these terms",
-    body: "These terms may be updated from time to time. Continued use of the site after a change means you accept the updated terms.",
-  },
-];
-
 export default function TermsPage() {
+  const t = useTranslations("Legal");
+
+  const sections = [
+    { title: t("terms1Title"), body: t("terms1Body") },
+    { title: t("terms2Title"), body: t("terms2Body") },
+    { title: t("terms3Title"), body: t("terms3Body") },
+    { title: t("terms4Title"), body: t("terms4Body") },
+    { title: t("terms5Title"), body: t("terms5Body") },
+    { title: t("terms6Title"), body: t("terms6Body") },
+    { title: t("terms7Title"), body: t("terms7Body") },
+  ];
+
   return (
     <>
       <Navbar />
@@ -44,9 +26,9 @@ export default function TermsPage() {
         <div className="mx-auto max-w-3xl">
 
           <Heading
-            badge="Terms"
-            title="Terms of Service"
-            description="Last updated July 2026. These terms apply whenever you purchase or use a template from Nexora Core."
+            badge={t("termsBadge")}
+            title={t("termsTitle")}
+            description={t("termsDescription")}
             align="center"
           />
 
@@ -68,10 +50,7 @@ export default function TermsPage() {
           </div>
 
           <p className="mt-10 text-center text-xs text-slate-600">
-            These terms are a general starting point and aren&apos;t a
-            substitute for legal advice. If you have specific legal or
-            regulatory requirements, have them reviewed by a legal
-            professional.
+            {t("termsDisclaimer")}
           </p>
 
         </div>

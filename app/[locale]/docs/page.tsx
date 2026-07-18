@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import Navbar from "@/components/navigation/navbar";
@@ -10,58 +11,24 @@ import Badge from "@/components/ui/badge";
 
 import { templates } from "@/lib/data/templates";
 
-const steps = [
-  {
-    title: "1. Purchase a template",
-    body:
-      "Choose a template from the marketplace and complete checkout. Payment is a one-time crypto payment, confirmed manually — there's no subscription.",
-  },
-  {
-    title: "2. Get the source code",
-    body:
-      "Once your payment is confirmed, the template's full source code is unlocked in your dashboard under \"My Purchases.\"",
-  },
-  {
-    title: "3. Install dependencies",
-    body:
-      "Unzip the project, then run npm install (or your package manager of choice) inside the project folder to install all dependencies.",
-  },
-  {
-    title: "4. Run it locally",
-    body:
-      "Run npm run dev and open http://localhost:3000 to see the template running on your machine.",
-  },
-  {
-    title: "5. Customize and deploy",
-    body:
-      "Update the content, colors, and copy to match your brand, then deploy to any platform that supports Next.js.",
-  },
-];
-
-const faqs = [
-  {
-    question: "Do I need a Next.js or React background?",
-    answer:
-      "Basic familiarity with React and Tailwind CSS helps, but every template ships with clear component names and structure so non-experts can still make simple edits.",
-  },
-  {
-    question: "Can I use a template for client projects?",
-    answer:
-      "Yes. Every purchase includes a commercial license, so you can use the template in your own projects or client work.",
-  },
-  {
-    question: "Do updates cost extra?",
-    answer:
-      "No. All future updates to a template you've purchased are included at no extra cost.",
-  },
-  {
-    question: "What if I need help?",
-    answer:
-      "Reach out through the contact details on the checkout confirmation, and we'll help you get unblocked.",
-  },
-];
-
 export default function DocsPage() {
+  const t = useTranslations("DocsPage");
+
+  const steps = [
+    { title: t("step1Title"), body: t("step1Body") },
+    { title: t("step2Title"), body: t("step2Body") },
+    { title: t("step3Title"), body: t("step3Body") },
+    { title: t("step4Title"), body: t("step4Body") },
+    { title: t("step5Title"), body: t("step5Body") },
+  ];
+
+  const faqs = [
+    { question: t("faq1Q"), answer: t("faq1A") },
+    { question: t("faq2Q"), answer: t("faq2A") },
+    { question: t("faq3Q"), answer: t("faq3A") },
+    { question: t("faq4Q"), answer: t("faq4A") },
+  ];
+
   return (
     <>
       <Navbar />
@@ -71,9 +38,9 @@ export default function DocsPage() {
         <div className="mx-auto max-w-5xl">
 
           <Heading
-            badge="Docs"
-            title="Getting started"
-            description="Everything you need to go from purchase to a running, customized site."
+            badge={t("badge")}
+            title={t("title")}
+            description={t("description")}
             align="center"
             accent="emerald"
           />
@@ -98,12 +65,11 @@ export default function DocsPage() {
           <div className="mt-20">
 
             <h2 className="text-2xl font-bold text-white">
-              Template-specific documentation
+              {t("templateDocsTitle")}
             </h2>
 
             <p className="mt-3 text-slate-400">
-              Each template also ships with its own README covering its
-              specific folder structure and configuration.
+              {t("templateDocsText")}
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -121,7 +87,7 @@ export default function DocsPage() {
                     </p>
 
                     <p className="mt-2 text-sm text-slate-500">
-                      View template & docs →
+                      {t("viewTemplateDocs")}
                     </p>
                   </Card>
                 </Link>
@@ -133,7 +99,7 @@ export default function DocsPage() {
           <div className="mt-20">
 
             <h2 className="text-2xl font-bold text-white">
-              FAQ
+              {t("faqTitle")}
             </h2>
 
             <div className="mt-8 space-y-4">

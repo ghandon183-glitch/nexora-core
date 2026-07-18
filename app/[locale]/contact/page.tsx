@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Navbar from "@/components/navigation/navbar";
 
@@ -14,6 +15,7 @@ import Button from "@/components/ui/button";
 type Status = "idle" | "sending" | "sent" | "error";
 
 export default function ContactPage() {
+  const t = useTranslations("ContactPage");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -57,9 +59,9 @@ export default function ContactPage() {
         <div className="mx-auto max-w-2xl">
 
           <Heading
-            badge="Contact"
-            title="Get in touch"
-            description="Questions about a template, a purchase, or anything else? Send a message and you'll hear back by email."
+            badge={t("badge")}
+            title={t("title")}
+            description={t("description")}
             align="center"
             accent="violet"
           />
@@ -69,11 +71,11 @@ export default function ContactPage() {
             {status === "sent" ? (
               <div className="py-8 text-center">
                 <p className="text-lg font-semibold text-cyan-300">
-                  Message sent — thanks for reaching out.
+                  {t("sentTitle")}
                 </p>
 
                 <p className="mt-2 text-sm text-slate-400">
-                  You should hear back by email soon.
+                  {t("sentText")}
                 </p>
               </div>
             ) : (
@@ -81,21 +83,21 @@ export default function ContactPage() {
 
                 <div>
                   <label htmlFor="contact-name" className="mb-2 block text-sm text-slate-300">
-                    Name
+                    {t("nameLabel")}
                   </label>
 
                   <Input
                     id="contact-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Jane Doe"
+                    placeholder={t("namePlaceholder")}
                     required
                   />
                 </div>
 
                 <div>
                   <label htmlFor="contact-email" className="mb-2 block text-sm text-slate-300">
-                    Email
+                    {t("emailLabel")}
                   </label>
 
                   <Input
@@ -103,21 +105,21 @@ export default function ContactPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder={t("emailPlaceholder")}
                     required
                   />
                 </div>
 
                 <div>
                   <label htmlFor="contact-message" className="mb-2 block text-sm text-slate-300">
-                    Message
+                    {t("messageLabel")}
                   </label>
 
                   <textarea
                     id="contact-message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="How can we help?"
+                    placeholder={t("messagePlaceholder")}
                     rows={5}
                     required
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 backdrop-blur-xl transition-all duration-300 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
@@ -126,8 +128,7 @@ export default function ContactPage() {
 
                 {status === "error" && (
                   <p className="text-sm text-red-400">
-                    Something went wrong sending your message. Please try
-                    again in a moment.
+                    {t("errorText")}
                   </p>
                 )}
 
@@ -136,7 +137,7 @@ export default function ContactPage() {
                   className="w-full"
                   disabled={status === "sending"}
                 >
-                  {status === "sending" ? "Sending..." : "Send Message"}
+                  {status === "sending" ? t("sending") : t("send")}
                 </Button>
 
               </form>

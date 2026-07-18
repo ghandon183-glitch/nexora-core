@@ -1,4 +1,9 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export default function HeroPreview() {
+  const t = useTranslations("HeroPreview");
   return (
     <div className="relative mx-auto w-full max-w-[560px]">
 
@@ -13,16 +18,16 @@ export default function HeroPreview() {
 
           <div>
             <p className="text-sm text-gray-400">
-              Dashboard Preview
+              {t("eyebrow")}
             </p>
 
             <h3 className="mt-1 text-2xl font-bold text-white">
-              Modern Analytics
+              {t("title")}
             </h3>
           </div>
 
           <div className="rounded-full bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-300">
-            ● Live
+            ● {t("live")}
           </div>
 
         </div>
@@ -50,7 +55,7 @@ export default function HeroPreview() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
 
             <p className="text-sm text-gray-400">
-              Revenue
+              {t("revenue")}
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-white">
@@ -62,7 +67,7 @@ export default function HeroPreview() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
 
             <p className="text-sm text-gray-400">
-              Growth
+              {t("growth")}
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-emerald-400">
@@ -74,7 +79,7 @@ export default function HeroPreview() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
 
             <p className="text-sm text-gray-400">
-              Users
+              {t("users")}
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-white">

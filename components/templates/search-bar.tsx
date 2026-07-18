@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
@@ -9,14 +11,15 @@ export default function SearchBar({
   value,
   onChange,
 }: SearchBarProps) {
+  const t = useTranslations("TemplatesPage");
   return (
     <div className="w-full">
       <input
         type="search"
-        aria-label="Search templates"
+        aria-label={t("searchLabel")}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search templates..."
+        placeholder={t("searchPlaceholder")}
         className="
           h-14
           w-full

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
 
@@ -13,6 +14,7 @@ interface ProductGalleryProps {
 export default function ProductGallery({
   images,
 }: ProductGalleryProps) {
+  const t = useTranslations("ProductDetail");
   const [activeImage, setActiveImage] = useState(0);
 
   const previous = () => {
@@ -36,7 +38,7 @@ export default function ProductGallery({
 
           <Image
             src={images[activeImage]}
-            alt="Template Preview"
+            alt={t("galleryAltMain")}
             fill
             priority
             className="object-cover object-top transition duration-700 group-hover:scale-105"
@@ -90,7 +92,7 @@ export default function ProductGallery({
 
               <Image
                 src={image}
-                alt={`Preview ${index + 1}`}
+                alt={`${t("galleryAltThumb")} ${index + 1}`}
                 fill
                 className="object-cover object-top transition duration-500 group-hover:scale-110"
               />

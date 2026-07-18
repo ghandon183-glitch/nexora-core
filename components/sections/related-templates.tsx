@@ -1,7 +1,9 @@
+import { useTranslations } from "next-intl";
 import TemplateCard from "@/components/ui/template-card";
 import { getAllTemplates } from "@/lib/data/get-template";
 
 export default function RelatedTemplates() {
+  const t = useTranslations("ProductDetail");
   const templates = getAllTemplates();
 
   return (
@@ -10,11 +12,11 @@ export default function RelatedTemplates() {
       <div className="mb-10">
 
         <h2 className="text-3xl font-bold text-white">
-          Related Templates
+          {t("relatedTitle")}
         </h2>
 
         <p className="mt-3 text-slate-400">
-          You may also like these premium templates.
+          {t("relatedSubtitle")}
         </p>
 
       </div>

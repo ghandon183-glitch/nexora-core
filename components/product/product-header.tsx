@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Badge from "@/components/ui/badge";
 
 interface ProductHeaderProps {
@@ -14,6 +15,7 @@ export default function ProductHeader({
   badge,
   headingFontClassName = "",
 }: ProductHeaderProps) {
+  const t = useTranslations("ProductDetail");
   return (
     <div className="space-y-12">
       {badge && <Badge>{badge}</Badge>}
@@ -30,9 +32,9 @@ export default function ProductHeader({
 
       <div className="flex flex-wrap gap-4">
         {[
-          ["Framework", "Next.js 15"],
-          ["Styling", "Tailwind CSS"],
-          ["License", "Commercial"],
+          [t("framework"), "Next.js 15"],
+          [t("styling"), "Tailwind CSS"],
+          [t("license"), t("commercial")],
         ].map(([title, value]) => (
           <div
             key={title}

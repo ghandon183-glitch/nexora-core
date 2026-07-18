@@ -1,46 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 
 import Card from "@/components/ui/card";
 
-const faqs = [
-  {
-    question: "Can I use this template for commercial projects?",
-    answer:
-      "Yes. You can use this template for unlimited commercial projects according to the license.",
-  },
-  {
-    question: "Will I receive future updates?",
-    answer:
-      "Yes. Every purchase includes lifetime updates at no additional cost.",
-  },
-  {
-    question: "Does it support Next.js 15?",
-    answer:
-      "Yes. The template is built specifically for the latest Next.js App Router.",
-  },
-  {
-    question: "Is support included?",
-    answer:
-      "Yes. Premium support is included and we'll continue fixing bugs and improving the template.",
-  },
-];
-
 export default function ProductFaq() {
+  const t = useTranslations("ProductDetail");
   const [open, setOpen] = useState<number | null>(0);
+
+  const faqs = [
+    { question: t("faq1Q"), answer: t("faq1A") },
+    { question: t("faq2Q"), answer: t("faq2A") },
+    { question: t("faq3Q"), answer: t("faq3A") },
+    { question: t("faq4Q"), answer: t("faq4A") },
+  ];
 
   return (
     <section className="space-y-8">
 
       <div>
         <h2 className="text-4xl font-bold text-white">
-          Frequently Asked Questions
+          {t("faqTitle")}
         </h2>
 
         <p className="mt-3 text-lg text-slate-400">
-          Everything you need to know before purchasing.
+          {t("faqSubtitle")}
         </p>
       </div>
 

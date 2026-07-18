@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Navbar from "@/components/navigation/navbar";
 
 import Section from "@/components/ui/section";
@@ -39,6 +41,7 @@ function Showcase({ title, description, children }: ShowcaseProps) {
 }
 
 export default function ComponentsPage() {
+  const t = useTranslations("ComponentsPage");
   return (
     <>
       <Navbar />
@@ -48,9 +51,9 @@ export default function ComponentsPage() {
         <div className="mx-auto max-w-7xl">
 
           <Heading
-            badge="Components"
-            title="Built with these components"
-            description="A live look at the UI primitives that power every Nexora Core template — the same Button, Card, and form components you'll get in the code."
+            badge={t("badge")}
+            title={t("title")}
+            description={t("description")}
             align="center"
             accent="violet"
           />
@@ -58,79 +61,79 @@ export default function ComponentsPage() {
           <div className="mt-16 grid gap-8 lg:grid-cols-2">
 
             <Showcase
-              title="Button"
-              description="Three variants: primary, outline, and ghost."
+              title={t("buttonTitle")}
+              description={t("buttonDesc")}
             >
-              <Button>Primary</Button>
-              <Button variant="outline">Outline</Button>
-              <Button variant="ghost">Ghost</Button>
+              <Button>{t("buttonPrimary")}</Button>
+              <Button variant="outline">{t("buttonOutline")}</Button>
+              <Button variant="ghost">{t("buttonGhost")}</Button>
             </Showcase>
 
             <Showcase
-              title="Badge"
-              description="Default, success, and warning states."
+              title={t("badgeTitle")}
+              description={t("badgeDesc")}
             >
-              <Badge>Default</Badge>
-              <Badge variant="success">Success</Badge>
-              <Badge variant="warning">Warning</Badge>
+              <Badge>{t("badgeDefault")}</Badge>
+              <Badge variant="success">{t("badgeSuccess")}</Badge>
+              <Badge variant="warning">{t("badgeWarning")}</Badge>
             </Showcase>
 
             <Showcase
-              title="Input"
-              description="Form input with focus ring and placeholder styling."
+              title={t("inputTitle")}
+              description={t("inputDesc")}
             >
               <Input aria-label="Example email input" placeholder="you@example.com" className="max-w-xs" />
             </Showcase>
 
             <Showcase
-              title="Card"
-              description="The base surface used across dashboards, pricing, and product pages."
+              title={t("cardTitle")}
+              description={t("cardDesc")}
             >
               <Card className="w-full max-w-xs p-6 hover:-translate-y-0 hover:border-white/10">
                 <p className="font-semibold text-white">
-                  Card title
+                  {t("cardDemoTitle")}
                 </p>
 
                 <p className="mt-2 text-sm text-slate-400">
-                  Any content can live inside a Card.
+                  {t("cardDemoBody")}
                 </p>
               </Card>
             </Showcase>
 
             <Showcase
-              title="Feature Card"
-              description="Card + icon slot, used for feature grids."
+              title={t("featureCardTitle")}
+              description={t("featureCardDesc")}
             >
               <div className="w-full max-w-xs">
                 <FeatureCard
-                  title="Fast by default"
-                  description="Optimized for Core Web Vitals out of the box."
+                  title={t("featureCardDemoTitle")}
+                  description={t("featureCardDemoDesc")}
                 />
               </div>
             </Showcase>
 
             <Showcase
-              title="Tabs"
-              description="Used on template detail pages for overview, reviews, FAQ, and changelog."
+              title={t("tabsTitle")}
+              description={t("tabsDesc")}
             >
               <div className="w-full">
                 <Tabs
                   items={[
                     {
                       id: "one",
-                      label: "Overview",
+                      label: t("tabsOverview"),
                       content: (
                         <p className="text-sm text-slate-300">
-                          Tab content renders here.
+                          {t("tabsOverviewContent")}
                         </p>
                       ),
                     },
                     {
                       id: "two",
-                      label: "Details",
+                      label: t("tabsDetails"),
                       content: (
                         <p className="text-sm text-slate-300">
-                          Switch tabs to see this change.
+                          {t("tabsDetailsContent")}
                         </p>
                       ),
                     },
@@ -143,8 +146,7 @@ export default function ComponentsPage() {
 
           <Card className="mt-10 p-10 text-center hover:-translate-y-0 hover:border-white/10">
             <p className="text-slate-400">
-              More components (Modal, Avatar, Stat Card, Tag, and more) are
-              in active development and will show up here as they ship.
+              {t("moreComponents")}
             </p>
           </Card>
 

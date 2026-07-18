@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface Props {
   value: string;
   onChange: (value: string) => void;
@@ -9,11 +11,12 @@ export default function SortFilter({
   value,
   onChange,
 }: Props) {
+  const t = useTranslations("TemplatesPage");
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      aria-label="Sort templates by"
+      aria-label={t("sortLabel")}
       className="
         rounded-xl
         border
@@ -24,10 +27,10 @@ export default function SortFilter({
         text-white
       "
     >
-      <option value="Newest">Newest</option>
-      <option value="Popular">Popular</option>
-      <option value="Price Low">Price Low</option>
-      <option value="Price High">Price High</option>
+      <option value="Newest">{t("sortNewest")}</option>
+      <option value="Popular">{t("sortPopular")}</option>
+      <option value="Price Low">{t("sortPriceLow")}</option>
+      <option value="Price High">{t("sortPriceHigh")}</option>
     </select>
   );
 }

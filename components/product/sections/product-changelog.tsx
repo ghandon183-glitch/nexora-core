@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Card from "@/components/ui/card";
 
 interface ChangelogItem {
@@ -13,17 +14,18 @@ interface ProductChangelogProps {
 export default function ProductChangelog({
   changelog,
 }: ProductChangelogProps) {
+  const t = useTranslations("ProductDetail");
   return (
     <section className="space-y-8">
 
       <div>
 
         <h2 className="text-4xl font-bold text-white">
-          Changelog
+          {t("changelogTitle")}
         </h2>
 
         <p className="mt-3 text-lg text-slate-400">
-          See what&apos;s new in every release.
+          {t("changelogSubtitle")}
         </p>
 
       </div>
@@ -40,7 +42,7 @@ export default function ProductChangelog({
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 
               <h3 className="text-2xl font-bold text-cyan-400">
-                Version {release.version}
+                {t("version")} {release.version}
               </h3>
 
               <span className="text-sm text-slate-500">

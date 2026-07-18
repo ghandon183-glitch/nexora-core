@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useRouter, Link } from "@/i18n/navigation";
 
@@ -27,6 +28,7 @@ const WALLETS = {
 type CurrencyKey = keyof typeof WALLETS;
 
 export default function CheckoutPage() {
+  const t = useTranslations("Checkout");
   const params = useParams<{ slug: string }>();
 
   const template = getTemplate(params.slug);
@@ -53,7 +55,7 @@ export default function CheckoutPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#060B18]">
         <p className="text-slate-500">
-          Loading...
+          {t("loading")}
         </p>
       </main>
     );
@@ -63,7 +65,7 @@ export default function CheckoutPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#060B18]">
         <p className="text-slate-500">
-          Template not found.
+          {t("templateNotFound")}
         </p>
       </main>
     );
@@ -116,11 +118,11 @@ export default function CheckoutPage() {
         <div className="mx-auto max-w-3xl">
 
           <h1 className="text-3xl font-black text-white">
-            Checkout
+            {t("title")}
           </h1>
 
           <p className="mt-2 text-slate-400">
-            Complete your purchase to unlock {template.title}.
+            {t("unlockText")} {template.title}.
           </p>
 
           <Card className="mt-10 p-8 hover:-translate-y-0 hover:border-white/10">
@@ -133,7 +135,7 @@ export default function CheckoutPage() {
                 </p>
 
                 <p className="mt-1 text-sm text-slate-400">
-                  Premium license · lifetime updates
+                  {t("premiumLicense")}
                 </p>
               </div>
 
@@ -147,11 +149,11 @@ export default function CheckoutPage() {
               <div className="mt-6 space-y-4 text-center">
 
                 <p className="text-cyan-300">
-                  You already own this template.
+                  {t("alreadyOwned")}
                 </p>
 
                 <Button onClick={() => router.push("/dashboard")}>
-                  Go to Dashboard
+                  {t("goToDashboard")}
                 </Button>
 
               </div>
@@ -160,7 +162,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-                    Pay with crypto
+                    {t("payWithCrypto")}
                   </p>
 
                   <div className="mt-4 flex gap-2">
@@ -180,11 +182,8 @@ export default function CheckoutPage() {
                   </div>
 
                   <p className="mt-4 text-sm text-slate-400">
-                    Send exactly <span className="font-bold text-white">${template.price}</span>{" "}
-                    worth of {WALLETS[currency].label} ({WALLETS[currency].network}) to the
-                    wallet address below, then confirm your payment. Orders
-                    are verified manually and unlocked shortly after
-                    confirmation.
+                    {t("sendExactly")} <span className="font-bold text-white">${template.price}</span>{" "}
+                    {t("worthOf")} {WALLETS[currency].label} ({WALLETS[currency].network}) {t("toWalletBelow")}
                   </p>
 
                   <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 p-4">
@@ -197,21 +196,19 @@ export default function CheckoutPage() {
                       onClick={handleCopy}
                       className="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white transition hover:border-cyan-400"
                     >
-                      {copied ? "Copied!" : "Copy"}
+                      {copied ? t("copied") : t("copy")}
                     </button>
 
                   </div>
 
                   <p className="mt-3 text-xs text-amber-400">
-                    ⚠️ Only send {WALLETS[currency].label} on the{" "}
-                    {WALLETS[currency].network}. Funds sent on the wrong
-                    network cannot be recovered.
+                    ⚠️ {t("networkWarning")} {WALLETS[currency].label} {t("networkWarningRest")}{" "}
+                    {WALLETS[currency].network}. {t("networkWarningEnd")}
                   </p>
                 </div>
 
                 <p className="text-xs text-slate-500">
-                  There is no live payment verification connected yet — this
-                  button simulates confirmation for demo purposes.
+                  {t("noLiveVerification")}
                 </p>
 
                 <Button
@@ -219,7 +216,7 @@ export default function CheckoutPage() {
                   onClick={handleConfirmPayment}
                   disabled={confirming}
                 >
-                  {confirming ? "Confirming..." : "I've completed the payment"}
+                  {confirming ? t("confirming") : t("completedPayment")}
                 </Button>
 
               </div>
@@ -231,7 +228,7 @@ export default function CheckoutPage() {
             href={`/templates/${template.slug}`}
             className="mt-6 inline-block text-sm text-slate-400 hover:text-cyan-400"
           >
-            ← Back to template
+            {t("backToTemplate")}
           </Link>
 
         </div>

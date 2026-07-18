@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent, Suspense } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 
@@ -10,6 +11,7 @@ import Button from "@/components/ui/button";
 import { useAuth } from "@/lib/context/auth-context";
 
 function SignInForm() {
+  const t = useTranslations("SignIn");
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -26,12 +28,12 @@ function SignInForm() {
     event.preventDefault();
 
     if (!email || !password) {
-      setError("Please fill in both fields.");
+      setError(t("errorFillBoth"));
       return;
     }
 
     if (!email.includes("@")) {
-      setError("Please enter a valid email address.");
+      setError(t("errorInvalidEmail"));
       return;
     }
 
@@ -52,7 +54,7 @@ function SignInForm() {
     >
       <div>
         <label htmlFor="signin-email" className="mb-2 block text-sm text-slate-300">
-          Email
+          {t("emailLabel")}
         </label>
 
         <Input
@@ -66,7 +68,7 @@ function SignInForm() {
 
       <div>
         <label htmlFor="signin-password" className="mb-2 block text-sm text-slate-300">
-          Password
+          {t("passwordLabel")}
         </label>
 
         <Input
@@ -85,27 +87,27 @@ function SignInForm() {
       )}
 
       <p className="text-xs text-slate-500">
-        There is no backend connected yet, so this signs you in
-        locally on this device only.
+        {t("noBackendNote")}
       </p>
 
       <Button
         type="submit"
         className="w-full"
       >
-        Sign In
+        {t("submit")}
       </Button>
     </form>
   );
 }
 
 export default function SignInPage() {
+  const t = useTranslations("SignIn");
   return (
     <AuthCard
-      title="Welcome back"
-      subtitle="Sign in to access your templates and orders."
-      footerText="Don't have an account?"
-      footerLinkText="Sign up"
+      title={t("title")}
+      subtitle={t("subtitle")}
+      footerText={t("footerText")}
+      footerLinkText={t("footerLinkText")}
       footerLinkHref="/sign-up"
     >
       <Suspense fallback={null}>

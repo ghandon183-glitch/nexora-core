@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Tabs from "@/components/ui/tabs";
 
 import ProductOverview from "./sections/product-overview";
@@ -35,12 +36,13 @@ export default function ProductTabs({
   features,
   changelog,
 }: ProductTabsProps) {
+  const t = useTranslations("ProductDetail");
   return (
     <Tabs
       items={[
         {
           id: "overview",
-          label: "Overview",
+          label: t("overview"),
           content: (
             <ProductOverview
               framework={framework}
@@ -56,17 +58,17 @@ export default function ProductTabs({
         },
         {
           id: "reviews",
-          label: "Reviews",
+          label: t("reviews"),
           content: <ProductReviews />,
         },
         {
           id: "faq",
-          label: "FAQ",
+          label: t("faq"),
           content: <ProductFaq />,
         },
         {
           id: "changelog",
-          label: "Changelog",
+          label: t("changelog"),
           content: (
             <ProductChangelog
               changelog={changelog}

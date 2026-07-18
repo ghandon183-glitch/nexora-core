@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import TemplateCard from "@/components/ui/template-card";
 import type { Template } from "@/lib/data/templates";
 
@@ -8,16 +9,17 @@ interface Props {
 export default function TemplatesGrid({
   templates,
 }: Props) {
+  const t = useTranslations("TemplatesPage");
   if (templates.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-slate-700 py-24 text-center">
 
         <h2 className="text-3xl font-bold text-white">
-          No templates found
+          {t("noResultsTitle")}
         </h2>
 
         <p className="mt-4 text-slate-400">
-          Try searching with another keyword.
+          {t("noResultsText")}
         </p>
 
       </div>

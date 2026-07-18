@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface Props {
   value: string;
   onChange: (value: string) => void;
@@ -14,11 +16,12 @@ export default function FrameworkFilter({
   value,
   onChange,
 }: Props) {
+  const t = useTranslations("TemplatesPage");
   return (
     <div className="space-y-3">
 
       <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
-        Framework
+        {t("frameworkHeading")}
       </h3>
 
       {frameworks.map((item) => (
@@ -33,7 +36,7 @@ export default function FrameworkFilter({
               : "bg-slate-900 text-slate-300 hover:bg-slate-800"
           }`}
         >
-          {item}
+          {item === "All" ? t("all") : item}
         </button>
       ))}
 

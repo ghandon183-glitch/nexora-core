@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
 import AuthCard from "@/components/auth/auth-card";
@@ -9,6 +10,7 @@ import Button from "@/components/ui/button";
 import { useAuth } from "@/lib/context/auth-context";
 
 export default function SignUpPage() {
+  const t = useTranslations("SignUp");
   const [name, setName] = useState("");
 
   const [email, setEmail] = useState("");
@@ -27,22 +29,22 @@ export default function SignUpPage() {
     event.preventDefault();
 
     if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in every field.");
+      setError(t("errorFillAll"));
       return;
     }
 
     if (!email.includes("@")) {
-      setError("Please enter a valid email address.");
+      setError(t("errorInvalidEmail"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(t("errorPasswordLength"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("errorPasswordMismatch"));
       return;
     }
 
@@ -54,10 +56,10 @@ export default function SignUpPage() {
 
   return (
     <AuthCard
-      title="Create your account"
-      subtitle="Get access to premium templates and future updates."
-      footerText="Already have an account?"
-      footerLinkText="Sign in"
+      title={t("title")}
+      subtitle={t("subtitle")}
+      footerText={t("footerText")}
+      footerLinkText={t("footerLinkText")}
       footerLinkHref="/sign-in"
     >
       <form
@@ -66,13 +68,13 @@ export default function SignUpPage() {
       >
         <div>
           <label htmlFor="signup-name" className="mb-2 block text-sm text-slate-300">
-            Full name
+            {t("nameLabel")}
           </label>
 
           <Input
             id="signup-name"
             type="text"
-            placeholder="Jane Doe"
+            placeholder={t("namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -80,7 +82,7 @@ export default function SignUpPage() {
 
         <div>
           <label htmlFor="signup-email" className="mb-2 block text-sm text-slate-300">
-            Email
+            {t("emailLabel")}
           </label>
 
           <Input
@@ -94,13 +96,13 @@ export default function SignUpPage() {
 
         <div>
           <label htmlFor="signup-password" className="mb-2 block text-sm text-slate-300">
-            Password
+            {t("passwordLabel")}
           </label>
 
           <Input
             id="signup-password"
             type="password"
-            placeholder="At least 8 characters"
+            placeholder={t("passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -108,7 +110,7 @@ export default function SignUpPage() {
 
         <div>
           <label htmlFor="signup-confirm-password" className="mb-2 block text-sm text-slate-300">
-            Confirm password
+            {t("confirmPasswordLabel")}
           </label>
 
           <Input
@@ -127,15 +129,14 @@ export default function SignUpPage() {
         )}
 
         <p className="text-xs text-slate-500">
-          There is no backend connected yet, so this creates a local
-          session on this device only.
+          {t("noBackendNote")}
         </p>
 
         <Button
           type="submit"
           className="w-full"
         >
-          Create Account
+          {t("submit")}
         </Button>
       </form>
     </AuthCard>

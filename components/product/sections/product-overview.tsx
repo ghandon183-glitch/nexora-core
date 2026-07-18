@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 interface ProductOverviewProps {
   framework: string;
   styling: string;
@@ -19,35 +21,35 @@ export default function ProductOverview({
   tags,
   features,
 }: ProductOverviewProps) {
+  const t = useTranslations("ProductDetail");
   return (
     <section className="space-y-10">
 
       <div>
         <h2 className="mb-4 text-3xl font-bold text-white">
-          Overview
+          {t("overviewTitle")}
         </h2>
 
         <p className="leading-8 text-slate-400">
-          Premium production-ready template built with modern technologies,
-          optimized performance and reusable UI components.
+          {t("overviewText")}
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
 
-        <InfoCard title="Framework" value={framework} />
-        <InfoCard title="Styling" value={styling} />
-        <InfoCard title="Components" value={components} />
-        <InfoCard title="Version" value={version} />
-        <InfoCard title="Updated" value={lastUpdate} />
-        <InfoCard title="Category" value={category} />
+        <InfoCard title={t("framework")} value={framework} />
+        <InfoCard title={t("styling")} value={styling} />
+        <InfoCard title={t("componentsLabel")} value={components} />
+        <InfoCard title={t("versionLabel")} value={version} />
+        <InfoCard title={t("updatedLabel")} value={lastUpdate} />
+        <InfoCard title={t("categoryLabel")} value={category} />
 
       </div>
 
       <div>
 
         <h3 className="mb-4 text-xl font-semibold text-white">
-          Features
+          {t("featuresTitle")}
         </h3>
 
         <ul className="grid gap-3 md:grid-cols-2">
@@ -68,7 +70,7 @@ export default function ProductOverview({
       <div>
 
         <h3 className="mb-4 text-xl font-semibold text-white">
-          Tags
+          {t("tagsTitle")}
         </h3>
 
         <div className="flex flex-wrap gap-3">

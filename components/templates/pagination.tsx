@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
@@ -13,6 +14,7 @@ export default function Pagination({
   totalPages,
   onPageChange,
 }: PaginationProps) {
+  const t = useTranslations("TemplatesPage");
   if (totalPages <= 1) {
     return null;
   }
@@ -24,7 +26,7 @@ export default function Pagination({
 
   return (
     <nav
-      aria-label="Templates pagination"
+      aria-label={t("paginationLabel")}
       className="mt-12 flex items-center justify-center gap-2"
     >
 
@@ -32,7 +34,7 @@ export default function Pagination({
         type="button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        aria-label="Previous page"
+        aria-label={t("previousPage")}
         className="
           flex
           h-10
@@ -82,7 +84,7 @@ export default function Pagination({
         type="button"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        aria-label="Next page"
+        aria-label={t("nextPage")}
         className="
           flex
           h-10

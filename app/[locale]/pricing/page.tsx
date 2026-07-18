@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import Navbar from "@/components/navigation/navbar";
@@ -13,6 +14,7 @@ import { templates } from "@/lib/data/templates";
 import { getHeadingFontClass } from "@/lib/fonts";
 
 export default function PricingPage() {
+  const t = useTranslations("PricingPage");
   return (
     <>
       <Navbar />
@@ -22,9 +24,9 @@ export default function PricingPage() {
         <div className="mx-auto max-w-7xl">
 
           <Heading
-            badge="Pricing"
-            title="One template, one price"
-            description="No subscriptions and no hidden tiers. Pick a template, pay once, and it's yours — with lifetime updates and a commercial license included."
+            badge={t("badge")}
+            title={t("title")}
+            description={t("description")}
             align="center"
             accent="amber"
           />
@@ -58,7 +60,7 @@ export default function PricingPage() {
                   <div className="mt-8 text-5xl font-black text-white">
                     ${template.price}
                     <span className="ml-2 text-base font-normal text-slate-500">
-                      one-time
+                      {t("oneTime")}
                     </span>
                   </div>
 
@@ -66,12 +68,12 @@ export default function PricingPage() {
 
                     <li className="flex items-center gap-3">
                       <span className="text-cyan-400">✓</span>
-                      {template.components}+ components
+                      {template.components}+ {t("componentsSuffix")}
                     </li>
 
                     <li className="flex items-center gap-3">
                       <span className="text-cyan-400">✓</span>
-                      Built with {template.framework}
+                      {t("builtWith")} {template.framework}
                     </li>
 
                     {template.features.slice(0, 3).map((feature) => (
@@ -86,12 +88,12 @@ export default function PricingPage() {
 
                     <li className="flex items-center gap-3">
                       <span className="text-cyan-400">✓</span>
-                      Lifetime updates
+                      {t("lifetimeUpdates")}
                     </li>
 
                     <li className="flex items-center gap-3">
                       <span className="text-cyan-400">✓</span>
-                      Commercial license
+                      {t("commercialLicense")}
                     </li>
 
                   </ul>
@@ -101,7 +103,7 @@ export default function PricingPage() {
                     className="mt-8 block"
                   >
                     <Button className="w-full">
-                      View {template.title}
+                      {t("view")} {template.title}
                     </Button>
                   </Link>
 
@@ -115,19 +117,17 @@ export default function PricingPage() {
 
             <div>
               <h3 className="text-xl font-bold text-white">
-                Payment is currently crypto-only
+                {t("cryptoOnlyTitle")}
               </h3>
 
               <p className="mt-2 max-w-2xl text-sm text-slate-400">
-                Every purchase is a one-time payment sent to a wallet address
-                during checkout, confirmed manually. No recurring charges,
-                ever.
+                {t("cryptoOnlyText")}
               </p>
             </div>
 
             <Link href="/templates">
               <Button variant="outline" className="whitespace-nowrap">
-                Browse All Templates
+                {t("browseAll")}
               </Button>
             </Link>
 

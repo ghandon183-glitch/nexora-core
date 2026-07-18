@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 
 import { useAuth } from "@/lib/context/auth-context";
@@ -21,6 +22,7 @@ const DOWNLOADS: Record<string, string> = {
 };
 
 export default function DashboardPage() {
+  const t = useTranslations("DashboardPage");
   const { user, loading, signOut } = useAuth();
 
   const { purchases } = usePurchases();
@@ -37,7 +39,7 @@ export default function DashboardPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#060B18]">
         <p className="text-slate-500">
-          Loading...
+          {t("loading")}
         </p>
       </main>
     );
@@ -65,7 +67,7 @@ export default function DashboardPage() {
 
           <div>
             <h1 className="text-3xl font-black text-white">
-              Welcome back, {user.name}
+              {t("welcomeBack")}, {user.name}
             </h1>
 
             <p className="mt-2 text-slate-400">
@@ -77,7 +79,7 @@ export default function DashboardPage() {
             variant="outline"
             onClick={handleSignOut}
           >
-            Sign Out
+            {t("signOut")}
           </Button>
 
         </div>
@@ -86,7 +88,7 @@ export default function DashboardPage() {
 
           <Card className="p-6 hover:-translate-y-0 hover:border-white/10">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-              Templates Owned
+              {t("templatesOwned")}
             </p>
 
             <p className="mt-3 text-3xl font-black text-white">
@@ -96,7 +98,7 @@ export default function DashboardPage() {
 
           <Card className="p-6 hover:-translate-y-0 hover:border-white/10">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-              Total Spent
+              {t("totalSpent")}
             </p>
 
             <p className="mt-3 text-3xl font-black text-white">
@@ -106,11 +108,11 @@ export default function DashboardPage() {
 
           <Card className="p-6 hover:-translate-y-0 hover:border-white/10">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-              Member Since
+              {t("memberSince")}
             </p>
 
             <p className="mt-3 text-3xl font-black text-white">
-              Today
+              {t("today")}
             </p>
           </Card>
 
@@ -119,20 +121,20 @@ export default function DashboardPage() {
         <div className="mt-12">
 
           <h2 className="text-xl font-bold text-white">
-            My Purchases
+            {t("myPurchases")}
           </h2>
 
           {purchases.length === 0 ? (
             <Card className="mt-6 flex flex-col items-center justify-center gap-4 p-16 text-center hover:-translate-y-0 hover:border-white/10">
 
               <p className="text-slate-400">
-                You haven&apos;t purchased any templates yet.
+                {t("noPurchasesText")}
               </p>
 
               <Button
                 onClick={() => router.push("/templates")}
               >
-                Browse Templates
+                {t("browseTemplates")}
               </Button>
 
             </Card>
@@ -153,14 +155,13 @@ export default function DashboardPage() {
                       </p>
 
                       <p className="mt-1 text-sm text-slate-400">
-                        Purchased on{" "}
+                        {t("purchasedOn")}{" "}
                         {new Date(purchase.purchasedAt).toLocaleDateString()}
                       </p>
 
                       {!downloadUrl && (
                         <p className="mt-1 text-xs text-amber-400">
-                          Source files are still being finalized — we&apos;ll
-                          email you as soon as they&apos;re ready.
+                          {t("sourcePending")}
                         </p>
                       )}
                     </div>
@@ -168,14 +169,14 @@ export default function DashboardPage() {
                     <div className="flex shrink-0 gap-3">
                       <Link href={`/templates/${purchase.slug}`}>
                         <Button variant="outline">
-                          View Template
+                          {t("viewTemplate")}
                         </Button>
                       </Link>
 
                       {downloadUrl && (
                         <a href={downloadUrl} download>
                           <Button>
-                            Download Source Code
+                            {t("downloadSource")}
                           </Button>
                         </a>
                       )}

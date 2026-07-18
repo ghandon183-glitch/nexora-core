@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { templates } from "@/lib/data/templates";
 
 interface Props {
@@ -16,11 +17,12 @@ export default function CategoryFilter({
   value,
   onChange,
 }: Props) {
+  const t = useTranslations("TemplatesPage");
   return (
     <div className="space-y-3">
 
       <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
-        Categories
+        {t("categoriesHeading")}
       </h3>
 
       {categories.map((item) => (
@@ -35,7 +37,7 @@ export default function CategoryFilter({
               : "bg-slate-900 text-slate-300 hover:bg-slate-800"
           }`}
         >
-          <span>{item}</span>
+          <span>{item === "All" ? t("all") : item}</span>
 
           <span className="text-xs opacity-70">
             {item === "All" ? "" : "•"}

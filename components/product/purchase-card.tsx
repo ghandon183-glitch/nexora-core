@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import Button from "@/components/ui/button";
@@ -14,6 +15,7 @@ export default function PurchaseCard({
   price,
   demoUrl,
 }: PurchaseCardProps) {
+  const t = useTranslations("ProductDetail");
   const hasDemo = demoUrl && demoUrl !== "#";
   return (
     <aside className="xl:sticky xl:top-40 xl:self-start">
@@ -24,7 +26,7 @@ export default function PurchaseCard({
           <div>
 
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-              Premium License
+              {t("premiumLicense")}
             </p>
 
             <h2 className="mt-3 text-6xl font-black leading-none text-cyan-400">
@@ -33,13 +35,13 @@ export default function PurchaseCard({
 
             <div className="mt-6 space-y-3 text-base text-slate-300">
 
-              <div>✓ One-time payment</div>
+              <div>✓ {t("onePayment")}</div>
 
-              <div>✓ Lifetime updates</div>
+              <div>✓ {t("lifetimeUpdates")}</div>
 
-              <div>✓ Commercial license</div>
+              <div>✓ {t("commercialLicense")}</div>
 
-              <div>✓ Premium support</div>
+              <div>✓ {t("premiumSupport")}</div>
 
             </div>
 
@@ -49,14 +51,14 @@ export default function PurchaseCard({
 
             <Link href={`/checkout/${slug}`}>
               <Button className="w-full">
-                Purchase Now
+                {t("purchaseNow")}
               </Button>
             </Link>
 
             {hasDemo ? (
               <a href={demoUrl} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" className="w-full">
-                  Live Preview
+                  {t("livePreview")}
                 </Button>
               </a>
             ) : (
@@ -66,7 +68,7 @@ export default function PurchaseCard({
                 disabled
                 title="Live preview coming soon"
               >
-                Live Preview (Coming Soon)
+                {t("livePreviewComingSoon")}
               </Button>
             )}
 

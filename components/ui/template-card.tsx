@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import Card from "./card";
@@ -26,6 +27,7 @@ export default function TemplateCard({
   demoUrl,
   components,
 }: TemplateCardProps) {
+  const t = useTranslations("TemplatesPage");
   const hasDemo = demoUrl && demoUrl !== "#";
   return (
     <Card className="group overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/60 p-0 transition-all duration-500 hover:-translate-y-2 hover:border-cyan-500/40 hover:shadow-[0_25px_60px_rgba(6,182,212,.18)]">
@@ -85,7 +87,7 @@ export default function TemplateCard({
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3 text-center">
 
             <p className="text-xs uppercase tracking-wider text-slate-500">
-              Framework
+              {t("cardFramework")}
             </p>
 
             <p className="mt-1 text-sm font-semibold text-white">
@@ -97,7 +99,7 @@ export default function TemplateCard({
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3 text-center">
 
             <p className="text-xs uppercase tracking-wider text-slate-500">
-              Styling
+              {t("cardStyling")}
             </p>
 
             <p className="mt-1 text-sm font-semibold text-white">
@@ -109,7 +111,7 @@ export default function TemplateCard({
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3 text-center">
 
             <p className="text-xs uppercase tracking-wider text-slate-500">
-              Components
+              {t("cardComponents")}
             </p>
 
             <p className="mt-1 text-sm font-semibold text-white">
@@ -127,7 +129,7 @@ export default function TemplateCard({
             className="flex-1"
           >
             <Button className="w-full">
-              View Template
+              {t("viewTemplate")}
             </Button>
           </Link>
 
@@ -139,7 +141,7 @@ export default function TemplateCard({
               className="flex-1"
             >
               <Button variant="outline" className="w-full">
-                Live Preview
+                {t("livePreview")}
               </Button>
             </a>
           ) : (
@@ -149,7 +151,7 @@ export default function TemplateCard({
               disabled
               title="Live preview coming soon"
             >
-              Coming Soon
+              {t("comingSoon")}
             </Button>
           )}
 
