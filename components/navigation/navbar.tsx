@@ -6,6 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 
 import { useAuth } from "@/lib/context/auth-context";
 import LanguageSwitcher from "@/components/navigation/language-switcher";
+import LogoMark from "@/components/ui/logo-mark";
 
 export default function Navbar() {
   const t = useTranslations("Nav");
@@ -37,8 +38,8 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-3"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 font-black text-black">
-            N
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 p-2 text-white">
+            <LogoMark className="h-full w-full" />
           </div>
 
           <div>

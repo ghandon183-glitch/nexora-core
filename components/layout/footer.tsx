@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import LogoMark from "@/components/ui/logo-mark";
 
 function FooterLink({
   label,
@@ -67,8 +68,8 @@ export default function Footer() {
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500 text-xl font-black text-black">
-                N
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 p-2.5 text-white">
+                <LogoMark className="h-full w-full" />
               </div>
 
               <div>

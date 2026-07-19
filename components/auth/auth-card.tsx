@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 
 import Card from "@/components/ui/card";
+import LogoMark from "@/components/ui/logo-mark";
 
 interface AuthCardProps {
   title: string;
@@ -28,8 +29,8 @@ export default function AuthCard({
           href="/"
           className="mb-10 flex items-center justify-center gap-3"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 font-black text-black">
-            N
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 p-2 text-white">
+            <LogoMark className="h-full w-full" />
           </div>
 
           <span className="text-lg font-bold tracking-wide text-white">
