@@ -12,18 +12,24 @@
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@iconify/react": "^6.0.2",
     "@radix-ui/react-tabs": "^1.1.15",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.42.0",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.25",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "next-intl": "^4.13.2",
     "nodemailer": "^9.0.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-icons": "^5.7.0",
     "resend": "^6.17.1",
-    "tailwind-merge": "^3.6.0"
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "vaul": "^1.1.2"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.1",

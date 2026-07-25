@@ -389,4 +389,73 @@ export const templates: Template[] = [
       },
     ],
   },
+
+  {
+    slug: "aurelia-store",
+
+    title: "Aurelia",
+
+    description:
+      "A boutique e-commerce storefront template for jewelry, ceramics, and home objects, with a signature hanging price-tag animation on the hero.",
+
+    image: "/templates/aurelia-store.jpg",
+
+    gallery: [
+      "/templates/gallery/aurelia-store/1.jpg",
+      "/templates/gallery/aurelia-store/2.jpg",
+      "/templates/gallery/aurelia-store/3.jpg",
+      "/templates/gallery/aurelia-store/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "E-commerce",
+
+    tags: [
+      "E-commerce",
+      "Storefront",
+      "Jewelry",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 20,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-07-24",
+
+    price: 59,
+
+    demoUrl: "/demo/aurelia-store/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Signature Hero Animation (GSAP)",
+      "Category Grid",
+      "Featured Products Grid",
+      "Bestsellers Grid",
+      "Customer Reviews",
+      "Newsletter Signup",
+      "Self-Hosted Fonts (No External Requests)",
+      "Framer Motion Scroll Reveals",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-07-24",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
 ];

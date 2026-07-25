@@ -5,6 +5,7 @@ export function getHeadingFontClass(slug: string): string {
     case "creative-agency": return "tracking-wide";
     case "kiln-estates": return "";
     case "nexi-ai": return "";
+    case "aurelia-store": return "italic";
     default: return "";
   }
 }
