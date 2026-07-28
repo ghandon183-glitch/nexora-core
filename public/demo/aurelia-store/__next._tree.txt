@@ -1,6 +1,11 @@
-:HL["/demo/aurelia-store/_next/static/chunks/1_p72zbj7xt7g.css","style"]
+:HL["/demo/aurelia-store/_next/static/chunks/13g0txi3mphhx.css","style"]
 :HC["/",""]
 :HL["/demo/aurelia-store/images/ring-bee.jpg","image"]
-:HL["/demo/aurelia-store/images/necklace-worn.jpg","image"]
+:HL["/demo/aurelia-store/images/rings-pair.jpg","image"]
+:HL["/demo/aurelia-store/images/necklace-heart.jpg","image"]
 :HL["/demo/aurelia-store/images/chain-macro.jpg","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"p0ZVw8lynrcPj6_HKz-wn"}
+:HL["/demo/aurelia-store/images/candles-lit.jpg","image"]
+:HL["/demo/aurelia-store/images/vase-dried-flowers.jpg","image"]
+:HL["/demo/aurelia-store/images/ceramic-vases-colorful.jpg","image"]
+:HL["/demo/aurelia-store/images/ring-cluster.jpg","image"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"Be9kNgiZ3knJkxpsK5VNO"}
