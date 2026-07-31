@@ -1,0 +1,12 @@
+:HL["/demo/solace-studio/_next/static/chunks/01.yf9na5d~bl.css","style"]
+:HC["/",""]
+:HL["/demo/solace-studio/images/trainer-1.png","image"]
+:HL["/demo/solace-studio/images/trainer-2.png","image"]
+:HL["/demo/solace-studio/images/trainer-3.png","image"]
+:HL["/demo/solace-studio/images/gallery-1.png","image"]
+:HL["/demo/solace-studio/images/gallery-2.png","image"]
+:HL["/demo/solace-studio/images/gallery-3.png","image"]
+:HL["/demo/solace-studio/images/hero-studio.png","image"]
+:HL["/demo/solace-studio/images/gallery-4.png","image"]
+:HL["/demo/solace-studio/images/gallery-5.png","image"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"Gg_x_9YHYcl2nH4Oi-0qK"}

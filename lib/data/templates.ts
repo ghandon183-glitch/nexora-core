@@ -458,4 +458,74 @@ export const templates: Template[] = [
       },
     ],
   },
+
+  {
+    slug: "solace-studio",
+
+    title: "Solace Studio",
+
+    description:
+      "A boutique yoga, pilates, and strength studio template with a live 'next class' countdown badge and a calm forest/cream/clay/mustard palette.",
+
+    image: "/templates/solace-studio.jpg",
+
+    gallery: [
+      "/templates/gallery/solace-studio/1.jpg",
+      "/templates/gallery/solace-studio/2.jpg",
+      "/templates/gallery/solace-studio/3.jpg",
+      "/templates/gallery/solace-studio/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "Fitness & Wellness",
+
+    tags: [
+      "Yoga",
+      "Fitness",
+      "Wellness",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 18,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-07-31",
+
+    price: 55,
+
+    demoUrl: "/demo/solace-studio/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Live 'Next Class' Countdown Badge",
+      "Class Schedule Grid",
+      "Trainer Profiles",
+      "Pricing Plans",
+      "Testimonials",
+      "Instagram-Style Gallery",
+      "Newsletter Signup",
+      "Self-Hosted Fonts (No External Requests)",
+      "Framer Motion Scroll Reveals",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-07-31",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
 ];
