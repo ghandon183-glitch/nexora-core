@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getAllTemplates } from "@/lib/data/get-template";
 
-const siteUrl = process.env.SITE_URL || "https://nexora-core.ghandon183.workers.dev";
+const siteUrl = process.env.SITE_URL || "https://nexora-core.nxora.workers.dev";
 
 const staticPaths = [
   "",

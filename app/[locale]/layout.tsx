@@ -9,7 +9,7 @@ import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/lib/context/auth-context";
 import { PurchasesProvider } from "@/lib/context/purchases-context";
 
-const siteUrl = process.env.SITE_URL || "https://nexora-core.ghandon183.workers.dev";
+const siteUrl = process.env.SITE_URL || "https://nexora-core.nxora.workers.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

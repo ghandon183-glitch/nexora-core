@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.SITE_URL || "https://nexora-core.ghandon183.workers.dev";
+const siteUrl = process.env.SITE_URL || "https://nexora-core.nxora.workers.dev";
 
 export default function robots(): MetadataRoute.Robots {
   return {
