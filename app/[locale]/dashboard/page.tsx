@@ -9,17 +9,7 @@ import { usePurchases } from "@/lib/context/purchases-context";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Navbar from "@/components/navigation/navbar";
-
-// Templates with a real, downloadable source-code package. Templates not
-// listed here don't have a build yet — customers still see their purchase,
-// but get a "coming soon" note instead of a broken download link.
-const DOWNLOADS: Record<string, string> = {
-  "modern-saas": "/downloads/modern-saas.zip",
-  "admin-dashboard": "/downloads/admin-dashboard.zip",
-  "creative-agency": "/downloads/creative-agency.zip",
-  "kiln-estates": "/downloads/kiln-estates.zip",
-  "nexi-ai": "/downloads/nexi-ai.zip",
-};
+import { DOWNLOADS } from "@/lib/data/downloads";
 
 export default function DashboardPage() {
   const t = useTranslations("DashboardPage");

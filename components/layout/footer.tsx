@@ -46,6 +46,7 @@ export default function Footer() {
 
   const resourceLinks: { label: string; href?: string; disabled?: boolean }[] = [
     { label: t("documentation"), href: "/docs" },
+    { label: "FAQ", href: "/faq" },
     { label: t("guides"), disabled: true },
     { label: t("blog"), disabled: true },
     { label: t("support"), href: "/contact" },

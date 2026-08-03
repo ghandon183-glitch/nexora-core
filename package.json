@@ -32,6 +32,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260801.1",
     "@opennextjs/cloudflare": "^1.20.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
