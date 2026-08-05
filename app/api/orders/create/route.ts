@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { insertOrder } from "@/lib/orders/db";
 import { WALLETS, ORDER_EXPIRY_MS, generatePayAmount, type CurrencyKey } from "@/lib/orders/pricing";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getVerificationById, markUsed } from "@/lib/verification/db";
 
 interface CreateOrderBody {
   templateSlug: string;
@@ -11,6 +12,7 @@ interface CreateOrderBody {
   currency: CurrencyKey;
   buyerName: string;
   buyerEmail: string;
+  verificationId: string;
 }
 
 export async function POST(request: Request) {
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request body" }, { status: 400 });
   }
 
-  const { templateSlug, templateTitle, basePriceUsd, currency, buyerName, buyerEmail } = body;
+  const { templateSlug, templateTitle, basePriceUsd, currency, buyerName, buyerEmail, verificationId } = body;
 
   if (
     !templateSlug ||
@@ -44,9 +46,36 @@ export async function POST(request: Request) {
     !basePriceUsd ||
     !buyerEmail ||
     !buyerName ||
+    !verificationId ||
     (currency !== "USDT" && currency !== "BTC")
   ) {
     return NextResponse.json({ ok: false, error: "Missing or invalid fields" }, { status: 400 });
+  }
+
+  // The download link goes to buyerEmail the moment payment is confirmed,
+  // so an order can only be created against an email that was just proven
+  // deliverable via a one-time code — never a raw, unverified string.
+  try {
+    const verification = await getVerificationById(verificationId);
+    const normalizedEmail = buyerEmail.trim().toLowerCase();
+
+    if (
+      !verification ||
+      !verification.verified ||
+      verification.used ||
+      verification.email !== normalizedEmail ||
+      Date.now() > verification.expires_at + 30 * 60 * 1000 // grace period past code expiry to actually place the order
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Email verification is missing or expired. Please verify your email again." },
+        { status: 400 }
+      );
+    }
+
+    await markUsed(verificationId);
+  } catch (error) {
+    console.error("[orders/create] Verification check failed:", error);
+    return NextResponse.json({ ok: false, error: "Could not verify email status" }, { status: 500 });
   }
 
   try {

@@ -30,6 +30,8 @@ interface OrderState {
 
 type OrderStatus = "idle" | "creating" | "waiting" | "confirmed" | "expired" | "error";
 
+type EmailStep = "entry" | "sending" | "codeSent" | "verifying" | "verified";
+
 export default function CheckoutPage() {
   const t = useTranslations("Checkout");
   const params = useParams<{ slug: string }>();
@@ -47,6 +49,15 @@ export default function CheckoutPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
+  // Every download link goes to this email the moment payment is confirmed,
+  // so it has to be re-verified at checkout — the account email typed at
+  // sign-up isn't trusted to be real or to belong to whoever's buying now.
+  const [emailStep, setEmailStep] = useState<EmailStep>("entry");
+  const [emailInput, setEmailInput] = useState("");
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -55,6 +66,12 @@ export default function CheckoutPage() {
       router.push(`/sign-in?next=/checkout/${params.slug}`);
     }
   }, [loading, user, router, params.slug]);
+
+  useEffect(() => {
+    if (user?.email) {
+      setEmailInput(user.email);
+    }
+  }, [user]);
 
   // Poll order status every 8s while waiting for on-chain confirmation.
   useEffect(() => {
@@ -140,7 +157,89 @@ export default function CheckoutPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleSendCode() {
+    const trimmedEmail = emailInput.trim();
+
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setVerifyError("Please enter a valid email address.");
+      return;
+    }
+
+    setEmailStep("sending");
+    setVerifyError(null);
+
+    try {
+      const res = await fetch("/api/verify-email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
+
+      const data = (await res.json()) as { ok: boolean; error?: string; verificationId?: string };
+
+      if (!data.ok || !data.verificationId) {
+        setVerifyError(data.error || "Could not send verification code. Please try again.");
+        setEmailStep("entry");
+        return;
+      }
+
+      setVerificationId(data.verificationId);
+      setCodeInput("");
+      setEmailStep("codeSent");
+    } catch {
+      setVerifyError("Network error. Please try again.");
+      setEmailStep("entry");
+    }
+  }
+
+  async function handleVerifyCode() {
+    if (!verificationId) return;
+
+    const trimmedCode = codeInput.trim();
+
+    if (trimmedCode.length !== 6) {
+      setVerifyError("Enter the 6-digit code from your email.");
+      return;
+    }
+
+    setEmailStep("verifying");
+    setVerifyError(null);
+
+    try {
+      const res = await fetch("/api/verify-email/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ verificationId, code: trimmedCode }),
+      });
+
+      const data = (await res.json()) as { ok: boolean; error?: string };
+
+      if (!data.ok) {
+        setVerifyError(data.error || "Incorrect code. Please try again.");
+        setEmailStep("codeSent");
+        return;
+      }
+
+      setEmailStep("verified");
+    } catch {
+      setVerifyError("Network error. Please try again.");
+      setEmailStep("codeSent");
+    }
+  }
+
+  function handleChangeEmail() {
+    setEmailStep("entry");
+    setVerificationId(null);
+    setCodeInput("");
+    setVerifyError(null);
+  }
+
   async function handleCreateOrder() {
+    if (emailStep !== "verified" || !verificationId) {
+      setVerifyError("Please verify your email first.");
+      return;
+    }
+
     setStatus("creating");
     setErrorMessage(null);
 
@@ -154,7 +253,8 @@ export default function CheckoutPage() {
           basePriceUsd: template!.price,
           currency,
           buyerName: user!.name,
-          buyerEmail: user!.email,
+          buyerEmail: emailInput.trim(),
+          verificationId,
         }),
       });
 
@@ -217,42 +317,135 @@ export default function CheckoutPage() {
               </div>
             ) : status === "idle" || status === "creating" || status === "error" ? (
               <div className="mt-6 space-y-6">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-                    {t("payWithCrypto")}
-                  </p>
+                {emailStep !== "verified" ? (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                        Verify your email
+                      </p>
+                      <p className="mt-2 text-sm text-slate-400">
+                        Your download link goes here the moment payment is confirmed, so we need
+                        to confirm you can actually receive email at this address.
+                      </p>
+                    </div>
 
-                  <div className="mt-4 flex gap-2">
-                    {(Object.keys(CURRENCY_LABELS) as CurrencyKey[]).map((key) => (
-                      <button
-                        key={key}
-                        onClick={() => setCurrency(key)}
-                        className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
-                          currency === key
-                            ? "border-cyan-400 bg-cyan-400/10 text-cyan-300"
-                            : "border-white/10 text-slate-400 hover:border-white/20"
-                        }`}
-                      >
-                        {CURRENCY_LABELS[key]}
-                      </button>
-                    ))}
+                    {emailStep === "entry" || emailStep === "sending" ? (
+                      <div className="space-y-3">
+                        <input
+                          type="email"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          placeholder="you@example.com"
+                          disabled={emailStep === "sending"}
+                          className="w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-cyan-400 focus:outline-none"
+                        />
+
+                        {verifyError && <p className="text-sm text-red-400">{verifyError}</p>}
+
+                        <Button
+                          className="w-full"
+                          onClick={handleSendCode}
+                          disabled={emailStep === "sending"}
+                        >
+                          {emailStep === "sending" ? "Sending code..." : "Send verification code"}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-sm text-slate-400">
+                          We sent a 6-digit code to{" "}
+                          <span className="text-white">{emailInput.trim()}</span>.
+                        </p>
+
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={codeInput}
+                          onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, ""))}
+                          placeholder="123456"
+                          disabled={emailStep === "verifying"}
+                          className="w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-center text-lg tracking-[0.4em] text-white placeholder:text-slate-600 focus:border-cyan-400 focus:outline-none"
+                        />
+
+                        {verifyError && <p className="text-sm text-red-400">{verifyError}</p>}
+
+                        <Button
+                          className="w-full"
+                          onClick={handleVerifyCode}
+                          disabled={emailStep === "verifying"}
+                        >
+                          {emailStep === "verifying" ? "Verifying..." : "Verify code"}
+                        </Button>
+
+                        <div className="flex justify-between text-xs">
+                          <button
+                            onClick={handleChangeEmail}
+                            className="text-slate-500 hover:text-cyan-400"
+                          >
+                            Use a different email
+                          </button>
+                          <button
+                            onClick={handleSendCode}
+                            className="text-slate-500 hover:text-cyan-400"
+                          >
+                            Resend code
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-sm text-emerald-300">
+                      <span>✓</span>
+                      <span>{emailInput.trim()} verified</span>
+                      <button
+                        onClick={handleChangeEmail}
+                        className="ml-auto text-xs text-slate-500 hover:text-cyan-400"
+                      >
+                        Change
+                      </button>
+                    </div>
 
-                  <p className="mt-4 text-sm text-slate-400">
-                    We&apos;ll generate a unique payment amount for your order so it can be
-                    verified automatically on-chain — no manual review needed.
-                  </p>
-                </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                        {t("payWithCrypto")}
+                      </p>
 
-                {errorMessage && <p className="text-sm text-red-400">{errorMessage}</p>}
+                      <div className="mt-4 flex gap-2">
+                        {(Object.keys(CURRENCY_LABELS) as CurrencyKey[]).map((key) => (
+                          <button
+                            key={key}
+                            onClick={() => setCurrency(key)}
+                            className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
+                              currency === key
+                                ? "border-cyan-400 bg-cyan-400/10 text-cyan-300"
+                                : "border-white/10 text-slate-400 hover:border-white/20"
+                            }`}
+                          >
+                            {CURRENCY_LABELS[key]}
+                          </button>
+                        ))}
+                      </div>
 
-                <Button
-                  className="w-full"
-                  onClick={handleCreateOrder}
-                  disabled={status === "creating"}
-                >
-                  {status === "creating" ? t("confirming") : "Generate payment address"}
-                </Button>
+                      <p className="mt-4 text-sm text-slate-400">
+                        We&apos;ll generate a unique payment amount for your order so it can be
+                        verified automatically on-chain — no manual review needed.
+                      </p>
+                    </div>
+
+                    {errorMessage && <p className="text-sm text-red-400">{errorMessage}</p>}
+
+                    <Button
+                      className="w-full"
+                      onClick={handleCreateOrder}
+                      disabled={status === "creating"}
+                    >
+                      {status === "creating" ? t("confirming") : "Generate payment address"}
+                    </Button>
+                  </>
+                )}
               </div>
             ) : status === "waiting" && order ? (
               <div className="mt-6 space-y-6">
@@ -299,8 +492,8 @@ export default function CheckoutPage() {
                 </div>
 
                 <p className="text-xs text-slate-500">
-                  You can safely close this page — we&apos;ll email {user!.email} the moment your
-                  payment is confirmed.
+                  You can safely close this page — we&apos;ll email {emailInput.trim()} the moment
+                  your payment is confirmed.
                 </p>
               </div>
             ) : status === "expired" ? (
