@@ -1,9 +1,11 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import { getEnv } from "@/lib/env";
 
 export const ADMIN_COOKIE_NAME = "nexora_admin_session";
 
-function getSecret(): string {
-  const secret = process.env.ADMIN_PASSWORD;
+async function getSecret(): Promise<string> {
+  const env = await getEnv();
+  const secret = env.ADMIN_PASSWORD;
   if (!secret) {
     throw new Error("ADMIN_PASSWORD is not configured.");
   }
@@ -16,15 +18,18 @@ function getSecret(): string {
  * expiration (set at login) is what limits session length, and the token
  * automatically becomes invalid for everyone if the password is rotated.
  */
-export function createSessionToken(): string {
-  return createHmac("sha256", getSecret()).update("nexora-admin-session").digest("hex");
+export async function createSessionToken(): Promise<string> {
+  const secret = await getSecret();
+  return createHmac("sha256", secret).update("nexora-admin-session").digest("hex");
 }
 
-export function isValidSessionToken(token: string | undefined | null): boolean {
+export async function isValidSessionToken(
+  token: string | undefined | null
+): Promise<boolean> {
   if (!token) return false;
 
   try {
-    const expected = Buffer.from(createSessionToken());
+    const expected = Buffer.from(await createSessionToken());
     const actual = Buffer.from(token);
 
     if (expected.length !== actual.length) return false;
@@ -35,9 +40,9 @@ export function isValidSessionToken(token: string | undefined | null): boolean {
   }
 }
 
-export function checkAdminPassword(candidate: string): boolean {
+export async function checkAdminPassword(candidate: string): Promise<boolean> {
   try {
-    const expected = Buffer.from(getSecret());
+    const expected = Buffer.from(await getSecret());
     const actual = Buffer.from(candidate);
 
     if (expected.length !== actual.length) return false;

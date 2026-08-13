@@ -1,5 +1,6 @@
 import { toSmallestUnit, WALLETS } from "./pricing";
 import type { Order } from "./db";
+import { getEnv } from "@/lib/env";
 
 // Official USDT (Tether) TRC20 contract address on Tron mainnet.
 const USDT_TRC20_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
@@ -26,8 +27,9 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
   const url = `https://api.trongrid.io/v1/accounts/${order.wallet_address}/transactions/trc20?limit=50&only_to=true&contract_address=${USDT_TRC20_CONTRACT}`;
 
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (process.env.TRONGRID_API_KEY) {
-    headers["TRON-PRO-API-KEY"] = process.env.TRONGRID_API_KEY;
+  const { TRONGRID_API_KEY: tronApiKey } = await getEnv();
+  if (tronApiKey) {
+    headers["TRON-PRO-API-KEY"] = tronApiKey;
   }
 
   const response = await fetch(url, { headers });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getEnv } from "@/lib/env";
 
 interface ContactBody {
   name: string;
@@ -49,8 +50,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const notifyEmail = process.env.NOTIFY_EMAIL;
+  const env = await getEnv();
+  const apiKey = env.RESEND_API_KEY;
+  const notifyEmail = env.NOTIFY_EMAIL;
 
   if (!apiKey || !notifyEmail) {
     console.log("[contact] Email not configured. Message:", {

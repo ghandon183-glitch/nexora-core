@@ -9,6 +9,7 @@ import {
 import { checkPayment } from "@/lib/orders/verify";
 import { DOWNLOADS } from "@/lib/data/downloads";
 import { sendCustomerEmail } from "@/lib/mailer";
+import { getEnv } from "@/lib/env";
 
 /**
  * Polled on a schedule (see docs/PAYMENT_VERIFICATION.md — a GitHub Actions
@@ -19,9 +20,10 @@ import { sendCustomerEmail } from "@/lib/mailer";
  * the URL.
  */
 export async function POST(request: Request) {
+  const env = await getEnv();
   const secret = request.headers.get("x-cron-secret");
 
-  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+  if (!env.CRON_SECRET || secret !== env.CRON_SECRET) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
@@ -42,7 +44,7 @@ export async function POST(request: Request) {
           await markOrderConfirmed(order.id, match.txHash, downloadToken);
           results.confirmed += 1;
 
-          const siteUrl = process.env.SITE_URL ?? "";
+          const siteUrl = env.SITE_URL ?? "";
           const downloadUrl = `${siteUrl}/download/${downloadToken}`;
           const hasFile = Boolean(DOWNLOADS[order.template_slug]);
 

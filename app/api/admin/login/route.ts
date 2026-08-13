@@ -25,13 +25,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 });
   }
 
-  if (!body.password || !checkAdminPassword(body.password)) {
+  if (!body.password || !(await checkAdminPassword(body.password))) {
     return NextResponse.json({ ok: false, error: "Incorrect password" }, { status: 401 });
   }
 
   const response = NextResponse.json({ ok: true });
 
-  response.cookies.set(ADMIN_COOKIE_NAME, createSessionToken(), {
+  response.cookies.set(ADMIN_COOKIE_NAME, await createSessionToken(), {
     httpOnly: true,
     secure: true,
     sameSite: "strict",

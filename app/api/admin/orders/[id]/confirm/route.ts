@@ -5,6 +5,7 @@ import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/admin/auth";
 import { adminForceConfirm, getOrderById } from "@/lib/orders/db";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { DOWNLOADS } from "@/lib/data/downloads";
+import { getEnv } from "@/lib/env";
 
 /**
  * Manual override for edge cases the automatic checker can't resolve on its
@@ -19,7 +20,7 @@ export async function POST(
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (!isValidSessionToken(token)) {
+  if (!(await isValidSessionToken(token))) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
@@ -35,7 +36,8 @@ export async function POST(
     const downloadToken = randomUUID();
     await adminForceConfirm(id, downloadToken);
 
-    const siteUrl = process.env.SITE_URL ?? "";
+    const env = await getEnv();
+    const siteUrl = env.SITE_URL ?? "";
     const downloadUrl = `${siteUrl}/download/${downloadToken}`;
     const hasFile = Boolean(DOWNLOADS[order.template_slug]);
 

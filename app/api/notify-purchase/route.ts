@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getEnv } from "@/lib/env";
 
 interface NotifyPurchaseBody {
   templateTitle: string;
@@ -55,8 +56,9 @@ export async function POST(request: Request) {
 
   // 1. Notify the site owner (via Resend — works today because the owner's
   // own address is the Resend account's verified address).
-  const apiKey = process.env.RESEND_API_KEY;
-  const notifyEmail = process.env.NOTIFY_EMAIL;
+  const env = await getEnv();
+  const apiKey = env.RESEND_API_KEY;
+  const notifyEmail = env.NOTIFY_EMAIL;
 
   if (apiKey && notifyEmail) {
     try {
@@ -91,7 +93,7 @@ export async function POST(request: Request) {
 
   // 2. Confirm receipt to the customer (via Gmail SMTP — can send to any
   // recipient, unlike the Resend test address).
-  const siteUrl = process.env.SITE_URL;
+  const siteUrl = env.SITE_URL;
 
   const dashboardLine = siteUrl
     ? `We'll make the download available in your <a href="${siteUrl}/dashboard">dashboard</a> shortly.`
