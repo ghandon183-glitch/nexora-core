@@ -1,0 +1,31 @@
+name: Check pending payments
+
+# Triggers the /api/cron/check-payments endpoint every 5 minutes so that
+# pending crypto orders are matched against the blockchain and confirmed
+# automatically. The route is protected by CRON_SECRET (sent via the
+# x-cron-secret header) — see docs/PAYMENT_VERIFICATION.md.
+#
+# Required GitHub repository secrets:
+#   CRON_SECRET  — long random string (e.g. `openssl rand -hex 32`),
+#                  must match the CRON_SECRET Worker secret/variable in Cloudflare.
+#   SITE_URL     — deployed site origin, e.g. https://nexora-core.nxora.workers.dev
+#                  (no trailing slash).
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check-payments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger payment check
+        run: |
+          curl --fail --silent --show-error \
+            --request POST \
+            --url "${SITE_URL}/api/cron/check-payments" \
+            --header "x-cron-secret: ${CRON_SECRET}" \
+            --max-time 55
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}

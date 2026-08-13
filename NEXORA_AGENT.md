@@ -30,8 +30,8 @@ state is maintained in two persistent checkpoint files at the repository root:
 
 ## COMPLETED TASKS
 
-Tasks 1 through 9 are COMPLETE. Release 1.1 is production-ready CONDITIONAL on
-production configuration/secrets being configured.
+Tasks 1–8 and Task 10 are COMPLETE. Release 1.1 is production-ready CONDITIONAL on
+production configuration/secrets, D1 migrations, and wallet-address verification.
 
 | Task | Status | Notes |
 |------|--------|-------|
@@ -43,26 +43,30 @@ production configuration/secrets being configured.
 | Task 6  | COMPLETE | — |
 | Task 7  | COMPLETE | Customer Order Details — lint PASS, build PASS |
 | Task 8  | COMPLETE | Admin Order Management & Revenue Dashboard — lint PASS, build PASS |
-| Task 9  | COMPLETE + VERIFIED | License Key System — lint PASS, build PASS, security verification PASS |
+| Task 9  | NOT PRESENT IN REPO | License Key System claimed by earlier checkpoint but not in codebase — see NEXORA_STATE.md |
+| Task 10 | COMPLETE + VERIFIED | Production Deployment Prep & Launch Hardening — lint PASS, build PASS (29 routes) |
 
-Full detail for Tasks 7–9 is in `NEXORA_STATE.md`.
+Full detail for Tasks 7, 9, and 10 is in `NEXORA_STATE.md`.
+
+> The earlier checkpoint over-stated state (Task 9 complete, 8 migrations, R2, 118 routes).
+> Task 10 corrected these against the actual repository. Trust the Task 10 findings.
 
 ---
 
-## CURRENT VERIFICATION (Release 1.1)
+## CURRENT VERIFICATION (Release 1.1, post-Task 10)
 
 - `npm run lint`: **PASS** — 0 errors, 0 warnings
-- `npm run build`: **PASS**
-- 118 routes compiled successfully
-- Security verification: **PASS**
+- `npm run build`: **PASS** — 29 routes compiled
+- `check-payments.yml` workflow: valid YAML
+- No Cloudflare deploy performed (deferred to a separate manual step)
 
 ---
 
 ## NEXT TASK
 
-**Task 10 — TBD**
+**Task 11 — TBD**
 
-> DO NOT START TASK 10.
+> DO NOT START TASK 11.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---
@@ -76,11 +80,11 @@ On future sessions, FIRST read only:
 
 ### Do NOT
 - Perform a full repository scan.
-- Re-audit completed Tasks 1–9.
+- Re-audit completed Tasks (1–8, 10).
 - Inspect unrelated source files (`app/`, `lib/`, `components/`, `migrations/`).
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 - Run `npm install`, `npm run lint`, `npm run build`, or tests unless instructed.
-- Start Task 10 without explicit user instruction.
+- Start Task 11 without explicit user instruction.
 - Modify any files unless explicitly instructed.
 
 ### DO
@@ -93,18 +97,24 @@ On future sessions, FIRST read only:
 
 ## PRODUCTION DEPLOYMENT REMINDERS
 
-Before deployment, Cloudflare configuration/secrets must be completed:
+Before deployment, the following must be completed (verified in Task 10 — see
+`NEXORA_STATE.md` for full detail):
 
-- `AUTH_SECRET`
-- `ADMIN_PASSWORD`
-- `LICENSE_SECRET`
-- `CRON_SECRET`
-- `RESEND_API_KEY`
-- `NOTIFY_EMAIL`
-- `SITE_URL`
-- Optional Gmail configuration if used
-- D1 migration deployment
-- R2 template files
-- OG image
+**Cloudflare Worker secrets/variables:**
+- `ADMIN_PASSWORD` (required), `CRON_SECRET` (required), `RESEND_API_KEY`,
+  `NOTIFY_EMAIL`, `SITE_URL`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`,
+  optional `TRONGRID_API_KEY`
+
+**GitHub Actions secrets:**
+- `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CRON_SECRET`, `SITE_URL`
+
+**Infrastructure:**
+- D1 database created + migrations `0001`/`0002` applied to remote
+- Template files in `public/downloads/*.zip` (static assets; **no R2 bucket required**)
+- OG image present (`public/og-image.jpg`)
+- Verify wallet addresses in `lib/orders/pricing.ts` are the intended production wallets
+
+> Removed (phantom, unused by code): `AUTH_SECRET`, `LICENSE_SECRET`.
 
 See `NEXORA_STATE.md` for known audit items and full production requirements.
+

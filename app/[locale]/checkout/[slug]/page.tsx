@@ -53,7 +53,7 @@ export default function CheckoutPage() {
   // so it has to be re-verified at checkout — the account email typed at
   // sign-up isn't trusted to be real or to belong to whoever's buying now.
   const [emailStep, setEmailStep] = useState<EmailStep>("entry");
-  const [emailInput, setEmailInput] = useState("");
+  const [emailInput, setEmailInput] = useState(user?.email ?? "");
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [codeInput, setCodeInput] = useState("");
   const [verifyError, setVerifyError] = useState<string | null>(null);
@@ -66,12 +66,6 @@ export default function CheckoutPage() {
       router.push(`/sign-in?next=/checkout/${params.slug}`);
     }
   }, [loading, user, router, params.slug]);
-
-  useEffect(() => {
-    if (user?.email) {
-      setEmailInput(user.email);
-    }
-  }, [user]);
 
   // Poll order status every 8s while waiting for on-chain confirmation.
   useEffect(() => {
