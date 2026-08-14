@@ -1,5 +1,5 @@
 import { getOrderByToken } from "@/lib/orders/db";
-import { DOWNLOADS } from "@/lib/data/downloads";
+import { getDownloadAssetPath } from "@/lib/data/downloads";
 import Navbar from "@/components/navigation/navbar";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
@@ -23,7 +23,9 @@ export default async function DownloadPage({
   }
 
   const isValid = order && order.status === "confirmed";
-  const downloadUrl = order ? DOWNLOADS[order.template_slug] : undefined;
+  // Download is served through the token-authorized API endpoint — never a
+  // direct public `/downloads/<slug>.zip` URL.
+  const hasPackage = order ? getDownloadAssetPath(order.template_slug) !== null : false;
 
   return (
     <>
@@ -70,8 +72,8 @@ export default async function DownloadPage({
                 Payment confirmed on-chain. Enjoy!
               </p>
 
-              {downloadUrl ? (
-                <a href={downloadUrl} download>
+              {hasPackage ? (
+                <a href={`/api/download/${token}`} download>
                   <Button className="mt-6 w-full">Download source files</Button>
                 </a>
               ) : (

@@ -6,7 +6,12 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Route `/downloads/*` requests through the Worker first so direct
+    // public access to paid ZIP assets can be denied in `middleware.ts`.
+    // Other static assets continue to bypass the Worker for performance.
+    // See https://developers.cloudflare.com/workers/static-assets/binding/#run_worker_first
+    "run_worker_first": ["/downloads/*"]
   },
   "d1_databases": [
     {

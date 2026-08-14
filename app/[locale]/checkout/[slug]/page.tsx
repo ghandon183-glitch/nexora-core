@@ -77,6 +77,7 @@ export default function CheckoutPage() {
         const data = (await res.json()) as {
           ok: boolean;
           status?: OrderStatus;
+          downloadToken?: string | null;
         };
 
         if (!data.ok) return;
@@ -87,6 +88,9 @@ export default function CheckoutPage() {
             slug: template!.slug,
             title: template!.title,
             price: template!.price,
+            // Persist the download token so the dashboard can link to the
+            // token-authorized endpoint instead of a public static URL.
+            downloadToken: data.downloadToken ?? undefined,
           });
         } else if (data.status === "expired") {
           setStatus("expired");

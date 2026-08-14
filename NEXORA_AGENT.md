@@ -2,7 +2,7 @@
 
 > Authoritative agent instructions for the NEXORA project.
 > This file is the persistent agent memory across sessions. Read this FIRST.
-> Do NOT re-scan or re-audit completed work. Do NOT start Task 13 without explicit instruction.
+> Do NOT re-scan or re-audit completed work. Do NOT start Task 14 without explicit instruction.
 
 ---
 
@@ -30,8 +30,9 @@ state is maintained in two persistent checkpoint files at the repository root:
 
 ## COMPLETED TASKS
 
-Tasks 1–8, 10, 11, and 12 are COMPLETE. Release 1.1 is production-ready CONDITIONAL on
-production configuration/secrets, D1 migrations, and wallet-address verification.
+Tasks 1–8, 10, 11, 12, and 13 are COMPLETE. Release 1.1 is production-ready CONDITIONAL on
+production configuration/secrets, D1 migrations, wallet-address verification, and a
+runtime confirmation of the Task 13 download-access deny after deploy.
 
 | Task | Status | Notes |
 |------|--------|-------|
@@ -47,18 +48,20 @@ production configuration/secrets, D1 migrations, and wallet-address verification
 | Task 10 | COMPLETE + VERIFIED | Production Deployment Prep & Launch Hardening — lint PASS, build PASS (29 routes) |
 | Task 11 | COMPLETE | Cloudflare context for production secrets (commit 70f1d62) — central `getEnv()` helper added |
 | Task 12 | COMPLETE + VERIFIED | Finished env centralization: GMAIL_* + SITE_URL all through `getEnv()` — lint PASS, build PASS (29 routes) |
+| Task 13 | COMPLETE + VERIFIED | Gated paid downloads behind `download_token` via `/api/download/[token]`; direct `/downloads/*` denied — lint PASS, build PASS, cf:build PASS |
 
-Full detail for Tasks 7, 9, 10, 11, and 12 is in `NEXORA_STATE.md`.
+Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
 
 > The earlier checkpoint over-stated state (Task 9 complete, 8 migrations, R2, 118 routes).
 > Task 10 corrected these against the actual repository. Trust the Task 10 findings.
 
 ---
 
-## CURRENT VERIFICATION (Release 1.1, post-Task 12)
+## CURRENT VERIFICATION (Release 1.1, post-Task 13)
 
 - `npm run lint`: **PASS** — 0 errors, 0 warnings
-- `npm run build`: **PASS** — 29 routes compiled
+- `npm run build`: **PASS** — 29 routes + `/api/download/[token]` compiled
+- `npm run cf:build`: **PASS** — Worker + assets bundled; `run_worker_first: ["/downloads/*"]` compiled
 - `check-payments.yml` workflow: valid YAML
 - No Cloudflare deploy performed (deferred to a separate manual step)
 
@@ -66,9 +69,9 @@ Full detail for Tasks 7, 9, 10, 11, and 12 is in `NEXORA_STATE.md`.
 
 ## NEXT TASK
 
-**Task 13 — TBD**
+**Task 14 — TBD**
 
-> DO NOT START TASK 13.
+> DO NOT START TASK 14.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---
@@ -82,11 +85,11 @@ On future sessions, FIRST read only:
 
 ### Do NOT
 - Perform a full repository scan.
-- Re-audit completed Tasks (1–8, 10, 11, 12).
+- Re-audit completed Tasks (1–8, 10, 11, 12, 13).
 - Inspect unrelated source files (`app/`, `lib/`, `components/`, `migrations/`).
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 - Run `npm install`, `npm run lint`, `npm run build`, or tests unless instructed.
-- Start Task 13 without explicit user instruction.
+- Start Task 14 without explicit user instruction.
 - Modify any files unless explicitly instructed.
 
 ### DO
@@ -113,6 +116,8 @@ Before deployment, the following must be completed (verified in Task 10 — see
 **Infrastructure:**
 - D1 database created + migrations `0001`/`0002` applied to remote
 - Template files in `public/downloads/*.zip` (static assets; **no R2 bucket required**)
+  — served only via `/api/download/[token]`; direct `/downloads/*` denied by
+  `middleware.ts` + `wrangler.jsonc` `assets.run_worker_first`
 - OG image present (`public/og-image.jpg`)
 - Verify wallet addresses in `lib/orders/pricing.ts` are the intended production wallets
 

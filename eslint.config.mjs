@@ -9,6 +9,8 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // OpenNext build output (Cloudflare Worker bundle) — generated, gitignored.
+    ".open-next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

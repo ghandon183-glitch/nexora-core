@@ -13,6 +13,12 @@ export interface Purchase {
   title: string;
   price: number;
   purchasedAt: string;
+  /**
+   * The order's `download_token` — the authorization credential for the
+   * token-authorized download endpoint (`/api/download/[token]`). Optional
+   * for backward-compat with localStorage entries written before Task 13.
+   */
+  downloadToken?: string;
 }
 
 interface PurchasesContextValue {

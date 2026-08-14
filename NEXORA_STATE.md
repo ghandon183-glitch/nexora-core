@@ -34,6 +34,7 @@
 | Task 10 | COMPLETE + VERIFIED |
 | Task 11 | COMPLETE (commit 70f1d62 - Cloudflare context for production secrets) |
 | Task 12 | COMPLETE + VERIFIED |
+| Task 13 | COMPLETE + VERIFIED |
 
 
 ---
@@ -198,6 +199,115 @@ code reads flow through the single allow-listed `getEnv()` helper.
 
 ---
 
+## TASK 13 — Gate paid template downloads behind the order `download_token`
+
+**STATUS: COMPLETE + VERIFIED.**
+
+### Problem solved
+The `download_token` previously gated only the download *page UI*, not the
+actual file. Paid template ZIPs lived as static assets at hardcoded, guessable
+public URLs (`/downloads/<slug>.zip`) and were linked directly from the
+download page and the dashboard. The slug list is public (templates page /
+sitemap), so anyone could download paid products for free without a token.
+
+### Design
+- New token-authorized endpoint `app/api/download/[token]/route.ts` is now the
+  sole delivery mechanism for paid ZIPs. It:
+  1. Reads the token from the URL.
+  2. Looks up the order via the existing parameterized `getOrderByToken()`.
+  3. Denies invalid / empty tokens (generic 404, no order info leaked).
+  4. Denies nonexistent orders (generic 404).
+  5. Denies orders whose status is not `confirmed` (generic 404 — no state leak).
+  6. Resolves the purchased template slug to its asset path via
+     `getDownloadAssetPath(slug)` — token A can only ever resolve to its own
+     order's template (cross-order access impossible by construction).
+  7. Streams the ZIP through the Cloudflare `ASSETS` binding
+     (`env.ASSETS.fetch(assetPath)`) — the same mechanism OpenNext itself uses
+     to serve static assets — with `Content-Type: application/zip` and
+     `Content-Disposition: attachment; filename="<slug>.zip"`.
+  8. Streams (never buffers) the body, so the ~13.7 MB largest package is
+     served within Worker limits.
+
+### How direct public ZIP access was eliminated
+- `wrangler.jsonc`: added `assets.run_worker_first: ["/downloads/*"]` so
+  Cloudflare routes direct `/downloads/*` requests through the Worker
+  (default behavior bypasses the Worker for static assets, serving them with
+  no auth). Other static assets continue to bypass the Worker for performance.
+- `middleware.ts`: added a deny rule — any request whose pathname starts with
+  `/downloads/` returns a 404 — and extended the matcher to include
+  `/downloads/:path*` (the dotted-path lookahead previously excluded `.zip`
+  files). Because the Worker runs middleware before the asset resolver, a
+  direct `/downloads/<slug>.zip` request is denied before the file can be
+  served. The token endpoint's internal `ASSETS.fetch` call is a binding
+  subrequest, NOT a public HTTP request, so it is unaffected by this deny.
+
+### Cloudflare / 13.7 MB feasibility
+Verified empirically via `npm run cf:build`:
+- `public/downloads/*.zip` (incl. 13.7 MB `solace-studio.zip`) are copied to
+  `.open-next/assets/downloads/` and served as platform static assets via the
+  `ASSETS` binding.
+- The Worker bundle (`worker.js`) is ~2 KB — it does NOT embed the ZIPs, so
+  there is no Worker-size/bundling issue. Files are streamed by the platform.
+- `run_worker_first: ["/downloads/*"]` is correctly compiled into
+  `.open-next/cloudflare/init.js` as
+  `define_ASSETS_RUN_WORKER_FIRST_default = ["/downloads/*"]`.
+- No R2 introduced and none required.
+
+### Files created/modified (Task 13)
+- `app/api/download/[token]/route.ts` — NEW; token-authorized download endpoint.
+- `lib/data/downloads.ts` — added `getDownloadAssetPath(slug)` server helper;
+  documented that `DOWNLOADS` paths are internal-only (never rendered as href).
+- `app/[locale]/download/[token]/page.tsx` — links to `/api/download/[token]`
+  instead of the public `/downloads/<slug>.zip` URL.
+- `app/[locale]/dashboard/page.tsx` — links to `/api/download/[token]` when a
+  token is present; legacy purchases without a token show "use your email link".
+- `lib/context/purchases-context.tsx` — added optional `downloadToken` to
+  `Purchase` (backward-compatible).
+- `app/[locale]/checkout/[slug]/page.tsx` — persists the `downloadToken`
+  returned by the status API into the purchase record (download-auth data only;
+  payment/verification/pricing logic unchanged).
+- `middleware.ts` — denies direct `/downloads/*` access (404); matcher updated.
+- `wrangler.jsonc` — `assets.run_worker_first: ["/downloads/*"]`.
+- `eslint.config.mjs` — ignore `.open-next/**` build output (generated, like
+  `.next/**`; surfaced by running `cf:build` for verification).
+
+### Verification (Task 13)
+- `npm run lint`: **PASS** — 0 errors, 0 warnings.
+- `npm run build`: **PASS** — 29 routes + new `/api/download/[token]` route.
+- `npm run cf:build`: **PASS** — Worker + assets bundled; `run_worker_first`
+  compiled; ZIPs remain in `.open-next/assets/downloads/`.
+
+Targeted static verification (runtime verification requires a deployed
+Cloudflare environment — see "Remaining manual deployment requirements"):
+- invalid/empty token → denied (guard at route line 37). ✓
+- nonexistent order → denied (line 49). ✓
+- unconfirmed order → denied (line 55). ✓
+- valid confirmed token → streams correct slug's ZIP only (slug derived from
+  the token's own order; cross-order impossible). ✓
+- token A cannot fetch order B's file (per-token lookup + per-order slug). ✓
+- no rendered `<a href="/downloads/...">` remains in `app/`/`components/`. ✓
+- direct `/downloads/*` → middleware 404 (run_worker_first routes to Worker). ✓
+
+### Remaining manual deployment requirements
+- Deploy to Cloudflare (not done) and confirm at runtime that:
+  (a) a direct `GET /downloads/<slug>.zip` returns 404, and
+  (b) `GET /api/download/<valid-token>` streams the correct ZIP.
+  These depend on Cloudflare platform behavior of `run_worker_first` +
+  OpenNext's middleware-first dispatch (statically confirmed in `worker.js`,
+  but not runtime-verified without deployment).
+- Existing Cloudflare/GitHub secrets and D1 migrations from Task 10 still apply.
+- No new secrets, no R2, no D1 migration required for Task 13.
+
+### OUT OF SCOPE (Task 13)
+- License keys (Task 9 — not present; future feature).
+- R2 (not required by current architecture).
+- Wallet addresses in `lib/orders/pricing.ts` (manual owner verification).
+- Pricing, payment verification, authentication, admin auth, email system,
+  rate limiting — all unchanged.
+- Test framework — none added.
+
+---
+
 ## PRODUCTION CONFIGURATION DOCUMENTATION
 
 **COMPLETE** (Task 10).
@@ -252,7 +362,9 @@ Before deployment, Cloudflare configuration/secrets must be completed
 - `SITE_URL` must be configured correctly for production (used in email links).
 - Wallet addresses in `lib/orders/pricing.ts` must be verified as the intended production
   wallets before accepting real payments (the docs describe them as placeholders).
-- No `download_logs` table currently exists; `orders.download_token` is the download credential.
+- Paid template downloads are gated behind the order `download_token` via
+  `/api/download/[token]` (Task 13); direct `/downloads/<slug>.zip` access is denied by
+  `middleware.ts` + `wrangler.jsonc` `run_worker_first`. Runtime confirmation pending deploy.
 - `CLAUDE.md` references a non-existent `AGENTS.md` (non-blocking, cosmetic).
 
 ---
@@ -264,13 +376,17 @@ After Task 10, **Release 1.1 is production-ready CONDITIONAL on**:
 2. the D1 migrations being applied to the remote database, and
 3. the wallet addresses being verified as the intended production wallets.
 
+After Task 13, paid downloads are token-gated; runtime confirmation of the
+direct-access deny is pending deploy (see Task 13 "Remaining manual deployment
+requirements").
+
 ---
 
 ## NEXT TASK
 
-**Task 13 — TBD**
+**Task 14 — TBD**
 
-> DO NOT START TASK 13.
+> DO NOT START TASK 14.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---
@@ -284,7 +400,7 @@ On future sessions, FIRST read only:
 
 Do NOT:
 - Perform a full repository scan.
-- Re-audit completed Tasks (1–8, 10, 11, 12).
+- Re-audit completed Tasks (1–8, 10, 11, 12, 13).
 - Inspect unrelated source files.
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 

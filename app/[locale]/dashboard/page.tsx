@@ -9,7 +9,7 @@ import { usePurchases } from "@/lib/context/purchases-context";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import Navbar from "@/components/navigation/navbar";
-import { DOWNLOADS } from "@/lib/data/downloads";
+import { getDownloadAssetPath } from "@/lib/data/downloads";
 
 export default function DashboardPage() {
   const t = useTranslations("DashboardPage");
@@ -132,7 +132,13 @@ export default function DashboardPage() {
             <div className="mt-6 space-y-4">
 
               {purchases.map((purchase) => {
-                const downloadUrl = DOWNLOADS[purchase.slug];
+                const hasPackage = getDownloadAssetPath(purchase.slug) !== null;
+                // Download goes through the token-authorized endpoint — never
+                // a direct public `/downloads/<slug>.zip` URL. Purchases made
+                // before this change (no stored token) fall back to guidance.
+                const downloadHref = purchase.downloadToken
+                  ? `/api/download/${purchase.downloadToken}`
+                  : null;
 
                 return (
                   <Card
@@ -149,9 +155,15 @@ export default function DashboardPage() {
                         {new Date(purchase.purchasedAt).toLocaleDateString()}
                       </p>
 
-                      {!downloadUrl && (
+                      {!hasPackage && (
                         <p className="mt-1 text-xs text-amber-400">
                           {t("sourcePending")}
+                        </p>
+                      )}
+
+                      {hasPackage && !downloadHref && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          Use the secure download link sent to your email.
                         </p>
                       )}
                     </div>
@@ -163,8 +175,8 @@ export default function DashboardPage() {
                         </Button>
                       </Link>
 
-                      {downloadUrl && (
-                        <a href={downloadUrl} download>
+                      {downloadHref && (
+                        <a href={downloadHref} download>
                           <Button>
                             {t("downloadSource")}
                           </Button>
