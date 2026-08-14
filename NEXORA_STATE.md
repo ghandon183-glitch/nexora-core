@@ -2,7 +2,7 @@
 
 > Authoritative resume state for the NEXORA project.
 > This file is the persistent memory across sessions. Read this FIRST.
-> Do NOT re-scan or re-audit completed work. Do NOT start Task 11 without explicit instruction.
+> Do NOT re-scan or re-audit completed work. Do NOT start Task 13 without explicit instruction.
 
 ---
 
@@ -32,6 +32,8 @@
 | Task 8  | COMPLETE |
 | Task 9  | **NOT PRESENT IN REPO** (see Task 10 audit note) |
 | Task 10 | COMPLETE + VERIFIED |
+| Task 11 | COMPLETE (commit 70f1d62 - Cloudflare context for production secrets) |
+| Task 12 | COMPLETE + VERIFIED |
 
 
 ---
@@ -132,6 +134,70 @@ Deployment audit + hardening of Release 1.1 for Cloudflare production.
 
 ---
 
+## TASK 11 — Cloudflare context for production secrets
+
+**STATUS: COMPLETE (commit 70f1d62).**
+
+Introduced `lib/env.ts` with a centralized `getEnv()` helper that reads the
+Worker's Cloudflare context (`getCloudflareContext({ async: true })`) first and
+falls back to `process.env` for local dev. Applied to the API routes and
+`lib/admin/auth.ts` for `ADMIN_PASSWORD`, `CRON_SECRET`, `RESEND_API_KEY`,
+`NOTIFY_EMAIL`, `SITE_URL`, `TRONGRID_API_KEY`. See commit 70f1d62.
+
+---
+
+## TASK 12 — Complete the Cloudflare production-secrets refactor
+
+**STATUS: COMPLETE + VERIFIED.**
+
+Finished the env centralization started in Task 11 so ALL secrets/vars the
+code reads flow through the single allow-listed `getEnv()` helper.
+
+### What was done
+1. `lib/env.ts` — added `GMAIL_USER` and `GMAIL_APP_PASSWORD` to the
+   `CloudflareEnv` interface and the `CF_ENV_KEYS` allow-list. Existing
+   Cloudflare-first / process.env fallback behavior preserved.
+2. `lib/mailer.ts` — removed the duplicated direct
+   `getCloudflareContext()` call and the local `cfEnv` cast; now imports and
+   uses the centralized `getEnv()` from `lib/env.ts`. Behavior when
+   credentials are missing is unchanged (returns `{ sent: false }`, never
+   throws). No secrets are logged. Email behavior otherwise unchanged.
+3. `app/sitemap.ts` — removed module-scope `process.env.SITE_URL`;
+   resolves `SITE_URL` through `getEnv()` with the workers.dev URL as
+   fallback. `sitemap()` is now `async`. All existing entries preserved
+   (static paths + per-template + locale alternates).
+4. `app/robots.ts` — removed module-scope `process.env.SITE_URL`;
+   resolves `SITE_URL` through `getEnv()` with the workers.dev fallback.
+   `robots()` is now `async`. Robots behavior preserved.
+5. `app/[locale]/layout.tsx` — removed module-scope `process.env.SITE_URL`;
+   converted static `export const metadata` to an `async generateMetadata()`
+   that resolves `SITE_URL` through `getEnv()` (workers.dev fallback).
+   All title / description / OpenGraph / Twitter / robots fields preserved;
+   only the URL origin resolution changed.
+
+### Files modified (Task 12)
+- `lib/env.ts`
+- `lib/mailer.ts`
+- `app/sitemap.ts`
+- `app/robots.ts`
+- `app/[locale]/layout.tsx`
+- `NEXORA_STATE.md` / `NEXORA_AGENT.md` (this update)
+
+### Verification (Task 12)
+- `npm run lint`: **PASS** — 0 errors, 0 warnings
+- `npm run build`: **PASS** — 29 routes compiled (same as before)
+- `GMAIL_USER` / `GMAIL_APP_PASSWORD` confirmed centralized in `getEnv()`.
+- `lib/mailer.ts` confirmed to no longer call `getCloudflareContext()`.
+- No client component imports `lib/env.ts` (all importers are server-only:
+  API routes, `lib/admin/auth.ts`, `lib/orders/verify.ts`, `lib/mailer.ts`,
+  and the `sitemap`/`robots`/layout metadata files; none carry `'use client'`).
+- `sitemap.ts` / `robots.ts` / `layout.tsx` confirmed free of module-scope
+  `process.env.SITE_URL`.
+- Admin authentication (`lib/admin/auth.ts`) unchanged and intact.
+- No unrelated files modified.
+
+---
+
 ## PRODUCTION CONFIGURATION DOCUMENTATION
 
 **COMPLETE** (Task 10).
@@ -202,9 +268,9 @@ After Task 10, **Release 1.1 is production-ready CONDITIONAL on**:
 
 ## NEXT TASK
 
-**Task 11 — TBD**
+**Task 13 — TBD**
 
-> DO NOT START TASK 11.
+> DO NOT START TASK 13.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---
@@ -218,7 +284,7 @@ On future sessions, FIRST read only:
 
 Do NOT:
 - Perform a full repository scan.
-- Re-audit completed Tasks (1–8, 10).
+- Re-audit completed Tasks (1–8, 10, 11, 12).
 - Inspect unrelated source files.
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 

@@ -8,45 +8,51 @@ import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/lib/context/auth-context";
 import { PurchasesProvider } from "@/lib/context/purchases-context";
+import { getEnv } from "@/lib/env";
 
-const siteUrl = process.env.SITE_URL || "https://nexora-core.nxora.workers.dev";
+const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Nexora Core | Premium Next.js Templates & UI Kit",
-    template: "%s | Nexora Core",
-  },
-  description:
-    "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
-  openGraph: {
-    title: "Nexora Core | Premium Next.js Templates & UI Kit",
+export async function generateMetadata(): Promise<Metadata> {
+  const env = await getEnv();
+  const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: "Nexora Core | Premium Next.js Templates & UI Kit",
+      template: "%s | Nexora Core",
+    },
     description:
       "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
-    url: siteUrl,
-    siteName: "Nexora Core",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Nexora Core — Premium Next.js Templates & UI Kit",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Nexora Core | Premium Next.js Templates & UI Kit",
-    description:
-      "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
-    images: ["/og-image.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+    openGraph: {
+      title: "Nexora Core | Premium Next.js Templates & UI Kit",
+      description:
+        "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
+      url: siteUrl,
+      siteName: "Nexora Core",
+      images: [
+        {
+          url: "/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Nexora Core — Premium Next.js Templates & UI Kit",
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Nexora Core | Premium Next.js Templates & UI Kit",
+      description:
+        "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
+      images: ["/og-image.jpg"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

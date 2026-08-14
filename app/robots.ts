@@ -1,8 +1,13 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.SITE_URL || "https://nexora-core.nxora.workers.dev";
+import { getEnv } from "@/lib/env";
 
-export default function robots(): MetadataRoute.Robots {
+const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const env = await getEnv();
+  const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;
+
   return {
     rules: [
       {

@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+import { getEnv } from "@/lib/env";
 
 interface SendCustomerEmailParams {
   to: string;
@@ -17,21 +18,20 @@ interface SendCustomerEmailParams {
  * Returns { sent: false } instead of throwing when Gmail credentials aren't
  * configured, so checkout never breaks because of missing email setup.
  *
- * Reads credentials via getCloudflareContext().env rather than
- * process.env — on Cloudflare Workers, vars/secrets set in the dashboard
- * aren't reliably exposed through process.env, even though they show up
- * fine in wrangler's local dev or other runtimes.
+ * Credentials are read through the centralized getEnv() helper
+ * (lib/env.ts), which prefers Cloudflare Worker vars/secrets (read via the
+ * request's Cloudflare context) and falls back to process.env for local
+ * development. Server-only.
  */
 export async function sendCustomerEmail({
   to,
   subject,
   html,
 }: SendCustomerEmailParams): Promise<{ sent: boolean; error?: string }> {
-  const { env } = await getCloudflareContext({ async: true });
-  const cfEnv = env as unknown as { GMAIL_USER?: string; GMAIL_APP_PASSWORD?: string };
+  const env = await getEnv();
 
-  const gmailUser = cfEnv.GMAIL_USER || process.env.GMAIL_USER;
-  const gmailAppPassword = cfEnv.GMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASSWORD;
+  const gmailUser = env.GMAIL_USER;
+  const gmailAppPassword = env.GMAIL_APP_PASSWORD;
 
   if (!gmailUser || !gmailAppPassword) {
     console.log(
