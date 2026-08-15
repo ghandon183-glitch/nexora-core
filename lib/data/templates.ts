@@ -535,7 +535,7 @@ export const templates: Template[] = [
     title: "Premium Portfolio",
 
     description:
-      "A sophisticated dark-mode portfolio for creative developers and designers — animated hero, project grid with generated visuals, services, timeline, testimonials, and a contact form.",
+      "A premium dark-mode creative-studio portfolio with an interactive WebGL depth-displaced hero, immersive project showcase, animated capabilities, and a contact form. Built with Next.js, Tailwind, and React Three Fiber.",
 
     image: "/templates/premium-portfolio.jpg",
 
@@ -552,8 +552,8 @@ export const templates: Template[] = [
 
     tags: [
       "Portfolio",
-      "Developer",
-      "Designer",
+      "Creative Studio",
+      "WebGL",
       "Next.js",
       "Tailwind",
     ],
@@ -564,7 +564,7 @@ export const templates: Template[] = [
 
     components: 22,
 
-    version: "1.0.0",
+    version: "2.0.0",
 
     lastUpdate: "2026-08-14",
 
@@ -577,19 +577,32 @@ export const templates: Template[] = [
     documentationUrl: "#",
 
     features: [
-      "Animated Hero with Staggered Reveals",
-      "Project Grid with Generated SVG Visuals",
-      "Services Section with Numbered Cards",
-      "Experience Timeline",
-      "Capabilities & Tech Stack",
-      "Testimonials",
+      "Interactive WebGL Depth-Displaced Hero",
+      "Pointer-Reactive 3D Scene with Bloom & Scan FX",
+      "Immersive Project Showcase with Hover Motion",
+      "Animated Capabilities with Grow-Line Indicators",
+      "Infinite Marquee Tech Strip",
+      "Cinematic Scroll Reveals (Framer Motion)",
       "Contact Form with Success State",
-      "Reduced-Motion Friendly Animations",
+      "Graceful WebGL Fallback (Static Image Base)",
+      "Reduced-Motion & Touch Aware",
       "Self-Hosted Fonts (No External Requests)",
       "SEO & Open Graph Metadata",
     ],
 
     changelog: [
+      {
+        version: "2.0.0",
+        date: "2026-08-14",
+        changes: [
+          "Premium visual redesign as a creative-studio portfolio",
+          "Interactive React Three Fiber depth-displaced hero with pointer parallax",
+          "Image-based immersive project showcase replacing generated SVG visuals",
+          "Animated capabilities section with grow-line indicators",
+          "Infinite marquee tech strip",
+          "WebGL fallback to static hero image for broad compatibility",
+        ],
+      },
       {
         version: "1.0.0",
         date: "2026-08-14",

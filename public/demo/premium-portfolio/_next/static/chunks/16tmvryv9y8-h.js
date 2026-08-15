@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,76091,t=>{"use strict";t.s(["assetPath",0,function(t){return`/demo/premium-portfolio${t}`}])},66180,t=>{t.v(o=>Promise.all(["static/chunks/3zlzo8erpwkvz.js"].map(o=>t.l(o))).then(()=>o(35561)))}]);
