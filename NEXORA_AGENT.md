@@ -2,7 +2,7 @@
 
 > Authoritative agent instructions for the NEXORA project.
 > This file is the persistent agent memory across sessions. Read this FIRST.
-> Do NOT re-scan or re-audit completed work. Do NOT start Task 14 without explicit instruction.
+> Do NOT re-scan or re-audit completed work. Do NOT start Task 19 without explicit instruction.
 
 ---
 
@@ -52,36 +52,40 @@ runtime confirmation of the Task 13 download-access deny after deploy.
 | Task 14 | COMPLETE | Sales readiness audit only — no code changes |
 | Task 15 | COMPLETE (not yet committed/pushed) | Production payment & Cloudflare readiness audit + canonical price-validation fix in `/api/orders/create`; wallets confirmed real & unchanged — lint PASS, build PASS, cf:build PASS |
 | Task 16 | COMPLETE (not yet committed/pushed) | Built 3 new premium templates (portfolio $59, blog $65, restaurant $69) — source builds + demos + preview/gallery images + ZIP packages + catalog/downloads integration; wallets untouched — lint PASS, build PASS, cf:build PASS |
+| Task 17 | COMPLETE (not yet committed/pushed) | Pre-Launch Sales Audit (audit-only) — findings handed off to Task 18 |
+| Task 18 | IN PROGRESS (not yet committed/pushed) | Fix Pre-Launch Trust, Accuracy & Production Hardening Blockers — see NEXORA_STATE.md; wallets untouched; lint PASS, build PASS |
 
-Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
+Full detail for Tasks 7, 9, 10, 11, 12, 13, and 18 is in `NEXORA_STATE.md`.
 
 > The earlier checkpoint over-stated state (Task 9 complete, 8 migrations, R2, 118 routes).
 > Task 10 corrected these against the actual repository. Trust the Task 10 findings.
 
 ---
 
-## CURRENT VERIFICATION (Release 1.1, post-Task 16)
+## CURRENT VERIFICATION (Release 1.1, post-Task 18)
 
 - `npm run lint`: **PASS** — 0 errors, 0 warnings
-- `npm run build`: **PASS** — 29 routes + `/api/download/[token]` compiled
-- `npm run cf:build`: **PASS** — Worker + assets bundled; `run_worker_first: ["/downloads/*"]` compiled
-- 3 new premium templates registered in catalog (10 total)
-- No Cloudflare deploy performed (deferred to a separate manual step)
-- Wallet addresses: **UNCHANGED** (confirmed real owner production wallets)
+- `npm run build`: **PASS** — Next.js 16.2.9, compiled successfully, 97 routes generated
+- Wallet addresses: **UNCHANGED** (verified empty git diff on `lib/orders/pricing.ts`)
+- Task 18 changes: all 6 locale message files corrected (manual→automatic, Next.js 15→App Router, Premium→Email support), notify-purchase + faq + product-header + templates.ts accuracy fixes, verify.ts timestamp guard (BLOCKER 3) implemented
 
 ---
 
 ## NEXT TASK
 
-**Task 17 — TBD**
+**Task 19 — TBD**
 
-> DO NOT START TASK 17.
+> DO NOT START TASK 19.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
-Tasks 15–16 have uncommitted changes awaiting owner review before commit/push:
+Tasks 15–18 have uncommitted changes awaiting owner review before commit/push:
 - `app/api/orders/create/route.ts` (Task 15)
 - `lib/data/templates.ts`, `lib/data/downloads.ts`, `public/demo/premium-*`,
   `public/downloads/premium-*.zip`, `public/templates/premium-*` (Task 16)
+- `docs/PAYMENT_VERIFICATION.md`, `messages/{en,es,de,fr,tr,zh}.json`,
+  `app/api/notify-purchase/route.ts`, `app/[locale]/faq/page.tsx`,
+  `app/[locale]/templates/[slug]/page.tsx`, `components/product/product-header.tsx`,
+  `lib/data/templates.ts`, `lib/orders/verify.ts` (Task 18)
 
 ---
 
@@ -94,11 +98,11 @@ On future sessions, FIRST read only:
 
 ### Do NOT
 - Perform a full repository scan.
-- Re-audit completed Tasks (1–8, 10, 11, 12, 13, 14, 15, 16).
+- Re-audit completed Tasks (1–8, 10, 11, 12, 13, 14, 15, 16, 17).
 - Inspect unrelated source files (`app/`, `lib/`, `components/`, `migrations/`).
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 - Run `npm install`, `npm run lint`, `npm run build`, or tests unless instructed.
-- Start Task 17 without explicit user instruction.
+- Start Task 19 without explicit user instruction.
 - Modify any files unless explicitly instructed.
 
 ### DO

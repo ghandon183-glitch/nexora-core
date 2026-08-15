@@ -36,16 +36,9 @@ npx wrangler d1 execute nexora-orders --remote --file=./migrations/0001_orders.s
 | `SITE_URL` | همون آدرس سایت |
 | `TRONGRID_API_KEY` | اختیاریه؛ بدون این هم کار می‌کنه ولی محدودیت نرخ درخواست کمتریه. رایگان از [tronscan/trongrid](https://www.trongrid.io) بگیر اگه رشد ترافیک زیاد شد |
 
-## ۵. بررسی آدرس‌های ولت
+## ۵. آدرس‌های ولت
 
-تو فایل `lib/orders/pricing.ts`، آدرس‌های ولت USDT و BTC رو با آدرس‌های واقعی خودت جایگزین کن (الان یه نمونه‌ی placeholder گذاشته شده):
-
-```ts
-export const WALLETS = {
-  USDT: { ..., address: "آدرس واقعی TRC20 خودت" },
-  BTC: { ..., address: "آدرس واقعی بیت‌کوین خودت" },
-};
-```
+تو فایل `lib/orders/pricing.ts`، آدرس‌های ولت USDT و BTC آدرس‌های واقعی و Production مالک هستن — **به‌هیچ‌عنوان تغییرشون نده، بازسازی‌شون نکن، یا «اصلاحشون» نکن**. این‌ها placeholder نیستن.
 
 ## ۶. Push و دیپلوی
 

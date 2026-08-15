@@ -106,8 +106,9 @@ export async function POST(request: Request) {
       <h2>Thanks, ${buyerName}!</h2>
       <p>We've received your confirmation that you sent payment for
       <strong>${templateTitle}</strong> ($${price}${currency ? ` in ${currency}` : ""}).</p>
-      <p>Purchases are verified manually, so this isn't an automatic
-      unlock — we're checking the wallet for a matching transaction.
+      <p>Your payment is detected automatically on-chain, so this isn't an
+      automatic unlock triggered by this email — we're matching the exact
+      amount against the blockchain.
       ${dashboardLine}
       If you have any questions in the meantime, just reply to this email
       or use the contact page.</p>

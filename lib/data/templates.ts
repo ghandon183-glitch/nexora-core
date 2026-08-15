@@ -41,7 +41,7 @@ export const templates: Template[] = [
     title: "Modern SaaS",
 
     description:
-      "Beautiful SaaS landing page built with Next.js 15 and Tailwind CSS.",
+      "Beautiful SaaS landing page built with Next.js 16 and Tailwind CSS.",
 
     image: "/templates/modern-saas.jpg",
 
@@ -64,7 +64,7 @@ export const templates: Template[] = [
       "Tailwind",
     ],
 
-    framework: "Next.js 15",
+    framework: "Next.js 16",
 
     styling: "Tailwind CSS",
 
@@ -144,7 +144,7 @@ export const templates: Template[] = [
       "Dashboard",
     ],
 
-    framework: "Next.js 15",
+    framework: "Next.js 16",
 
     styling: "Tailwind CSS",
 
@@ -213,7 +213,7 @@ export const templates: Template[] = [
       "Creative",
     ],
 
-    framework: "Next.js 15",
+    framework: "Next.js 16",
 
     styling: "Tailwind CSS",
 

@@ -23,7 +23,7 @@ const PAYMENT_FAQS = [
   {
     question: "What if I send the wrong amount?",
     answer:
-      "If the amount doesn't match exactly, our system won't auto-detect it — but your funds aren't lost. Contact us with your transaction hash and order details and we'll verify and unlock it manually.",
+      "If the amount doesn't match exactly, our system won't auto-detect it — but your funds aren't lost. Contact us with your transaction hash and order details and we'll verify it manually as a one-off exception and unlock your download. (This is only needed when the exact amount wasn't sent — correctly sent payments are detected and unlocked automatically.)",
   },
   {
     question: "What if I send on the wrong network?",

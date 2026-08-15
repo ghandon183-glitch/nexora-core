@@ -15,6 +15,17 @@ interface TronGridTrc20Transfer {
   token_info: { address: string };
   to: string;
   value: string; // integer string, smallest unit (6 decimals for USDT)
+  block_timestamp?: number; // milliseconds since epoch
+}
+
+/**
+ * Returns true when the transaction should be accepted, i.e. it occurred at
+ * or after the order was created. A missing timestamp fails open (accepted)
+ * so we never block a legitimate payment when the API omits the field.
+ */
+function isOnOrAfterOrder(txTimestampMs: number | undefined, order: Order): boolean {
+  if (txTimestampMs === undefined || Number.isNaN(txTimestampMs)) return true;
+  return txTimestampMs >= order.created_at;
 }
 
 /**
@@ -44,10 +55,11 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
   for (const transfer of transfers) {
     if (transfer.token_info?.address !== USDT_TRC20_CONTRACT) continue;
     if (transfer.to !== order.wallet_address) continue;
+    // Reject transactions that predate this order — an old transfer that
+    // happens to share the same fingerprinted amount cannot be replayed to
+    // unlock a later order. Fail open only if the timestamp is absent.
+    if (!isOnOrAfterOrder(transfer.block_timestamp, order)) continue;
 
-    // Only accept transactions created at or after the order — an old
-    // transaction that happens to share the same fingerprinted amount
-    // (astronomically unlikely, but cheap to guard against) is ignored.
     if (BigInt(transfer.value) === wanted) {
       return { matched: true, txHash: transfer.transaction_id };
     }
@@ -59,7 +71,7 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
 interface MempoolTx {
   txid: string;
   vout: { scriptpubkey_address?: string; value: number }[];
-  status: { confirmed: boolean };
+  status: { confirmed: boolean; block_time?: number }; // block_time in seconds
 }
 
 /**
@@ -81,6 +93,12 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
 
   for (const tx of txs) {
     if (!tx.status.confirmed) continue;
+    // Reject transactions that predate this order. block_time is in seconds;
+    // convert to ms for comparison. Fail open if the timestamp is absent.
+    const blockTimeMs = tx.status.block_time
+      ? tx.status.block_time * 1000
+      : undefined;
+    if (!isOnOrAfterOrder(blockTimeMs, order)) continue;
 
     for (const output of tx.vout) {
       if (output.scriptpubkey_address !== order.wallet_address) continue;

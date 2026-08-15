@@ -53,6 +53,7 @@ export default async function TemplateDetailsPage({
                 badge={template.badge}
                 price={template.price}
                 headingFontClassName={getHeadingFontClass(template.slug)}
+                framework={template.framework}
               />
 
               <ProductTabs

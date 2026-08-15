@@ -566,9 +566,62 @@ See "TASK 16" detail below. Three new production-quality premium templates
 built, demo-exported, imaged, zipped, and integrated into the marketplace
 catalog + downloads map. Wallets untouched.
 
-**Task 17 — TBD**
+**Task 17 — COMPLETE (not yet committed/pushed)**
 
-> DO NOT START TASK 17.
+Pre-Launch Sales Audit (audit-only). Findings handed off to Task 18.
+
+**Task 18 — IN PROGRESS (not yet committed/pushed)**
+
+Fix Pre-Launch Trust, Accuracy & Production Hardening Blockers. Implementation +
+verification task. CRITICAL: real production wallets in `lib/orders/pricing.ts`
+(USDT: TTs2YMrifwWhiEPWVxhqqHd7v5DZNu477R, BTC: bc1qky4uvdn0v9kyha9v9wns5893f62djd8ssa04u0)
+must NOT be changed — verified untouched (empty git diff). Do NOT start Task 19.
+
+Changes applied this session (all verified: `npm run lint` PASS, `npm run build` PASS):
+
+- `docs/PAYMENT_VERIFICATION.md` — wallet section: removed "placeholder" language,
+  clarified wallets are real production owner addresses (prior session).
+- `messages/en.json` + `es.json` + `de.json` + `fr.json` + `tr.json` + `zh.json` —
+  corrected inaccurate strings across ALL 6 locales: "confirmed manually" →
+  "confirmed automatically on-chain" (cryptoOnlyText, step1Body, toWalletBelow,
+  noLiveVerification); FAQ3 "Next.js 15" → "latest Next.js App Router"; FAQ4 +
+  premiumSupport "Premium support" → "Email support"; privacy2Body clarified
+  auto on-chain detection (no manual button/email); terms3Body accuracy;
+  about card2Body accuracy.
+- `app/api/notify-purchase/route.ts` line 109 — "Purchases are verified manually"
+  → "payment is detected automatically on-chain".
+- `app/[locale]/faq/page.tsx` line 26 — wrong-amount answer now clarifies manual
+  handling is a one-off exception only when the exact amount wasn't sent.
+- `components/product/product-header.tsx` — hardcoded "Next.js 15" → accepts a
+  `framework` prop (defaults to "Next.js"); wired up in
+  `app/[locale]/templates/[slug]/page.tsx` to pass `template.framework`.
+- `lib/data/templates.ts` — all 3 `framework: "Next.js 15"` → "Next.js 16"
+  (templates ship Next.js 16.2.x; marketplace uses 16.2.9); description
+  "Next.js 15" → "Next.js 16".
+- `lib/orders/verify.ts` (BLOCKER 3) — implemented timestamp guard: new
+  `isOnOrAfterOrder()` rejects transactions predating `order.created_at` for
+  both USDT (TronGrid `block_timestamp` ms) and BTC (mempool.space `block_time`
+  sec → ms). Fails open (accepts) when the timestamp field is absent, so a
+  legitimate payment is never blocked by a missing API field.
+
+Out of scope / not changed (with reasoning):
+- BLOCKER 2 (localStorage-only auth) — design limitation, not an accuracy
+  defect. Auth pages already render an honest `noBackendNote` in all locales
+  ("no backend connected ... local session on this device only"), and
+  privacy/terms pages accurately describe localStorage-only storage. Building
+  a real backend auth system would be a new feature (out of Task 18 scope).
+- HIGH 3 (QR code) — no QR claims/refs exist in the codebase (only a transitive
+  npm dep). Nothing to fix.
+- `lib/orders/pricing.ts` — production wallets, untouched (verified).
+- Admin force-confirm email "manually verified" — accurate (it IS a manual
+  admin override via adminForceConfirm).
+
+Git: branch `main`, HEAD 40baa2a, 13 files modified, working tree clean of
+unintended changes. Commit/push deferred to owner review.
+
+**Task 19 — TBD**
+
+> DO NOT START TASK 19.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---

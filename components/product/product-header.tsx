@@ -7,6 +7,7 @@ interface ProductHeaderProps {
   badge?: string;
   price: number;
   headingFontClassName?: string;
+  framework?: string;
 }
 
 export default function ProductHeader({
@@ -14,6 +15,7 @@ export default function ProductHeader({
   description,
   badge,
   headingFontClassName = "",
+  framework,
 }: ProductHeaderProps) {
   const t = useTranslations("ProductDetail");
   return (
@@ -32,7 +34,7 @@ export default function ProductHeader({
 
       <div className="flex flex-wrap gap-4">
         {[
-          [t("framework"), "Next.js 15"],
+          [t("framework"), framework ?? "Next.js"],
           [t("styling"), "Tailwind CSS"],
           [t("license"), t("commercial")],
         ].map(([title, value]) => (
