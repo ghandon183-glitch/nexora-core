@@ -37,6 +37,7 @@
 | Task 13 | COMPLETE + VERIFIED |
 | Task 14 | COMPLETE (audit only — no code changes) |
 | Task 15 | COMPLETE (not yet committed/pushed) |
+| Task 16 | COMPLETE (not yet committed/pushed) — 3 new premium templates |
 
 
 ---
@@ -383,6 +384,99 @@ runtime-verify payment + secure-download flows.
 
 ---
 
+## TASK 16 — Build 3 New Premium Templates
+
+**STATUS: COMPLETE (not yet committed/pushed — deferred to owner review).**
+
+Three production-quality, sellable premium templates built as standalone
+Next.js source trees, statically exported as live demos, previewed with
+branded gallery imagery, packaged as clean ZIPs, and registered in the
+marketplace catalog + downloads map.
+
+### Wallets (AUTHORITATIVE — unchanged)
+The real production wallet addresses in `lib/orders/pricing.ts` were NOT
+touched, regenerated, or "corrected" during Task 16 (confirmed by
+`git diff lib/orders/pricing.ts` showing no changes):
+- USDT TRC20: `TTs2YMrifwWhiEPWVxhqqHd7v5DZNu477R` (unchanged)
+- BTC: `bc1qky4uvdn0v9kyha9v9wns5893f62djd8ssa04u0` (unchanged)
+
+### Template 1 — premium-portfolio ($59)
+A sophisticated dark-mode portfolio for creative developers and designers.
+- **Design:** Dark base (#0a0a0c) with lime accent (#d4ff4f), Space Grotesk
+  display + Inter body, self-hosted fonts (no external requests).
+- **Sections:** Animated hero with staggered reveals, about, skills,
+  experience timeline, projects grid (generated SVG visuals), services with
+  numbered cards, tech stack, testimonials, contact form with success state,
+  footer.
+- **Build:** `next build` ✓ (Turbopack, static export, 3 pages).
+- **Demo:** `public/demo/premium-portfolio/index.html`.
+
+### Template 2 — premium-blog ($65)
+An editorial magazine template with multi-route architecture.
+- **Design:** Light editorial palette with burnt-orange accent (#c2410c),
+  Lora serif + Inter body, light & dark mode.
+- **Routes:** Homepage, `/articles/[slug]` (6 articles), `/category/[slug]`
+  (5 categories), `/about`, `/author`.
+- **Components:** Nav, Footer, FeaturedArticle, ArticleGrid, Categories,
+  Trending, Newsletter, RelatedArticles, ArticleCover (SVG art).
+- **Build:** `next build` ✓ (16 static pages generated).
+- **Demo:** `public/demo/premium-blog/` (all routes).
+
+### Template 3 — premium-restaurant ($69)
+An elegant fine-dining restaurant template with interactive reservation.
+- **Design:** Warm dark palette (#14110d) with gold accent (#c8a25a),
+  Cormorant Garamond display + Inter body, self-hosted fonts.
+- **Sections:** Cinematic hero with stats, philosophy (live fire, local
+  pantry, fermentation), menu preview, chef profile, gallery, testimonials,
+  events, hours/location/contact, reservation page.
+- **Reservation page:** Interactive date picker, party-size selector,
+  time-slot selector, notes, success state.
+- **Build:** `next build` ✓ (5 static pages: /, /menu, /reserve,
+  /_not-found, plus menu).
+- **Demo:** `public/demo/premium-restaurant/`.
+
+### Assets created (all in marketplace repo)
+- **Demos:** `public/demo/premium-portfolio/`, `public/demo/premium-blog/`,
+  `public/demo/premium-restaurant/` (pre-built static exports with
+  `NEXT_PUBLIC_BASE_PATH` set).
+- **Preview images:** `public/templates/premium-{portfolio,blog,restaurant}.jpg`
+  (2560×1440, 62–84 KB each).
+- **Gallery images:** `public/templates/gallery/premium-{slug}/{1-4}.jpg`
+  (4 per template × 3 = 12 images, 2560×1440).
+- **ZIP packages:** `public/downloads/premium-{portfolio,blog,restaurant}.zip`
+  (21–26 KB, clean source only — no node_modules/.next/out).
+
+### Files modified (Task 16)
+- `lib/data/templates.ts` — 3 new template catalog entries (full schema:
+  slug, title, description, image, gallery, badge, category, tags, framework,
+  styling, components, version, lastUpdate, price, demoUrl, purchaseUrl,
+  documentationUrl, features, changelog).
+- `lib/data/downloads.ts` — 3 new entries in DOWNLOADS map pointing at the
+  ZIP asset paths.
+- `NEXORA_STATE.md` — this Task 16 detail + status table + next-task notes.
+
+### Verification (Task 16)
+- `npm run lint`: **PASS** — 0 errors, 0 warnings.
+- `npm run build`: **PASS** — 29 routes compiled (marketplace).
+- `npm run cf:build`: **PASS** — Worker + assets bundled (OpenNext).
+- `git diff --check`: **PASS** — no whitespace errors.
+- Template source builds (all 3): **PASS**.
+- ZIP contents verified: clean (no node_modules), package.json + source
+  files present.
+- Wallet addresses: **UNCHANGED** (confirmed after builds).
+- Catalog now has 10 templates total (7 existing + 3 new); hero count
+  auto-updates via `templates.length`.
+
+### Notes
+- Template source trees live in the build sandbox `/tmp/tpl/` (not committed
+  to the marketplace repo — only the ZIP packages, demos, and images are).
+- All three templates use `NEXT_PUBLIC_BASE_PATH` for hosting demos under
+  `/demo/<slug>/` in the marketplace.
+- Self-hosted fonts via `@fontsource/*` — no external font requests in any
+  template (production-friendly, no privacy leakage).
+
+---
+
 ## PRODUCTION CONFIGURATION DOCUMENTATION
 
 **COMPLETE** (Task 10).
@@ -466,9 +560,15 @@ WALLETS and left unchanged. One launch blocker fixed (server-side canonical pric
 validation in `/api/orders/create`). Working tree has one uncommitted change;
 commit/push deferred to owner review.
 
-**Task 16 — TBD**
+**Task 16 — COMPLETE (not yet committed/pushed)**
 
-> DO NOT START TASK 16.
+See "TASK 16" detail below. Three new production-quality premium templates
+built, demo-exported, imaged, zipped, and integrated into the marketplace
+catalog + downloads map. Wallets untouched.
+
+**Task 17 — TBD**
+
+> DO NOT START TASK 17.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---

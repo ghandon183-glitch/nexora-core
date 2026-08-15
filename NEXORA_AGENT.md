@@ -51,6 +51,7 @@ runtime confirmation of the Task 13 download-access deny after deploy.
 | Task 13 | COMPLETE + VERIFIED | Gated paid downloads behind `download_token` via `/api/download/[token]`; direct `/downloads/*` denied — lint PASS, build PASS, cf:build PASS |
 | Task 14 | COMPLETE | Sales readiness audit only — no code changes |
 | Task 15 | COMPLETE (not yet committed/pushed) | Production payment & Cloudflare readiness audit + canonical price-validation fix in `/api/orders/create`; wallets confirmed real & unchanged — lint PASS, build PASS, cf:build PASS |
+| Task 16 | COMPLETE (not yet committed/pushed) | Built 3 new premium templates (portfolio $59, blog $65, restaurant $69) — source builds + demos + preview/gallery images + ZIP packages + catalog/downloads integration; wallets untouched — lint PASS, build PASS, cf:build PASS |
 
 Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
 
@@ -59,12 +60,12 @@ Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
 
 ---
 
-## CURRENT VERIFICATION (Release 1.1, post-Task 15)
+## CURRENT VERIFICATION (Release 1.1, post-Task 16)
 
 - `npm run lint`: **PASS** — 0 errors, 0 warnings
 - `npm run build`: **PASS** — 29 routes + `/api/download/[token]` compiled
 - `npm run cf:build`: **PASS** — Worker + assets bundled; `run_worker_first: ["/downloads/*"]` compiled
-- `check-payments.yml` workflow: valid YAML
+- 3 new premium templates registered in catalog (10 total)
 - No Cloudflare deploy performed (deferred to a separate manual step)
 - Wallet addresses: **UNCHANGED** (confirmed real owner production wallets)
 
@@ -72,13 +73,15 @@ Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
 
 ## NEXT TASK
 
-**Task 16 — TBD**
+**Task 17 — TBD**
 
-> DO NOT START TASK 16.
+> DO NOT START TASK 17.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
-Task 15 has one uncommitted change (`app/api/orders/create/route.ts`) awaiting
-owner review before commit/push.
+Tasks 15–16 have uncommitted changes awaiting owner review before commit/push:
+- `app/api/orders/create/route.ts` (Task 15)
+- `lib/data/templates.ts`, `lib/data/downloads.ts`, `public/demo/premium-*`,
+  `public/downloads/premium-*.zip`, `public/templates/premium-*` (Task 16)
 
 ---
 
@@ -91,11 +94,11 @@ On future sessions, FIRST read only:
 
 ### Do NOT
 - Perform a full repository scan.
-- Re-audit completed Tasks (1–8, 10, 11, 12, 13, 14, 15).
+- Re-audit completed Tasks (1–8, 10, 11, 12, 13, 14, 15, 16).
 - Inspect unrelated source files (`app/`, `lib/`, `components/`, `migrations/`).
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 - Run `npm install`, `npm run lint`, `npm run build`, or tests unless instructed.
-- Start Task 16 without explicit user instruction.
+- Start Task 17 without explicit user instruction.
 - Modify any files unless explicitly instructed.
 
 ### DO

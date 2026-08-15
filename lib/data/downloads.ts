@@ -18,6 +18,9 @@ export const DOWNLOADS: Record<string, string> = {
   "nexi-ai": "/downloads/nexi-ai.zip",
   "aurelia-store": "/downloads/aurelia-store.zip",
   "solace-studio": "/downloads/solace-studio.zip",
+  "premium-portfolio": "/downloads/premium-portfolio.zip",
+  "premium-blog": "/downloads/premium-blog.zip",
+  "premium-restaurant": "/downloads/premium-restaurant.zip",
 };
 
 /**

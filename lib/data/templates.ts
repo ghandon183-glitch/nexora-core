@@ -528,4 +528,220 @@ export const templates: Template[] = [
       },
     ],
   },
+
+  {
+    slug: "premium-portfolio",
+
+    title: "Premium Portfolio",
+
+    description:
+      "A sophisticated dark-mode portfolio for creative developers and designers — animated hero, project grid with generated visuals, services, timeline, testimonials, and a contact form.",
+
+    image: "/templates/premium-portfolio.jpg",
+
+    gallery: [
+      "/templates/gallery/premium-portfolio/1.jpg",
+      "/templates/gallery/premium-portfolio/2.jpg",
+      "/templates/gallery/premium-portfolio/3.jpg",
+      "/templates/gallery/premium-portfolio/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "Portfolio",
+
+    tags: [
+      "Portfolio",
+      "Developer",
+      "Designer",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 22,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-08-14",
+
+    price: 59,
+
+    demoUrl: "/demo/premium-portfolio/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Animated Hero with Staggered Reveals",
+      "Project Grid with Generated SVG Visuals",
+      "Services Section with Numbered Cards",
+      "Experience Timeline",
+      "Capabilities & Tech Stack",
+      "Testimonials",
+      "Contact Form with Success State",
+      "Reduced-Motion Friendly Animations",
+      "Self-Hosted Fonts (No External Requests)",
+      "SEO & Open Graph Metadata",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-08-14",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: "premium-blog",
+
+    title: "Premium Blog",
+
+    description:
+      "An editorial magazine template with a featured essay, article grid, dynamic article pages, category and author pages, trending, and a newsletter CTA. Built in Lora serif and Inter.",
+
+    image: "/templates/premium-blog.jpg",
+
+    gallery: [
+      "/templates/gallery/premium-blog/1.jpg",
+      "/templates/gallery/premium-blog/2.jpg",
+      "/templates/gallery/premium-blog/3.jpg",
+      "/templates/gallery/premium-blog/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "Blog & Magazine",
+
+    tags: [
+      "Blog",
+      "Magazine",
+      "Editorial",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 26,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-08-14",
+
+    price: 65,
+
+    demoUrl: "/demo/premium-blog/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Magazine Homepage with Featured Essay",
+      "Dynamic Article Detail Pages",
+      "Category Listing Pages (Static-Generated)",
+      "Author Profile Page",
+      "About Page with Stats",
+      "Trending Section",
+      "Newsletter CTA with Success State",
+      "Generated SVG Cover Art per Article",
+      "Rich Prose Styling (Headings, Quotes, Lists)",
+      "Light & Dark Mode",
+      "SEO Metadata & Open Graph per Article",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-08-14",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
+
+  {
+    slug: "premium-restaurant",
+
+    title: "Premium Restaurant",
+
+    description:
+      "An elegant fine-dining restaurant template with a cinematic hero, philosophy, full menu, chef profile, gallery, events, hours, and an interactive reservation flow. Warm dark palette with gold accents.",
+
+    image: "/templates/premium-restaurant.jpg",
+
+    gallery: [
+      "/templates/gallery/premium-restaurant/1.jpg",
+      "/templates/gallery/premium-restaurant/2.jpg",
+      "/templates/gallery/premium-restaurant/3.jpg",
+      "/templates/gallery/premium-restaurant/4.jpg",
+    ],
+
+    badge: "New",
+
+    category: "Restaurant & Hospitality",
+
+    tags: [
+      "Restaurant",
+      "Fine Dining",
+      "Reservation",
+      "Next.js",
+      "Tailwind",
+    ],
+
+    framework: "Next.js 16",
+
+    styling: "Tailwind CSS",
+
+    components: 24,
+
+    version: "1.0.0",
+
+    lastUpdate: "2026-08-14",
+
+    price: 69,
+
+    demoUrl: "/demo/premium-restaurant/index.html",
+
+    purchaseUrl: "#",
+
+    documentationUrl: "#",
+
+    features: [
+      "Cinematic Hero with Animated Stats",
+      "Philosophy Section (Live Fire, Local Pantry)",
+      "Homepage Menu Preview + Full Menu Page",
+      "Chef Profile with Signature",
+      "Gallery Grid with Generated SVG Visuals",
+      "Testimonials from Press & Regulars",
+      "Upcoming Events Listing",
+      "Hours, Location & Contact Details",
+      "Interactive Reservation Page",
+      "Date, Party Size & Time Selectors",
+      "Reservation Success State",
+      "Self-Hosted Fonts (No External Requests)",
+    ],
+
+    changelog: [
+      {
+        version: "1.0.0",
+        date: "2026-08-14",
+        changes: [
+          "Initial release",
+        ],
+      },
+    ],
+  },
 ];
