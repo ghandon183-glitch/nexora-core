@@ -49,6 +49,8 @@ runtime confirmation of the Task 13 download-access deny after deploy.
 | Task 11 | COMPLETE | Cloudflare context for production secrets (commit 70f1d62) — central `getEnv()` helper added |
 | Task 12 | COMPLETE + VERIFIED | Finished env centralization: GMAIL_* + SITE_URL all through `getEnv()` — lint PASS, build PASS (29 routes) |
 | Task 13 | COMPLETE + VERIFIED | Gated paid downloads behind `download_token` via `/api/download/[token]`; direct `/downloads/*` denied — lint PASS, build PASS, cf:build PASS |
+| Task 14 | COMPLETE | Sales readiness audit only — no code changes |
+| Task 15 | COMPLETE (not yet committed/pushed) | Production payment & Cloudflare readiness audit + canonical price-validation fix in `/api/orders/create`; wallets confirmed real & unchanged — lint PASS, build PASS, cf:build PASS |
 
 Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
 
@@ -57,22 +59,26 @@ Full detail for Tasks 7, 9, 10, 11, 12, and 13 is in `NEXORA_STATE.md`.
 
 ---
 
-## CURRENT VERIFICATION (Release 1.1, post-Task 13)
+## CURRENT VERIFICATION (Release 1.1, post-Task 15)
 
 - `npm run lint`: **PASS** — 0 errors, 0 warnings
 - `npm run build`: **PASS** — 29 routes + `/api/download/[token]` compiled
 - `npm run cf:build`: **PASS** — Worker + assets bundled; `run_worker_first: ["/downloads/*"]` compiled
 - `check-payments.yml` workflow: valid YAML
 - No Cloudflare deploy performed (deferred to a separate manual step)
+- Wallet addresses: **UNCHANGED** (confirmed real owner production wallets)
 
 ---
 
 ## NEXT TASK
 
-**Task 14 — TBD**
+**Task 16 — TBD**
 
-> DO NOT START TASK 14.
+> DO NOT START TASK 16.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
+
+Task 15 has one uncommitted change (`app/api/orders/create/route.ts`) awaiting
+owner review before commit/push.
 
 ---
 
@@ -85,11 +91,11 @@ On future sessions, FIRST read only:
 
 ### Do NOT
 - Perform a full repository scan.
-- Re-audit completed Tasks (1–8, 10, 11, 12, 13).
+- Re-audit completed Tasks (1–8, 10, 11, 12, 13, 14, 15).
 - Inspect unrelated source files (`app/`, `lib/`, `components/`, `migrations/`).
 - Inspect `nexora-payment-system-update.zip` unless explicitly instructed.
 - Run `npm install`, `npm run lint`, `npm run build`, or tests unless instructed.
-- Start Task 14 without explicit user instruction.
+- Start Task 16 without explicit user instruction.
 - Modify any files unless explicitly instructed.
 
 ### DO

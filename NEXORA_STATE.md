@@ -35,6 +35,8 @@
 | Task 11 | COMPLETE (commit 70f1d62 - Cloudflare context for production secrets) |
 | Task 12 | COMPLETE + VERIFIED |
 | Task 13 | COMPLETE + VERIFIED |
+| Task 14 | COMPLETE (audit only — no code changes) |
+| Task 15 | COMPLETE (not yet committed/pushed) |
 
 
 ---
@@ -308,6 +310,79 @@ Cloudflare environment — see "Remaining manual deployment requirements"):
 
 ---
 
+## TASK 15 — Production Payment & Cloudflare Launch Readiness
+
+**STATUS: COMPLETE (not yet committed/pushed — deferred to owner review).**
+
+Audit + one required launch fix for the production payment system. No
+Cloudflare deployment performed. No wallet changes.
+
+### Wallet clarification (AUTHORITATIVE)
+The wallet addresses in `lib/orders/pricing.ts` are **REAL OWNER PRODUCTION
+WALLETS**, not placeholders. An earlier audit/`docs/PAYMENT_VERIFICATION.md`
+described them as placeholders — that statement is NOT applicable. They were
+NOT changed, regenerated, or "corrected" in Task 15:
+- USDT TRC20: `TTs2YMrifwWhiEPWVxhqqHd7v5DZNu477R` (unchanged)
+- BTC: `bc1qky4uvdn0v9kyha9v9wns5893f62djd8ssa04u0` (unchanged)
+
+### Payment flow audit (verified end-to-end)
+Customer → template → `/checkout/${slug}` → email verification (6-digit code
+via Gmail SMTP) → currency select (USDT/BTC) → `POST /api/orders/create`
+(rate-limited, email-verification re-checked + marked used) →
+`generatePayAmount` fingerprinted amount → `WALLETS[currency].address` stored
+on order → buyer sends exact crypto → GitHub Actions cron every 5 min →
+`POST /api/cron/check-payments` (CRON_SECRET protected) → `checkPayment()`:
+USDT via TronGrid TRC20 API (exact-amount match), BTC via mempool.space
+(confirmed txs, exact-satoshi match) → on match `markOrderConfirmed` +
+randomUUID `download_token` → customer email (Gmail SMTP) with
+`/download/${token}` → `/api/download/[token]` (Task 13 token-gated stream
+via ASSETS binding). Flow is sound.
+
+### Launch blocker found & fixed
+**Price manipulation (BLOCKER).** `/api/orders/create` trusted the
+client-supplied `basePriceUsd` from the request body. A tampered request
+could set `basePriceUsd: 1` (instead of e.g. 49) and the server would
+generate a fingerprinted amount for $1, store `base_price_usd: 1`, and the
+on-chain match would succeed for $1 worth of crypto — yielding a confirmed
+order + download for a fraction of the real price. The Task 8
+"server-side canonical pricing" applied only to admin views, not order
+creation.
+**Fix:** `/api/orders/create` now resolves the canonical price from the
+server-side template catalog via `getTemplate(slug).price` and ignores the
+client-supplied `basePriceUsd` entirely (field removed from the request
+interface + validation + order persistence; checkout client still sends it
+harmlessly, ignored). Minimal change, no pricing values or wallets touched.
+
+### Files modified (Task 15)
+- `app/api/orders/create/route.ts` — server-side canonical price validation.
+
+### Other issues found (NOT fixed — documented, not launch blockers)
+- **Misleading timestamp-guard comment (NON-BLOCKING):** `lib/orders/verify.ts`
+  USDT path comments that it ignores transactions created before the order,
+  but no timestamp check is implemented (BTC path likewise). The fingerprint
+  uniqueness makes practical exploitation astronomically unlikely; left as-is
+  to avoid redesigning verification. Defense-in-depth future task.
+- **`/api/notify-purchase` orphaned (NON-BLOCKING):** never called by the
+  checkout flow (checkout polls `/api/orders/[id]/status` instead). Dead but
+  harmless; left as-is.
+- **In-memory rate limiting (NON-BLOCKING):** documented limitation; acceptable
+  at launch, Redis recommended at scale.
+
+### Verification (Task 15)
+- `npm run lint`: **PASS** — 0 errors, 0 warnings.
+- `npm run build`: **PASS** — 29 routes compiled.
+- `npm run cf:build`: **PASS** — Worker + assets bundled.
+- `git diff --check`: **PASS** — no whitespace errors.
+- Wallet addresses: **UNCHANGED** (confirmed after builds).
+
+### Manual production steps remaining (owner — DO NOT perform during audit)
+See "Manual Production Checklist" in the Task 15 report. Owner must: set
+Cloudflare Worker secrets, set GitHub Actions secrets, apply D1 migrations to
+remote, set `SITE_URL`, set a strong matching `CRON_SECRET`, deploy, and
+runtime-verify payment + secure-download flows.
+
+---
+
 ## PRODUCTION CONFIGURATION DOCUMENTATION
 
 **COMPLETE** (Task 10).
@@ -384,9 +459,16 @@ requirements").
 
 ## NEXT TASK
 
-**Task 14 — TBD**
+**Task 15 — COMPLETE (not yet committed/pushed)**
 
-> DO NOT START TASK 14.
+See "TASK 15" detail below. Wallet addresses confirmed as REAL OWNER PRODUCTION
+WALLETS and left unchanged. One launch blocker fixed (server-side canonical price
+validation in `/api/orders/create`). Working tree has one uncommitted change;
+commit/push deferred to owner review.
+
+**Task 16 — TBD**
+
+> DO NOT START TASK 16.
 > WAIT FOR EXPLICIT USER INSTRUCTION.
 
 ---

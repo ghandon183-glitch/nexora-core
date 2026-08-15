@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { insertOrder } from "@/lib/orders/db";
 import { WALLETS, ORDER_EXPIRY_MS, generatePayAmount, type CurrencyKey } from "@/lib/orders/pricing";
+import { getTemplate } from "@/lib/data/get-template";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getVerificationById, markUsed } from "@/lib/verification/db";
 
 interface CreateOrderBody {
   templateSlug: string;
   templateTitle: string;
-  basePriceUsd: number;
   currency: CurrencyKey;
   buyerName: string;
   buyerEmail: string;
@@ -38,12 +38,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request body" }, { status: 400 });
   }
 
-  const { templateSlug, templateTitle, basePriceUsd, currency, buyerName, buyerEmail, verificationId } = body;
+  const { templateSlug, templateTitle, currency, buyerName, buyerEmail, verificationId } = body;
 
   if (
     !templateSlug ||
     !templateTitle ||
-    !basePriceUsd ||
     !buyerEmail ||
     !buyerName ||
     !verificationId ||
@@ -78,8 +77,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Could not verify email status" }, { status: 500 });
   }
 
+  // Resolve the canonical price server-side. The client sends `basePriceUsd`
+  // for convenience, but it must never be trusted — a tampered request could
+  // otherwise underpay (e.g. $1 for a $49 template) and still get an
+  // on-chain match + download. The authoritative price is the one in the
+  // server's template catalog.
+  const template = getTemplate(templateSlug);
+
+  if (!template) {
+    return NextResponse.json({ ok: false, error: "Template not found" }, { status: 404 });
+  }
+
+  const canonicalPriceUsd = template.price;
+
   try {
-    const payAmount = await generatePayAmount(currency, basePriceUsd);
+    const payAmount = await generatePayAmount(currency, canonicalPriceUsd);
     const wallet = WALLETS[currency];
     const now = Date.now();
 
@@ -87,7 +99,7 @@ export async function POST(request: Request) {
       id: randomUUID(),
       template_slug: templateSlug,
       template_title: templateTitle,
-      base_price_usd: basePriceUsd,
+      base_price_usd: canonicalPriceUsd,
       currency,
       wallet_address: wallet.address,
       pay_amount: payAmount,
