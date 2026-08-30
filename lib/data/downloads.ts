@@ -19,6 +19,7 @@ export const DOWNLOADS: Record<string, string> = {
   "aurelia-store": "/downloads/aurelia-store.zip",
   "solace-studio": "/downloads/solace-studio.zip",
   "premium-portfolio": "/downloads/premium-portfolio.zip",
+  "aether": "/downloads/aether.zip",
   "premium-blog": "/downloads/premium-blog.zip",
   "premium-restaurant": "/downloads/premium-restaurant.zip",
 };
