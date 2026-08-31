@@ -112,8 +112,8 @@ export const templates: Template[] = [
   {
     slug: "aether", title: "AETHER — Premium Creative Studio",
     description: "A cinematic premium creative-studio template for agencies and independent studios, featuring an interactive WebGL hero, immersive project showcase, animated capabilities, process storytelling, and a high-end editorial visual system.",
-    image: "/templates/premium-portfolio.jpg",
-    gallery: ["/templates/gallery/premium-portfolio/1.jpg","/templates/gallery/premium-portfolio/2.jpg","/templates/gallery/premium-portfolio/3.jpg","/templates/gallery/premium-portfolio/4.jpg"],
+    image: "/templates/aether.jpg",
+    gallery: ["/templates/gallery/aether/1.jpg","/templates/gallery/aether/2.jpg","/templates/gallery/aether/3.jpg","/templates/gallery/aether/4.jpg"],
     badge: "New", category: "Creative Studio", tags: ["Creative Studio","Agency","Portfolio","WebGL","Next.js","Tailwind"],
     framework: "Next.js 16", styling: "Tailwind CSS", components: 20, version: "0.1.0", lastUpdate: "2026-08-30", price: 79,
     demoUrl: "#", purchaseUrl: "#", documentationUrl: "#",
