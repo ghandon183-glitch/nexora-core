@@ -116,7 +116,7 @@ export const templates: Template[] = [
     gallery: ["/templates/gallery/aether/1.jpg","/templates/gallery/aether/2.jpg","/templates/gallery/aether/3.jpg","/templates/gallery/aether/4.jpg"],
     badge: "New", category: "Creative Studio", tags: ["Creative Studio","Agency","Portfolio","WebGL","Next.js","Tailwind"],
     framework: "Next.js 16", styling: "Tailwind CSS", components: 20, version: "0.1.0", lastUpdate: "2026-08-30", price: 79,
-    demoUrl: "/demo/aether/index.html", purchaseUrl: "#", documentationUrl: "#",
+    demoUrl: "https://nexora-aether-demo.nxora.workers.dev/", purchaseUrl: "#", documentationUrl: "#",
     features: ["Interactive WebGL Hero","React Three Fiber 3D Experience","Immersive Project Showcase","Animated Capabilities & Process","Motion & Scroll Reveals","Infinite Technology Marquee","Responsive Editorial Layout","Reduced-Motion Awareness","Touch-Friendly Interactions","Self-Hosted Visual Assets","SEO Metadata Ready"],
     changelog: [{ version: "0.1.0", date: "2026-08-30", changes: ["Initial AETHER release","Premium creative-studio visual system","Interactive WebGL hero and immersive project showcase"] }],
   },
