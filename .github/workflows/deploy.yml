@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .aether-build public/demo/aether
+          rm -rf .aether-build public/demo/aether .aether-wrangler.jsonc
           mkdir -p .aether-build public/demo/aether
           unzip -q public/downloads/aether.zip -d .aether-build
           cat > .aether-build/next.config.mjs <<'EOF'
@@ -45,7 +45,25 @@ jobs:
           cp -R .aether-build/out/. public/demo/aether/
           test -f public/demo/aether/index.html
 
-      - name: Build and deploy to Cloudflare
+      - name: Deploy AETHER as dedicated static Worker
+        run: |
+          cat > .aether-wrangler.jsonc <<'EOF'
+          {
+            "$schema": "node_modules/wrangler/config-schema.json",
+            "name": "nexora-aether-demo",
+            "compatibility_date": "2026-07-01",
+            "assets": {
+              "directory": ".aether-build/out",
+              "html_handling": "auto-trailing-slash"
+            }
+          }
+          EOF
+          npx wrangler deploy --config .aether-wrangler.jsonc
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Build and deploy NEXORA
         run: npm run cf:deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
