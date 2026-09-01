@@ -99,7 +99,7 @@ export const templates: Template[] = [
     changelog: [{ version: "1.0.0", date: "2026-07-31", changes: ["Initial release"] }],
   },
   {
-    slug: "premium-portfolio", title: "Premium Portfolio",
+    slug: "premium-portfolio", title: "Studio North",
     description: "A premium dark-mode creative-studio portfolio with an interactive WebGL depth-displaced hero, immersive project showcase, animated capabilities, and a contact form. Built with Next.js, Tailwind, and React Three Fiber.",
     image: "/templates/premium-portfolio.jpg",
     gallery: ["/templates/gallery/premium-portfolio/1.jpg","/templates/gallery/premium-portfolio/2.jpg","/templates/gallery/premium-portfolio/3.jpg","/templates/gallery/premium-portfolio/4.jpg"],
@@ -116,7 +116,7 @@ export const templates: Template[] = [
     gallery: ["/templates/gallery/aether/1.jpg","/templates/gallery/aether/2.jpg","/templates/gallery/aether/3.jpg","/templates/gallery/aether/4.jpg"],
     badge: "New", category: "Creative Studio", tags: ["Creative Studio","Agency","Portfolio","WebGL","Next.js","Tailwind"],
     framework: "Next.js 16", styling: "Tailwind CSS", components: 20, version: "0.1.0", lastUpdate: "2026-08-30", price: 79,
-    demoUrl: "#", purchaseUrl: "#", documentationUrl: "#",
+    demoUrl: "/demo/aether/index.html", purchaseUrl: "#", documentationUrl: "#",
     features: ["Interactive WebGL Hero","React Three Fiber 3D Experience","Immersive Project Showcase","Animated Capabilities & Process","Motion & Scroll Reveals","Infinite Technology Marquee","Responsive Editorial Layout","Reduced-Motion Awareness","Touch-Friendly Interactions","Self-Hosted Visual Assets","SEO Metadata Ready"],
     changelog: [{ version: "0.1.0", date: "2026-08-30", changes: ["Initial AETHER release","Premium creative-studio visual system","Interactive WebGL hero and immersive project showcase"] }],
   },
