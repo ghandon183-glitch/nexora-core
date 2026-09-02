@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0e27;
-  --foreground: #f8fafc;
+  --background: #120b06;
+  --foreground: #f6efe1;
 
-  --card: rgba(30, 27, 66, 0.55);
-  --card-border: rgba(255,255,255,.10);
+  --card: rgba(43, 27, 13, 0.72);
+  --card-border: rgba(217, 176, 108, 0.16);
 
-  --primary: #06b6d4;
-  --primary-hover: #0891b2;
+  --primary: #c79a57;
+  --primary-hover: #d9b06c;
 
-  --muted: #a5b4d0;
+  --muted: #b6a888;
 
   --radius: 24px;
 }
@@ -35,22 +35,24 @@
 
 html{
   scroll-behavior:smooth;
+  background:#120b06;
 }
 
 body{
   min-height:100vh;
   overflow-x:hidden;
-
   background:
-  radial-gradient(circle at 15% 10%,rgba(139,92,246,.30) 0%,transparent 35%),
-  radial-gradient(circle at 85% 18%,rgba(6,182,212,.26) 0%,transparent 38%),
-  radial-gradient(circle at 75% 75%,rgba(244,114,182,.20) 0%,transparent 34%),
-  radial-gradient(circle at 10% 80%,rgba(251,191,36,.16) 0%,transparent 32%),
-  linear-gradient(180deg,#0a0e27 0%,#141234 100%);
-
+    radial-gradient(circle at 15% 8%,rgba(160,104,45,.18) 0%,transparent 34%),
+    radial-gradient(circle at 86% 16%,rgba(217,176,108,.12) 0%,transparent 36%),
+    radial-gradient(circle at 76% 72%,rgba(111,67,27,.16) 0%,transparent 34%),
+    radial-gradient(circle at 10% 88%,rgba(191,130,55,.10) 0%,transparent 30%),
+    linear-gradient(180deg,#120b06 0%,#1a1008 42%,#120b06 100%);
   color:var(--foreground);
-
   font-family:var(--font-geist-sans),Arial,sans-serif;
+}
+
+main{
+  position:relative;
 }
 
 img{
@@ -68,6 +70,35 @@ a{
 }
 
 ::selection{
-  background:#06b6d4;
-  color:#000;
+  background:#d9b06c;
+  color:#160d03;
+}
+
+/* NEXORA warm premium surface language */
+.bg-background{background-color:#120b06!important}
+.text-foreground{color:#f6efe1!important}
+.text-muted-foreground{color:#b6a888!important}
+.border-border{border-color:rgba(217,176,108,.16)!important}
+
+/* Keep native document scrolling available; the Hero owns only its visual morph. */
+html,body{overscroll-behavior-y:auto}
+
+/* Warm utility overrides for common Tailwind surfaces without changing layout or links. */
+[class*="bg-slate-"],[class*="bg-gray-"],[class*="bg-zinc-"]{
+  background-color:rgba(38,24,13,.72)!important;
+}
+[class*="border-slate-"],[class*="border-gray-"],[class*="border-zinc-"]{
+  border-color:rgba(217,176,108,.14)!important;
+}
+[class*="text-slate-"],[class*="text-gray-"],[class*="text-zinc-"]{
+  color:#c6b79b!important;
+}
+[class*="text-cyan-"],[class*="text-blue-"],[class*="text-indigo-"]{
+  color:#d9b06c!important;
+}
+[class*="bg-cyan-"],[class*="bg-blue-"],[class*="bg-indigo-"]{
+  background-color:#b98a45!important;
+}
+[class*="hover\:bg-cyan-"]:hover,[class*="hover\:bg-blue-"]:hover,[class*="hover\:bg-indigo-"]:hover{
+  background-color:#d9b06c!important;
 }
