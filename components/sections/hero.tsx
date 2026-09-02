@@ -116,8 +116,6 @@ export default function Hero() {
     };
 
     const resetTopPresentation = () => {
-      // Restore the cards to a visible, animated arc after returning from
-      // the rest of the page. The old 360deg endpoint pushed them off-screen.
       returnedToTop = true;
       returnTopStart = performance.now();
       setVScroll(600);
@@ -127,22 +125,25 @@ export default function Hero() {
 
     const onScroll = () => {
       if (navOverride) return;
+      // Do not force window.scrollY back to zero. The browser must be able
+      // to scroll through the rest of the marketplace normally.
       if (window.scrollY <= 2 && released) resetTopPresentation();
-      if (!released && window.scrollY > 0) window.scrollTo({ top: 0, behavior: "auto" });
     };
 
     const onWheel = (event: WheelEvent) => {
       const dy = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
       const atTop = window.scrollY <= 2;
-      if (
-        atTop &&
-        !released &&
-        !navOverride &&
-        ((dy > 0 && vScroll < MAX_SCROLL) || (dy < 0 && vScroll > 0))
-      ) {
-        event.preventDefault();
-        setVScroll(vScroll + dy);
-        returnedToTop = false;
+
+      // Let the browser keep its native wheel behavior. We only use the
+      // wheel delta as an additional input for the Hero's visual morph.
+      if (atTop && !navOverride) {
+        if (dy > 0 && vScroll < MAX_SCROLL) {
+          setVScroll(vScroll + dy * 1.35);
+          returnedToTop = false;
+        } else if (dy < 0 && vScroll > 600) {
+          setVScroll(vScroll + dy * 1.35);
+          returnedToTop = false;
+        }
       }
     };
 
@@ -151,13 +152,16 @@ export default function Hero() {
     };
 
     const onTouchMove = (event: TouchEvent) => {
-      if (window.scrollY > 2 || released || navOverride) return;
+      if (window.scrollY > 2 || navOverride) return;
       const y = event.touches[0]?.clientY ?? touchY;
       const delta = touchY - y;
       touchY = y;
-      if ((delta > 0 && vScroll < MAX_SCROLL) || (delta < 0 && vScroll > 0)) {
-        event.preventDefault();
+      if (delta > 0 && vScroll < MAX_SCROLL) {
         setVScroll(vScroll + delta * 1.6);
+        returnedToTop = false;
+      } else if (delta < 0 && vScroll > 600) {
+        setVScroll(vScroll + delta * 1.6);
+        returnedToTop = false;
       }
     };
 
@@ -175,9 +179,9 @@ export default function Hero() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    hero.addEventListener("wheel", onWheel, { passive: false });
+    hero.addEventListener("wheel", onWheel, { passive: true });
     hero.addEventListener("touchstart", onTouchStart, { passive: true });
-    hero.addEventListener("touchmove", onTouchMove, { passive: false });
+    hero.addEventListener("touchmove", onTouchMove, { passive: true });
     hero.addEventListener("mousemove", onMouseMove, { passive: true });
 
     const anchors = Array.from(document.querySelectorAll('a[href^="#"]'));
@@ -203,8 +207,6 @@ export default function Hero() {
       const mobile = W < 768;
 
       const morphTarget = clamp(vScroll / 600, 0, 1);
-      // After the first morph, the page is released. At the top the arc
-      // becomes a living loop instead of remaining at the old endpoint.
       const idleRotation =
         returnedToTop && window.scrollY <= 2 ? ((now - returnTopStart) / 1000) * 14 : 0;
       const rotationTarget =
