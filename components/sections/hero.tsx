@@ -116,9 +116,8 @@ export default function Hero() {
     };
 
     const resetTopPresentation = () => {
-      // Critical fix: after the user returns from the rest of the site,
-      // restore the cards to a visible, animated arc instead of leaving
-      // them at the fully rotated-offscreen scroll position.
+      // Restore the cards to a visible, animated arc after returning from
+      // the rest of the page. The old 360deg endpoint pushed them off-screen.
       returnedToTop = true;
       returnTopStart = performance.now();
       setVScroll(600);
@@ -204,9 +203,8 @@ export default function Hero() {
       const mobile = W < 768;
 
       const morphTarget = clamp(vScroll / 600, 0, 1);
-      // After the first morph, the page is released. When the user comes
-      // back to the top, the arc becomes a living loop instead of remaining
-      // at the old 360deg scroll endpoint (where most cards were off-screen).
+      // After the first morph, the page is released. At the top the arc
+      // becomes a living loop instead of remaining at the old endpoint.
       const idleRotation =
         returnedToTop && window.scrollY <= 2 ? ((now - returnTopStart) / 1000) * 14 : 0;
       const rotationTarget =
@@ -350,7 +348,7 @@ export default function Hero() {
             <p>{t("description")}</p>
             <div className="nx-actions">
               <Link href="/templates" className="nx-btn">{t("exploreTemplates")} <span>→</span></Link>
-              <a href="#collection" className="nx-btn nx-btn-ghost">View Collection <span>↓</span></a>
+              <Link href="/templates" className="nx-btn nx-btn-ghost">View Collection <span>↓</span></Link>
             </div>
           </div>
           <div ref={stageRef} className="nx-stage" aria-label="NEXORA template cards" />
