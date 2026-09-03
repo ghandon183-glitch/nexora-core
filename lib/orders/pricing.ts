@@ -1,3 +1,5 @@
+import { randomInt } from "crypto";
+
 export const WALLETS = {
   USDT: {
     label: "USDT",
@@ -15,8 +17,20 @@ export const WALLETS = {
 
 export type CurrencyKey = keyof typeof WALLETS;
 
-/** How long a buyer has to send the exact fingerprinted amount. */
-export const ORDER_EXPIRY_MS = 45 * 60 * 1000; // 45 minutes
+/** How long a buyer has to send the exact quoted amount. */
+export const ORDER_EXPIRY_MS = 45 * 60 * 1000;
+
+/**
+ * Customer-first crypto pricing policy.
+ *
+ * The site price remains the canonical USD price, but the on-chain amount is
+ * deliberately below it so the buyer has room for wallet/network costs.
+ * This is a merchant-funded crypto discount; direct wallet transfers do not
+ * let us know the buyer's final wallet fee, so we must not pretend that a
+ * particular fee amount is guaranteed.
+ */
+const MIN_CRYPTO_DISCOUNT_USD = 1.01;
+const MAX_BTC_CRYPTO_DISCOUNT_USD = 2.0;
 
 async function fetchBtcUsdRate(): Promise<number> {
   const response = await fetch(
@@ -39,30 +53,47 @@ async function fetchBtcUsdRate(): Promise<number> {
 }
 
 /**
- * Generates the exact amount a buyer must send, with a small random
- * fingerprint added so no two pending orders ever share the same amount —
- * this is what lets automatic on-chain matching work without an order ID
- * field on the transaction itself.
+ * Generates a customer-friendly exact amount.
+ *
+ * USDT: quote is between $1.001 and $1.009 below the catalogue price.
+ * BTC: quote is between $1.01 and $2.00 below the catalogue price.
+ *
+ * The random fingerprint is kept inside that discount window, so the exact
+ * crypto amount can never exceed the advertised USD price. The order creator
+ * retries if a rare active-order amount collision is detected.
  */
 export async function generatePayAmount(
   currency: CurrencyKey,
   basePriceUsd: number
 ): Promise<string> {
+  if (basePriceUsd <= MIN_CRYPTO_DISCOUNT_USD) {
+    throw new Error("Template price is too low for the crypto fee-credit policy");
+  }
+
   if (currency === "USDT") {
-    // USDT is ~1:1 with USD. Add a fingerprint in the 6th decimal place
-    // (a millionth of a dollar) so it's invisible in the UI's rounded
-    // display but still unique on-chain.
-    const fingerprint = Math.floor(Math.random() * 9000) + 1000; // 0.001000–0.009999
-    const amount = basePriceUsd + fingerprint / 1_000_000;
+    // Keep a little over $1 of room for wallet/network costs while using the
+    // six USDT decimals for an order fingerprint.
+    const fingerprintMicros = randomInt(1_000, 10_000); // $0.001000–$0.009999
+    const amount = basePriceUsd - MIN_CRYPTO_DISCOUNT_USD + fingerprintMicros / 1_000_000;
     return amount.toFixed(6);
   }
 
-  // BTC: convert USD to BTC at the current rate, then add a satoshi-level
-  // fingerprint.
   const btcUsdRate = await fetchBtcUsdRate();
-  const baseBtc = basePriceUsd / btcUsdRate;
-  const fingerprintSats = Math.floor(Math.random() * 9000) + 1000; // 1000–9999 sats
-  const amountBtc = baseBtc + fingerprintSats / 1e8;
+  const minPayUsd = basePriceUsd - MAX_BTC_CRYPTO_DISCOUNT_USD;
+  const maxPayUsd = basePriceUsd - MIN_CRYPTO_DISCOUNT_USD;
+
+  // Pick a satoshi offset whose USD value is always inside the discount
+  // window. This keeps the quoted BTC amount below the advertised price even
+  // when BTC moves substantially.
+  const windowUsd = maxPayUsd - minPayUsd;
+  const maxFingerprintSats = Math.max(1, Math.floor((windowUsd * 1e8) / btcUsdRate));
+  const fingerprintSats = randomInt(1, maxFingerprintSats + 1);
+  const amountBtc = minPayUsd / btcUsdRate + fingerprintSats / 1e8;
+
+  if (amountBtc <= 0) {
+    throw new Error("Calculated BTC payment amount is invalid");
+  }
+
   return amountBtc.toFixed(8);
 }
 
