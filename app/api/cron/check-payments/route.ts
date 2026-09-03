@@ -13,8 +13,8 @@ import { getEnv } from "@/lib/env";
 
 /**
  * Polled every 5 minutes by GitHub Actions. The endpoint is protected by a
- * shared secret. Order state transitions are guarded in D1 so overlapping
- * cron runs cannot confirm/expire the same order twice.
+ * shared secret. Orders are checked in small parallel batches so one slow
+ * blockchain/API response cannot hold the whole queue behind it.
  */
 export async function POST(request: Request) {
   const env = await getEnv();
@@ -33,25 +33,23 @@ export async function POST(request: Request) {
   };
 
   try {
-    const pendingOrders = await getPendingOrders();
+    // getPendingOrders is intentionally capped at 15. With one blockchain
+    // lookup per order, this stays comfortably inside the Workers Free
+    // external-subrequest ceiling while making progress on a busy queue.
+    const pendingOrders = await getPendingOrders(undefined, 15);
     results.checked = pendingOrders.length;
 
-    for (const order of pendingOrders) {
+    const processOrder = async (order: (typeof pendingOrders)[number]) => {
       try {
         const now = Date.now();
         const match = await checkPayment(order);
 
         if (match.matched && match.txHash) {
           const downloadToken = randomUUID();
-          const claimed = await markOrderConfirmed(
-            order.id,
-            match.txHash,
-            downloadToken
-          );
+          const claimed = await markOrderConfirmed(order.id, match.txHash, downloadToken);
 
-          // Another overlapping run may have claimed this order already.
           // Only the run that wins the conditional UPDATE sends the email.
-          if (!claimed) continue;
+          if (!claimed) return;
 
           results.confirmed += 1;
 
@@ -75,7 +73,7 @@ export async function POST(request: Request) {
             `,
           });
 
-          continue;
+          return;
         }
 
         if (now > order.expires_at) {
@@ -95,7 +93,10 @@ export async function POST(request: Request) {
           `${order.id}: ${orderError instanceof Error ? orderError.message : "unknown error"}`
         );
       }
-    }
+    };
+
+    // Promise.allSettled means one failed order never aborts the other checks.
+    await Promise.allSettled(pendingOrders.map(processOrder));
 
     return NextResponse.json({ ok: true, ...results });
   } catch (error) {
