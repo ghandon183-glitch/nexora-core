@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE_NAME, checkAdminPassword, createSessionToken } from "@/lib/admin/auth";
+import {
+  ADMIN_COOKIE_NAME,
+  ADMIN_SESSION_TTL_SECONDS,
+  checkAdminPassword,
+  createSessionToken,
+} from "@/lib/admin/auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
@@ -13,7 +18,7 @@ export async function POST(request: Request) {
   if (!allowed) {
     return NextResponse.json(
       { ok: false, error: "Too many attempts. Try again later." },
-      { status: 429, headers: { "Retry-After": String(retryAfterSeconds ?? 60) } }
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds ?? 60), "Cache-Control": "no-store" } }
     );
   }
 
@@ -25,18 +30,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 });
   }
 
-  if (!body.password || !(await checkAdminPassword(body.password))) {
+  const password = typeof body.password === "string" ? body.password : "";
+
+  if (!password || password.length > 512 || !(await checkAdminPassword(password))) {
     return NextResponse.json({ ok: false, error: "Incorrect password" }, { status: 401 });
   }
 
-  const response = NextResponse.json({ ok: true });
+  const response = NextResponse.json(
+    { ok: true },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 
   response.cookies.set(ADMIN_COOKIE_NAME, await createSessionToken(), {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: ADMIN_SESSION_TTL_SECONDS,
   });
 
   return response;
