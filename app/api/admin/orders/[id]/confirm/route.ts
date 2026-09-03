@@ -6,35 +6,69 @@ import { adminForceConfirm, getOrderById } from "@/lib/orders/db";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { DOWNLOADS } from "@/lib/data/downloads";
 import { getEnv } from "@/lib/env";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
-/**
- * Manual override for edge cases the automatic checker can't resolve on its
- * own — e.g. a buyer who slightly overpaid or underpaid, or sent from an
- * exchange wallet that batches transactions. Used sparingly; the normal
- * path is fully automatic.
- */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getClientIp(request);
+  const rate = checkRateLimit(`admin-confirm:${ip}`, {
+    max: 30,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rate.retryAfterSeconds ?? 60),
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+  }
+
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
   if (!(await isValidSessionToken(token))) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401, headers: { "Cache-Control": "no-store" } }
+    );
   }
 
   const { id } = await params;
+
+  if (!id || id.length > 80) {
+    return NextResponse.json(
+      { ok: false, error: "Invalid order" },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
 
   try {
     const order = await getOrderById(id);
 
     if (!order) {
-      return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: "Order not found" },
+        { status: 404, headers: { "Cache-Control": "no-store" } }
+      );
     }
 
     const downloadToken = randomUUID();
-    await adminForceConfirm(id, downloadToken);
+    const claimed = await adminForceConfirm(id, downloadToken);
+
+    if (!claimed) {
+      return NextResponse.json(
+        { ok: true, alreadyConfirmed: true },
+        { headers: { "Cache-Control": "no-store" } }
+      );
+    }
 
     const env = await getEnv();
     const siteUrl = env.SITE_URL ?? "";
@@ -56,9 +90,12 @@ export async function POST(
       `,
     });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("[admin/orders/confirm] Failed:", error);
-    return NextResponse.json({ ok: false, error: "Could not confirm order" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Could not confirm order" },
+      { status: 500, headers: { "Cache-Control": "no-store" } }
+    );
   }
 }
