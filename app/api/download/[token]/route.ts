@@ -3,38 +3,34 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 import { getOrderByToken } from "@/lib/orders/db";
 import { getDownloadAssetPath } from "@/lib/data/downloads";
-
-/**
- * Token-authorized download endpoint.
- *
- * The order's `download_token` is the sole authorization credential for
- * downloading a purchased template package. This route:
- *   1. Looks up the order by token (parameterized D1 query).
- *   2. Denies invalid tokens / nonexistent orders.
- *   3. Denies orders that are not `confirmed`.
- *   4. Resolves the purchased template slug to its ZIP asset.
- *   5. Streams the ZIP back via the Cloudflare `ASSETS` binding with
- *      `Content-Type: application/zip` and a forced-download
- *      `Content-Disposition`.
- *
- * The file is streamed (not buffered), so the ~13.7 MB largest package is
- * served without exceeding Worker memory limits. The asset path is internal
- * — direct `/downloads/<slug>.zip` access is denied in production by
- * `middleware.ts` + `wrangler.jsonc` `assets.run_worker_first`.
- *
- * Error responses are deliberately generic and leak no order details.
- */
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const ASSETS_ORIGIN = "https://assets.local";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  const ip = getClientIp(request);
+  const rate = checkRateLimit(`download:${ip}`, {
+    max: 30,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rate.allowed) {
+    return new NextResponse(null, {
+      status: 429,
+      headers: {
+        "Retry-After": String(rate.retryAfterSeconds ?? 60),
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
   const { token } = await params;
 
-  // Reject obviously invalid tokens before hitting the database.
-  if (!token || typeof token !== "string" || token.length === 0) {
+  if (!token || !UUID_RE.test(token)) {
     return deny();
   }
 
@@ -46,27 +42,15 @@ export async function GET(
     return deny();
   }
 
-  if (!order) {
-    return deny();
-  }
-
-  // Only confirmed orders may download. Pending/expired/review orders are
-  // denied with the same generic response to avoid leaking order state.
-  if (order.status !== "confirmed") {
+  if (!order || order.status !== "confirmed") {
     return deny();
   }
 
   const assetPath = getDownloadAssetPath(order.template_slug);
   if (!assetPath) {
-    // No package built yet for this template — return a generic not-ready
-    // response without revealing whether the order exists.
     return deny(404);
   }
 
-  // Fetch the asset through the Cloudflare `ASSETS` binding (the same
-  // mechanism OpenNext uses internally to serve static assets). This is an
-  // internal binding subrequest, so it is unaffected by the public
-  // `run_worker_first` deny rule on `/downloads/*`.
   let assetResponse: Response;
   try {
     const { env } = await getCloudflareContext({ async: true });
@@ -85,29 +69,27 @@ export async function GET(
   }
 
   if (!assetResponse.ok || !assetResponse.body) {
-    console.error(
-      "[download] Asset not served via ASSETS binding:",
-      assetResponse.status
-    );
+    console.error("[download] Asset not served via ASSETS binding:", assetResponse.status);
     return deny(404);
   }
 
   const filename = `${order.template_slug}.zip`;
-
-  // Stream the asset body straight through — no buffering, so large packages
-  // (incl. ~13.7 MB) are served within Worker limits.
-  return new Response(assetResponse.body, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "Content-Length": assetResponse.headers.get("Content-Length") ?? "",
-      "Cache-Control": "private, no-store",
-    },
+  const headers = new Headers({
+    "Content-Type": "application/zip",
+    "Content-Disposition": `attachment; filename="${filename}"`,
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
   });
+
+  const contentLength = assetResponse.headers.get("Content-Length");
+  if (contentLength) headers.set("Content-Length", contentLength);
+
+  return new Response(assetResponse.body, { status: 200, headers });
 }
 
-/** Generic denial response that leaks no order/file information. */
 function deny(status = 404): NextResponse {
-  return new NextResponse(null, { status });
+  return new NextResponse(null, {
+    status,
+    headers: { "Cache-Control": "no-store" },
+  });
 }
