@@ -1,12 +1,28 @@
 import { NextResponse } from "next/server";
 import { getOrderById } from "@/lib/orders/db";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getClientIp(request);
+  const { allowed, retryAfterSeconds } = checkRateLimit(`order-status:${ip}`, {
+    max: 120,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Too many status checks. Please wait a moment." },
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds ?? 60) } }
+    );
+  }
+
   const { id } = await params;
 
+  // UUIDs are intentionally used for order IDs. Do not expose any buyer data
+  // from this endpoint; only the minimum state needed by checkout is returned.
   try {
     const order = await getOrderById(id);
 
