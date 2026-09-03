@@ -181,13 +181,16 @@ export async function markOrderReview(id: string): Promise<boolean> {
   return (result.meta?.changes ?? 0) > 0;
 }
 
-/** Manual override for the admin panel — confirms an order by hand. */
+/**
+ * Manual override for the admin panel. Returns false if the order was already
+ * confirmed, preventing duplicate download-token rotation and duplicate email.
+ */
 export async function adminForceConfirm(
   id: string,
   downloadToken: string
-): Promise<void> {
+): Promise<boolean> {
   const db = await getOrdersDb();
-  await db
+  const result = await db
     .prepare(
       `UPDATE orders
        SET status = 'confirmed', tx_hash = COALESCE(tx_hash, 'manual-admin-override'),
@@ -196,4 +199,6 @@ export async function adminForceConfirm(
     )
     .bind(downloadToken, Date.now(), id)
     .run();
+
+  return (result.meta?.changes ?? 0) > 0;
 }
