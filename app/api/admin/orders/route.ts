@@ -8,14 +8,23 @@ export async function GET() {
   const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
   if (!(await isValidSessionToken(token))) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401, headers: { "Cache-Control": "no-store" } }
+    );
   }
 
   try {
     const orders = await getRecentOrders(200);
-    return NextResponse.json({ ok: true, orders });
+    return NextResponse.json(
+      { ok: true, orders },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (error) {
     console.error("[admin/orders] Failed to fetch orders:", error);
-    return NextResponse.json({ ok: false, error: "Could not fetch orders" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Could not fetch orders" },
+      { status: 500, headers: { "Cache-Control": "no-store" } }
+    );
   }
 }
