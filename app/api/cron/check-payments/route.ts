@@ -12,12 +12,9 @@ import { sendCustomerEmail } from "@/lib/mailer";
 import { getEnv } from "@/lib/env";
 
 /**
- * Polled on a schedule (see docs/PAYMENT_VERIFICATION.md — a GitHub Actions
- * cron job calls this every 5 minutes) to check pending orders against the
- * blockchain and automatically unlock downloads for matching payments.
- *
- * Protected by a shared secret so it can't be triggered by anyone who finds
- * the URL.
+ * Polled every 5 minutes by GitHub Actions. The endpoint is protected by a
+ * shared secret. Order state transitions are guarded in D1 so overlapping
+ * cron runs cannot confirm/expire the same order twice.
  */
 export async function POST(request: Request) {
   const env = await getEnv();
@@ -27,7 +24,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const results = { confirmed: 0, expired: 0, review: 0, checked: 0, errors: [] as string[] };
+  const results = {
+    confirmed: 0,
+    expired: 0,
+    review: 0,
+    checked: 0,
+    errors: [] as string[],
+  };
 
   try {
     const pendingOrders = await getPendingOrders();
@@ -36,12 +39,20 @@ export async function POST(request: Request) {
     for (const order of pendingOrders) {
       try {
         const now = Date.now();
-
         const match = await checkPayment(order);
 
         if (match.matched && match.txHash) {
           const downloadToken = randomUUID();
-          await markOrderConfirmed(order.id, match.txHash, downloadToken);
+          const claimed = await markOrderConfirmed(
+            order.id,
+            match.txHash,
+            downloadToken
+          );
+
+          // Another overlapping run may have claimed this order already.
+          // Only the run that wins the conditional UPDATE sends the email.
+          if (!claimed) continue;
+
           results.confirmed += 1;
 
           const siteUrl = env.SITE_URL ?? "";
@@ -68,15 +79,18 @@ export async function POST(request: Request) {
         }
 
         if (now > order.expires_at) {
-          await markOrderExpired(order.id);
-          results.expired += 1;
+          const expired = await markOrderExpired(order.id);
+          if (expired) results.expired += 1;
         }
       } catch (orderError) {
-        // One bad order (e.g. a transient upstream API error) shouldn't
-        // stop the whole batch — flag it for manual review and move on.
-        console.error(`[cron/check-payments] Error checking order ${order.id}:`, orderError);
-        await markOrderReview(order.id).catch(() => {});
-        results.review += 1;
+        console.error(
+          `[cron/check-payments] Error checking order ${order.id}:`,
+          orderError
+        );
+
+        const reviewed = await markOrderReview(order.id).catch(() => false);
+        if (reviewed) results.review += 1;
+
         results.errors.push(
           `${order.id}: ${orderError instanceof Error ? orderError.message : "unknown error"}`
         );
