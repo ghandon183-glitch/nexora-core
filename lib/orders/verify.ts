@@ -10,21 +10,16 @@ export interface MatchResult {
   txHash?: string;
 }
 
-interface TronGridTrc20Transfer {
-  transaction_id: string;
-  token_info: { address: string };
-  to: string;
-  value: string; // integer string, smallest unit (6 decimals for USDT)
-  block_timestamp?: number; // milliseconds since epoch
-}
-
 /**
- * Returns true when the transaction should be accepted, i.e. it occurred at
- * or after the order was created. A missing timestamp fails open (accepted)
- * so we never block a legitimate payment when the API omits the field.
+ * Only accept transactions with a known timestamp that occurred at or after
+ * the order was created. Failing closed here prevents replaying an old
+ * transaction if an upstream API ever omits its timestamp.
  */
-function isOnOrAfterOrder(txTimestampMs: number | undefined, order: Order): boolean {
-  if (txTimestampMs === undefined || Number.isNaN(txTimestampMs)) return true;
+function isOnOrAfterOrder(
+  txTimestampMs: number | undefined,
+  order: Order
+): boolean {
+  if (txTimestampMs === undefined || Number.isNaN(txTimestampMs)) return false;
   return txTimestampMs >= order.created_at;
 }
 
@@ -39,9 +34,7 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
 
   const headers: Record<string, string> = { Accept: "application/json" };
   const { TRONGRID_API_KEY: tronApiKey } = await getEnv();
-  if (tronApiKey) {
-    headers["TRON-PRO-API-KEY"] = tronApiKey;
-  }
+  if (tronApiKey) headers["TRON-PRO-API-KEY"] = tronApiKey;
 
   const response = await fetch(url, { headers });
 
@@ -49,15 +42,14 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
     throw new Error(`TronGrid request failed: ${response.status}`);
   }
 
-  const data = (await response.json()) as { data?: TronGridTrc20Transfer[] };
+  const data = (await response.json()) as {
+    data?: TronGridTrc20Transfer[];
+  };
   const transfers = data.data ?? [];
 
   for (const transfer of transfers) {
     if (transfer.token_info?.address !== USDT_TRC20_CONTRACT) continue;
     if (transfer.to !== order.wallet_address) continue;
-    // Reject transactions that predate this order — an old transfer that
-    // happens to share the same fingerprinted amount cannot be replayed to
-    // unlock a later order. Fail open only if the timestamp is absent.
     if (!isOnOrAfterOrder(transfer.block_timestamp, order)) continue;
 
     if (BigInt(transfer.value) === wanted) {
@@ -68,10 +60,18 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
   return { matched: false };
 }
 
+interface TronGridTrc20Transfer {
+  transaction_id: string;
+  token_info: { address: string };
+  to: string;
+  value: string;
+  block_timestamp?: number;
+}
+
 interface MempoolTx {
   txid: string;
   vout: { scriptpubkey_address?: string; value: number }[];
-  status: { confirmed: boolean; block_time?: number }; // block_time in seconds
+  status: { confirmed: boolean; block_time?: number };
 }
 
 /**
@@ -82,7 +82,6 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
   const wantedSats = toSmallestUnit(order.pay_amount, WALLETS.BTC.decimals);
 
   const url = `https://mempool.space/api/address/${order.wallet_address}/txs`;
-
   const response = await fetch(url, { headers: { Accept: "application/json" } });
 
   if (!response.ok) {
@@ -93,11 +92,12 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
 
   for (const tx of txs) {
     if (!tx.status.confirmed) continue;
-    // Reject transactions that predate this order. block_time is in seconds;
-    // convert to ms for comparison. Fail open if the timestamp is absent.
-    const blockTimeMs = tx.status.block_time
-      ? tx.status.block_time * 1000
-      : undefined;
+
+    const blockTimeMs =
+      tx.status.block_time !== undefined
+        ? tx.status.block_time * 1000
+        : undefined;
+
     if (!isOnOrAfterOrder(blockTimeMs, order)) continue;
 
     for (const output of tx.vout) {
@@ -113,8 +113,6 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
 }
 
 export async function checkPayment(order: Order): Promise<MatchResult> {
-  if (order.currency === "USDT") {
-    return checkUsdtPayment(order);
-  }
+  if (order.currency === "USDT") return checkUsdtPayment(order);
   return checkBtcPayment(order);
 }
