@@ -15,11 +15,11 @@ interface CreateOrderBody {
   verificationId: string;
 }
 
-// Direct-wallet matching uses an exact payment amount as the order reference.
-// Keep a bounded number of active orders per currency so the small fingerprint
-// space remains collision-resistant and the payment checker cannot be flooded.
 const MAX_PENDING_PER_CURRENCY = 100;
 const MAX_QUOTE_ATTEMPTS = 12;
+const MAX_REQUEST_BYTES = 16 * 1024;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
@@ -36,6 +36,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const contentLength = Number(request.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_REQUEST_BYTES) {
+    return NextResponse.json({ ok: false, error: "Request body is too large" }, { status: 413 });
+  }
+
   let body: CreateOrderBody;
 
   try {
@@ -47,23 +52,33 @@ export async function POST(request: Request) {
   const { templateSlug, currency, buyerName, buyerEmail, verificationId } = body;
 
   if (
+    typeof templateSlug !== "string" ||
+    typeof buyerEmail !== "string" ||
+    typeof buyerName !== "string" ||
+    typeof verificationId !== "string" ||
     !templateSlug ||
     !buyerEmail ||
     !buyerName ||
     !verificationId ||
-    (currency !== "USDT" && currency !== "BTC")
+    (currency !== "USDT" && currency !== "BTC") ||
+    templateSlug.length > 120 ||
+    buyerName.length > 120 ||
+    buyerEmail.length > 254 ||
+    verificationId.length > 80 ||
+    !UUID_RE.test(verificationId)
   ) {
     return NextResponse.json({ ok: false, error: "Missing or invalid fields" }, { status: 400 });
   }
 
-  // Resolve the canonical catalog price/title before doing any payment work.
-  const template = getTemplate(templateSlug);
+  const normalizedEmail = buyerEmail.trim().toLowerCase();
+  if (!EMAIL_RE.test(normalizedEmail)) {
+    return NextResponse.json({ ok: false, error: "Invalid email address" }, { status: 400 });
+  }
 
+  const template = getTemplate(templateSlug);
   if (!template) {
     return NextResponse.json({ ok: false, error: "Template not found" }, { status: 404 });
   }
-
-  const normalizedEmail = buyerEmail.trim().toLowerCase();
 
   try {
     const verification = await getVerificationById(verificationId);
@@ -93,9 +108,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Consume the one-time verification only after all cheap validation and
-    // capacity checks have passed. Quote collisions are retried below without
-    // requiring the buyer to repeat email verification.
     await markUsed(verificationId);
 
     let lastError: unknown = null;
@@ -103,8 +115,6 @@ export async function POST(request: Request) {
     for (let attempt = 0; attempt < MAX_QUOTE_ATTEMPTS; attempt += 1) {
       const payAmount = await generatePayAmount(currency, template.price);
 
-      // Avoid normal collisions before touching the database. The final INSERT
-      // is still allowed to fail safely in the extremely small race window.
       if (await hasPendingPayAmount(currency, payAmount)) continue;
 
       const wallet = WALLETS[currency];
@@ -145,8 +155,6 @@ export async function POST(request: Request) {
         });
       } catch (error) {
         lastError = error;
-        // A concurrent request may have selected the same exact fingerprint.
-        // Generate another one rather than failing the buyer immediately.
       }
     }
 
