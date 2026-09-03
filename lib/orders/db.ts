@@ -18,16 +18,8 @@ export interface Order {
   confirmed_at: number | null;
 }
 
-/**
- * Returns the D1 binding.
- *
- * In local `next dev`, Cloudflare bindings aren't available — every function
- * below fails loudly with a clear message rather than silently no-op'ing,
- * so a missing binding is never mistaken for "no orders yet".
- */
 export async function getOrdersDb() {
   const { env } = await getCloudflareContext({ async: true });
-
   const db = (env as unknown as { ORDERS_DB?: D1Database }).ORDERS_DB;
 
   if (!db) {
@@ -74,23 +66,19 @@ export async function insertOrder(order: Order): Promise<void> {
 
 export async function getOrderById(id: string): Promise<Order | null> {
   const db = await getOrdersDb();
-
   const result = await db
     .prepare("SELECT * FROM orders WHERE id = ?")
     .bind(id)
     .first<Order>();
-
   return result ?? null;
 }
 
 export async function getOrderByToken(token: string): Promise<Order | null> {
   const db = await getOrdersDb();
-
   const result = await db
     .prepare("SELECT * FROM orders WHERE download_token = ?")
     .bind(token)
     .first<Order>();
-
   return result ?? null;
 }
 
@@ -98,62 +86,63 @@ export async function getPendingOrders(
   currency?: "USDT" | "BTC"
 ): Promise<Order[]> {
   const db = await getOrdersDb();
-
   const stmt = currency
     ? db
         .prepare("SELECT * FROM orders WHERE status = 'pending' AND currency = ?")
         .bind(currency)
     : db.prepare("SELECT * FROM orders WHERE status = 'pending'");
-
   const result = await stmt.all<Order>();
-
   return result.results ?? [];
 }
 
 export async function getRecentOrders(limit = 100): Promise<Order[]> {
   const db = await getOrdersDb();
-
   const result = await db
     .prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT ?")
     .bind(limit)
     .all<Order>();
-
   return result.results ?? [];
 }
 
+/**
+ * Atomically claims a pending order for confirmation. Returning false means
+ * another cron invocation already changed the order, so callers must not
+ * send a duplicate email or overwrite its download token.
+ */
 export async function markOrderConfirmed(
   id: string,
   txHash: string,
   downloadToken: string
-): Promise<void> {
+): Promise<boolean> {
   const db = await getOrdersDb();
-
-  await db
+  const result = await db
     .prepare(
       `UPDATE orders
        SET status = 'confirmed', tx_hash = ?, download_token = ?, confirmed_at = ?
-       WHERE id = ?`
+       WHERE id = ? AND status = 'pending'`
     )
     .bind(txHash, downloadToken, Date.now(), id)
     .run();
+
+  return (result.meta?.changes ?? 0) > 0;
 }
 
-export async function markOrderExpired(id: string): Promise<void> {
+export async function markOrderExpired(id: string): Promise<boolean> {
   const db = await getOrdersDb();
-
-  await db
-    .prepare("UPDATE orders SET status = 'expired' WHERE id = ?")
+  const result = await db
+    .prepare("UPDATE orders SET status = 'expired' WHERE id = ? AND status = 'pending'")
     .bind(id)
     .run();
+  return (result.meta?.changes ?? 0) > 0;
 }
 
-export async function markOrderReview(id: string): Promise<void> {
+export async function markOrderReview(id: string): Promise<boolean> {
   const db = await getOrdersDb();
-
-  await db
-    .prepare("UPDATE orders SET status = 'review' WHERE id = ?")
+  const result = await db
+    .prepare("UPDATE orders SET status = 'review' WHERE id = ? AND status = 'pending'")
     .bind(id)
     .run();
+  return (result.meta?.changes ?? 0) > 0;
 }
 
 /** Manual override for the admin panel — confirms an order by hand. */
@@ -162,13 +151,12 @@ export async function adminForceConfirm(
   downloadToken: string
 ): Promise<void> {
   const db = await getOrdersDb();
-
   await db
     .prepare(
       `UPDATE orders
        SET status = 'confirmed', tx_hash = COALESCE(tx_hash, 'manual-admin-override'),
            download_token = ?, confirmed_at = ?
-       WHERE id = ?`
+       WHERE id = ? AND status != 'confirmed'`
     )
     .bind(downloadToken, Date.now(), id)
     .run();
