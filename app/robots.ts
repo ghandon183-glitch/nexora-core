@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-
 import { getEnv } from "@/lib/env";
 
 const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
@@ -14,15 +13,17 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         userAgent: "*",
         allow: "/",
         disallow: [
+          "/api/",
           "/dashboard",
           "/checkout",
           "/sign-in",
           "/sign-up",
-          "/api/",
+          "/admin",
           "/*/dashboard",
           "/*/checkout",
           "/*/sign-in",
           "/*/sign-up",
+          "/*/admin",
         ],
       },
     ],
