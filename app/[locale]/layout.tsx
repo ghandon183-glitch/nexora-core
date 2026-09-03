@@ -12,9 +12,20 @@ import { getEnv } from "@/lib/env";
 
 const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   const env = await getEnv();
   const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;
+  const canonicalPath = `/${locale}`;
+  const languages: Record<string, string> = {};
+
+  for (const language of routing.locales) {
+    languages[language] = `${siteUrl}/${language}`;
+  }
 
   return {
     metadataBase: new URL(siteUrl),
@@ -24,11 +35,15 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description:
       "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
+    alternates: {
+      canonical: canonicalPath,
+      languages,
+    },
     openGraph: {
       title: "Nexora Core | Premium Next.js Templates & UI Kit",
       description:
         "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
-      url: siteUrl,
+      url: canonicalPath,
       siteName: "Nexora Core",
       images: [
         {
@@ -74,16 +89,11 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html
-      lang={locale}
-      className={`h-full overflow-x-hidden antialiased`}
-    >
+    <html lang={locale} className="h-full overflow-x-hidden antialiased">
       <body className="min-h-full flex flex-col overflow-x-hidden">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            <PurchasesProvider>
-              {children}
-            </PurchasesProvider>
+            <PurchasesProvider>{children}</PurchasesProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
