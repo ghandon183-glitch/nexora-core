@@ -82,24 +82,60 @@ export async function getOrderByToken(token: string): Promise<Order | null> {
   return result ?? null;
 }
 
-export async function getPendingOrders(
+export async function hasPendingPayAmount(
+  currency: "USDT" | "BTC",
+  payAmount: string
+): Promise<boolean> {
+  const db = await getOrdersDb();
+  const result = await db
+    .prepare(
+      "SELECT 1 AS found FROM orders WHERE status = 'pending' AND currency = ? AND pay_amount = ? LIMIT 1"
+    )
+    .bind(currency, payAmount)
+    .first<{ found: number }>();
+  return Boolean(result);
+}
+
+export async function getPendingOrderCount(
   currency?: "USDT" | "BTC"
-): Promise<Order[]> {
+): Promise<number> {
   const db = await getOrdersDb();
   const stmt = currency
     ? db
-        .prepare("SELECT * FROM orders WHERE status = 'pending' AND currency = ?")
+        .prepare("SELECT COUNT(*) AS count FROM orders WHERE status = 'pending' AND currency = ?")
         .bind(currency)
-    : db.prepare("SELECT * FROM orders WHERE status = 'pending'");
+    : db.prepare("SELECT COUNT(*) AS count FROM orders WHERE status = 'pending'");
+  const result = await stmt.first<{ count: number }>();
+  return Number(result?.count ?? 0);
+}
+
+export async function getPendingOrders(
+  currency?: "USDT" | "BTC",
+  limit = 15
+): Promise<Order[]> {
+  const db = await getOrdersDb();
+  const safeLimit = Math.max(1, Math.min(25, Math.floor(limit)));
+  const stmt = currency
+    ? db
+        .prepare(
+          "SELECT * FROM orders WHERE status = 'pending' AND currency = ? ORDER BY created_at ASC LIMIT ?"
+        )
+        .bind(currency, safeLimit)
+    : db
+        .prepare(
+          "SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at ASC LIMIT ?"
+        )
+        .bind(safeLimit);
   const result = await stmt.all<Order>();
   return result.results ?? [];
 }
 
 export async function getRecentOrders(limit = 100): Promise<Order[]> {
   const db = await getOrdersDb();
+  const safeLimit = Math.max(1, Math.min(200, Math.floor(limit)));
   const result = await db
     .prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT ?")
-    .bind(limit)
+    .bind(safeLimit)
     .all<Order>();
   return result.results ?? [];
 }
