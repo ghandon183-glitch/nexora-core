@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { insertOrder } from "@/lib/orders/db";
+import { insertOrder, getPendingOrderCount, hasPendingPayAmount } from "@/lib/orders/db";
 import { WALLETS, ORDER_EXPIRY_MS, generatePayAmount, type CurrencyKey } from "@/lib/orders/pricing";
 import { getTemplate } from "@/lib/data/get-template";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -8,12 +8,18 @@ import { getVerificationById, markUsed } from "@/lib/verification/db";
 
 interface CreateOrderBody {
   templateSlug: string;
-  templateTitle: string;
+  templateTitle?: string;
   currency: CurrencyKey;
   buyerName: string;
   buyerEmail: string;
   verificationId: string;
 }
+
+// Direct-wallet matching uses an exact payment amount as the order reference.
+// Keep a bounded number of active orders per currency so the small fingerprint
+// space remains collision-resistant and the payment checker cannot be flooded.
+const MAX_PENDING_PER_CURRENCY = 100;
+const MAX_QUOTE_ATTEMPTS = 12;
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
@@ -38,11 +44,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request body" }, { status: 400 });
   }
 
-  const { templateSlug, templateTitle, currency, buyerName, buyerEmail, verificationId } = body;
+  const { templateSlug, currency, buyerName, buyerEmail, verificationId } = body;
 
   if (
     !templateSlug ||
-    !templateTitle ||
     !buyerEmail ||
     !buyerName ||
     !verificationId ||
@@ -51,19 +56,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Missing or invalid fields" }, { status: 400 });
   }
 
-  // The download link goes to buyerEmail the moment payment is confirmed,
-  // so an order can only be created against an email that was just proven
-  // deliverable via a one-time code — never a raw, unverified string.
+  // Resolve the canonical catalog price/title before doing any payment work.
+  const template = getTemplate(templateSlug);
+
+  if (!template) {
+    return NextResponse.json({ ok: false, error: "Template not found" }, { status: 404 });
+  }
+
+  const normalizedEmail = buyerEmail.trim().toLowerCase();
+
   try {
     const verification = await getVerificationById(verificationId);
-    const normalizedEmail = buyerEmail.trim().toLowerCase();
 
     if (
       !verification ||
       !verification.verified ||
       verification.used ||
       verification.email !== normalizedEmail ||
-      Date.now() > verification.expires_at + 30 * 60 * 1000 // grace period past code expiry to actually place the order
+      Date.now() > verification.expires_at + 30 * 60 * 1000
     ) {
       return NextResponse.json(
         { ok: false, error: "Email verification is missing or expired. Please verify your email again." },
@@ -71,62 +81,80 @@ export async function POST(request: Request) {
       );
     }
 
+    const pendingCount = await getPendingOrderCount(currency);
+    if (pendingCount >= MAX_PENDING_PER_CURRENCY) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Crypto checkout is temporarily at capacity. Your account is safe — please try again in a few minutes.",
+        },
+        { status: 429, headers: { "Retry-After": "300" } }
+      );
+    }
+
+    // Consume the one-time verification only after all cheap validation and
+    // capacity checks have passed. Quote collisions are retried below without
+    // requiring the buyer to repeat email verification.
     await markUsed(verificationId);
-  } catch (error) {
-    console.error("[orders/create] Verification check failed:", error);
-    return NextResponse.json({ ok: false, error: "Could not verify email status" }, { status: 500 });
-  }
 
-  // Resolve the canonical price server-side. The client sends `basePriceUsd`
-  // for convenience, but it must never be trusted — a tampered request could
-  // otherwise underpay (e.g. $1 for a $49 template) and still get an
-  // on-chain match + download. The authoritative price is the one in the
-  // server's template catalog.
-  const template = getTemplate(templateSlug);
+    let lastError: unknown = null;
 
-  if (!template) {
-    return NextResponse.json({ ok: false, error: "Template not found" }, { status: 404 });
-  }
+    for (let attempt = 0; attempt < MAX_QUOTE_ATTEMPTS; attempt += 1) {
+      const payAmount = await generatePayAmount(currency, template.price);
 
-  const canonicalPriceUsd = template.price;
+      // Avoid normal collisions before touching the database. The final INSERT
+      // is still allowed to fail safely in the extremely small race window.
+      if (await hasPendingPayAmount(currency, payAmount)) continue;
 
-  try {
-    const payAmount = await generatePayAmount(currency, canonicalPriceUsd);
-    const wallet = WALLETS[currency];
-    const now = Date.now();
+      const wallet = WALLETS[currency];
+      const now = Date.now();
 
-    const order = {
-      id: randomUUID(),
-      template_slug: templateSlug,
-      template_title: templateTitle,
-      base_price_usd: canonicalPriceUsd,
-      currency,
-      wallet_address: wallet.address,
-      pay_amount: payAmount,
-      buyer_name: buyerName,
-      buyer_email: buyerEmail,
-      status: "pending" as const,
-      tx_hash: null,
-      download_token: null,
-      created_at: now,
-      expires_at: now + ORDER_EXPIRY_MS,
-      confirmed_at: null,
-    };
-
-    await insertOrder(order);
-
-    return NextResponse.json({
-      ok: true,
-      order: {
-        id: order.id,
-        payAmount,
-        walletAddress: wallet.address,
-        network: wallet.network,
+      const order = {
+        id: randomUUID(),
+        template_slug: template.slug,
+        template_title: template.title,
+        base_price_usd: template.price,
         currency,
-        expiresAt: order.expires_at,
-        status: order.status,
-      },
-    });
+        wallet_address: wallet.address,
+        pay_amount: payAmount,
+        buyer_name: buyerName.trim().slice(0, 120),
+        buyer_email: normalizedEmail,
+        status: "pending" as const,
+        tx_hash: null,
+        download_token: null,
+        created_at: now,
+        expires_at: now + ORDER_EXPIRY_MS,
+        confirmed_at: null,
+      };
+
+      try {
+        await insertOrder(order);
+
+        return NextResponse.json({
+          ok: true,
+          order: {
+            id: order.id,
+            payAmount,
+            walletAddress: wallet.address,
+            network: wallet.network,
+            currency,
+            expiresAt: order.expires_at,
+            status: order.status,
+          },
+        });
+      } catch (error) {
+        lastError = error;
+        // A concurrent request may have selected the same exact fingerprint.
+        // Generate another one rather than failing the buyer immediately.
+      }
+    }
+
+    console.error("[orders/create] Could not allocate a unique payment quote:", lastError);
+    return NextResponse.json(
+      { ok: false, error: "Could not allocate a unique payment amount. Please try again shortly." },
+      { status: 503 }
+    );
   } catch (error) {
     console.error("[orders/create] Failed to create order:", error);
     return NextResponse.json({ ok: false, error: "Could not create order" }, { status: 500 });
