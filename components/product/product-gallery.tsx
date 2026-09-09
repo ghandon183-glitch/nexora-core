@@ -41,6 +41,7 @@ export default function ProductGallery({
             alt={t("galleryAltMain")}
             fill
             priority
+            sizes="(min-width: 1280px) 756px, 100vw"
             className="object-cover object-top transition duration-700 group-hover:scale-105"
           />
 
@@ -94,6 +95,7 @@ export default function ProductGallery({
                 src={image}
                 alt={`${t("galleryAltThumb")} ${index + 1}`}
                 fill
+                sizes="(min-width: 1280px) 174px, 25vw"
                 className="object-cover object-top transition duration-500 group-hover:scale-110"
               />
 

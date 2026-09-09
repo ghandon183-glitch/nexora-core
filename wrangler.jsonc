@@ -13,6 +13,9 @@
     // See https://developers.cloudflare.com/workers/static-assets/binding/#run_worker_first
     "run_worker_first": ["/downloads/*"]
   },
+  "images": {
+    "binding": "IMAGES"
+  },
   "d1_databases": [
     {
       "binding": "ORDERS_DB",
