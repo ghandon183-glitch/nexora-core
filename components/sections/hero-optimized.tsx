@@ -39,6 +39,10 @@ export default function HeroOptimized() {
     let phase: "scatter" | "line" | "circle" = reduced ? "circle" : "scatter";
     const morph = S(reduced ? 1 : 0), rotation = S(), mouse = S();
     const scatter = cards.map(() => ({ x: (Math.random() - .5) * 1500, y: (Math.random() - .5) * 1000, r: (Math.random() - .5) * 180 }));
+    // Loop only runs while the hero is on-screen and the tab is visible; it never
+    // spins forever in the background (fixes unbounded main-thread work / TBT).
+    let visible = true;
+    let tabVisible = document.visibilityState === "visible";
 
     const onScroll = () => {
       const y = window.scrollY;
@@ -82,7 +86,8 @@ export default function HeroOptimized() {
       last = now;
       const W = width, H = height, mobile = W < 768, minDim = Math.min(W, H);
       const mt = clamp(vScroll / 600, 0, 1);
-      const idle = returnedToTop && window.scrollY <= 2 ? ((now - returnTopStart) / 1000) * 14 : 0;
+      // Reduced-motion users get a static arrangement, not an ever-accumulating idle spin.
+      const idle = !reduced && returnedToTop && window.scrollY <= 2 ? ((now - returnTopStart) / 1000) * 14 : 0;
       const rt = returnedToTop && window.scrollY <= 2 ? idle : clamp((vScroll - 600) / 2400, 0, 1) * 360;
       if (reduced) {
         morph.v = mt; rotation.v = rt; mouse.v = mouseTarget * 100;
@@ -134,16 +139,58 @@ export default function HeroOptimized() {
       if (title) { title.style.opacity = String(introOp); title.style.filter = `blur(${clamp(10 - introOp * 10, 0, 10)}px)`; }
       if (hint) hint.style.opacity = String(introOp * .5);
       if (content) content.style.opacity = returnedToTop ? "1" : String(clamp((m - .8) / .2, 0, 1));
-      raf = requestAnimationFrame(frame);
+      // Reduced-motion: paint this single static frame and stop — never reschedule.
+      if (reduced) return;
+      // Otherwise keep looping only while the hero is actually visible.
+      if (visible && tabVisible) raf = requestAnimationFrame(frame);
     };
 
-    onScroll();
-    raf = requestAnimationFrame(frame);
-    return () => {
+    const startLoop = () => {
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    const stopLoop = () => {
+      if (!raf) return;
       cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    const io = "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          ([entry]) => {
+            visible = entry.isIntersecting;
+            if (visible && tabVisible && !reduced) startLoop();
+            else stopLoop();
+          },
+          { threshold: 0 }
+        )
+      : null;
+    io?.observe(hero);
+
+    const onVisibilityChange = () => {
+      tabVisible = document.visibilityState === "visible";
+      if (visible && tabVisible && !reduced) startLoop();
+      else stopLoop();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    onScroll();
+    // Reduced-motion: render the static final frame once, no loop at all.
+    // Otherwise: kick off the loop (IntersectionObserver above will pause it
+    // whenever the hero scrolls out of view or the tab is backgrounded).
+    if (reduced) {
+      frame(performance.now());
+    } else {
+      startLoop();
+    }
+    return () => {
+      stopLoop();
       if (lineTimer) clearTimeout(lineTimer);
       if (circleTimer) clearTimeout(circleTimer);
       ro?.disconnect();
+      io?.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("resize", resize);
       window.removeEventListener("scroll", onScroll);
       hero.removeEventListener("mousemove", onMouseMove);
