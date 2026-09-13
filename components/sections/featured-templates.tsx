@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import TemplateCard from "@/components/ui/template-card";
-import Reveal from "@/components/ui/reveal";
+import Reveal from "@/components/ui/reveal-light";
 import { templates } from "@/lib/data/templates";
 
 export default function FeaturedTemplates() {

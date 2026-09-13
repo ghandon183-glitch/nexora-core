@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import Button from "@/components/ui/button";
-import Reveal from "@/components/ui/reveal";
+import Reveal from "@/components/ui/reveal-light";
 import { templates } from "@/lib/data/templates";
 import { getHeadingFontClass } from "@/lib/fonts";
 

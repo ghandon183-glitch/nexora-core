@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import Reveal from "@/components/ui/reveal";
+import Reveal from "@/components/ui/reveal-light";
 import Card from "@/components/ui/card";
 
 export default function Testimonials() {
