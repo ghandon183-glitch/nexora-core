@@ -19,6 +19,17 @@ interface AdminOrder {
   confirmed_at: number | null;
 }
 
+interface PaymegateWebhookStatus {
+  providerStatus?: number;
+  configuredUrl?: string | null;
+  expectedUrl?: string;
+  providerReturnedSecret?: boolean;
+  signingSecret?: string | null;
+  localSecretConfigured?: boolean;
+  message?: string | null;
+  error?: string;
+}
+
 const STATUS_STYLES: Record<AdminOrder["status"], string> = {
   pending: "bg-amber-400/10 text-amber-300 border-amber-400/30",
   confirmed: "bg-cyan-400/10 text-cyan-300 border-cyan-400/30",
@@ -34,6 +45,9 @@ export default function AdminPage() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [filter, setFilter] = useState<"all" | AdminOrder["status"]>("all");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [webhook, setWebhook] = useState<PaymegateWebhookStatus | null>(null);
+  const [webhookLoading, setWebhookLoading] = useState(false);
+  const [webhookError, setWebhookError] = useState<string | null>(null);
 
   async function fetchOrders() {
     setLoadingOrders(true);
@@ -50,6 +64,24 @@ export default function AdminPage() {
       }
     } finally {
       setLoadingOrders(false);
+    }
+  }
+
+  async function fetchWebhookStatus() {
+    setWebhookError(null);
+    try {
+      const res = await fetch("/api/admin/paymegate/webhook", { cache: "no-store" });
+      const data = (await res.json()) as PaymegateWebhookStatus & { ok?: boolean };
+      if (res.status === 401) {
+        setAuthenticated(false);
+        return;
+      }
+      setWebhook(data);
+      if (!res.ok) {
+        setWebhookError(data.error || data.message || "Could not read Paymegate webhook status.");
+      }
+    } catch {
+      setWebhookError("Could not read Paymegate webhook status.");
     }
   }
 
@@ -84,6 +116,23 @@ export default function AdminPage() {
       }
     } finally {
       setConfirmingId(null);
+    }
+  }
+
+  async function handlePaymegateSetup() {
+    setWebhookLoading(true);
+    setWebhookError(null);
+    try {
+      const res = await fetch("/api/admin/paymegate/webhook", { method: "POST" });
+      const data = (await res.json()) as PaymegateWebhookStatus & { ok?: boolean };
+      setWebhook(data);
+      if (!res.ok) {
+        setWebhookError(data.error || data.message || "Paymegate webhook setup failed.");
+      }
+    } catch {
+      setWebhookError("Could not reach Paymegate webhook setup.");
+    } finally {
+      setWebhookLoading(false);
     }
   }
 
@@ -128,6 +177,73 @@ export default function AdminPage() {
             {loadingOrders ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
+
+        <Card className="mt-8 p-6 hover:-translate-y-0 hover:border-white/10">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-white">Paymegate webhook</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                Connect the signed Paymegate payment callback to NEXORA. This uses your
+                server-side Paymegate API key; the API key is never sent to the browser.
+              </p>
+              <p className="mt-3 text-xs text-slate-500">
+                Webhook URL: <code className="text-slate-300">https://nexora-core.nxora.workers.dev/api/paymegate/webhook</code>
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={fetchWebhookStatus} disabled={webhookLoading}>
+                Check status
+              </Button>
+              <Button onClick={handlePaymegateSetup} disabled={webhookLoading}>
+                {webhookLoading ? "Connecting..." : "Connect / refresh"}
+              </Button>
+            </div>
+          </div>
+
+          {webhookError && (
+            <p className="mt-4 rounded-lg border border-red-400/20 bg-red-400/5 p-3 text-sm text-red-300">
+              {webhookError}
+            </p>
+          )}
+
+          {webhook && (
+            <div className="mt-5 space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4 text-sm">
+              <p className="text-slate-300">
+                Provider status: <span className="font-semibold text-white">{webhook.providerStatus ?? "—"}</span>
+              </p>
+              <p className="text-slate-300">
+                Provider URL: <span className="font-mono text-xs text-slate-400">{webhook.configuredUrl || "Not reported"}</span>
+              </p>
+              <p className="text-slate-300">
+                Local signing secret:{" "}
+                <span className={webhook.localSecretConfigured ? "text-cyan-300" : "text-amber-300"}>
+                  {webhook.localSecretConfigured ? "configured" : "missing in Cloudflare"}
+                </span>
+              </p>
+
+              {webhook.providerReturnedSecret && webhook.signingSecret && (
+                <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-4">
+                  <p className="font-semibold text-amber-200">One-time signing secret</p>
+                  <p className="mt-1 text-xs leading-5 text-amber-100/70">
+                    Copy this value into Cloudflare Production as <code>PAYMEGATE_WEBHOOK_SECRET</code>.
+                    Never send it in chat or commit it to GitHub.
+                  </p>
+                  <div className="mt-3 break-all rounded-md bg-black/30 p-3 font-mono text-xs text-white">
+                    {webhook.signingSecret}
+                  </div>
+                </div>
+              )}
+
+              {!webhook.providerReturnedSecret && !webhook.localSecretConfigured && (
+                <p className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-amber-100/80">
+                  Paymegate did not return a signing secret from this request. Check the
+                  Paymegate Merchant Webhooks page for a one-time secret field or use
+                  Connect / refresh after saving the webhook URL there.
+                </p>
+              )}
+            </div>
+          )}
+        </Card>
 
         <div className="mt-6 flex flex-wrap gap-2">
           {(["all", "pending", "review", "confirmed", "expired"] as const).map((key) => (
