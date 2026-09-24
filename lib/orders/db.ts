@@ -49,7 +49,7 @@ export async function insertOrder(order: Order): Promise<void> {
         tx_hash, download_token, created_at, expires_at, confirmed_at,
         payment_provider, paymegate_order_uuid, paymegate_transaction_uuid,
         paymegate_transaction_ref, paymegate_event_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       order.id,
