@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useRouter, Link } from "@/i18n/navigation";
 
 import { getTemplate } from "@/lib/data/get-template";
@@ -26,6 +26,7 @@ interface OrderState {
   network: string;
   currency: CurrencyKey;
   expiresAt: number;
+  paymentProvider?: "crypto" | "paymegate";
 }
 
 type OrderStatus = "idle" | "creating" | "waiting" | "confirmed" | "expired" | "error";
@@ -34,7 +35,8 @@ type EmailStep = "entry" | "sending" | "codeSent" | "verifying" | "verified";
 
 export default function CheckoutPage() {
   const t = useTranslations("Checkout");
-  const params = useParams<{ slug: string }>();
+  const params = useParams<{ slug: string; locale?: string }>();
+  const searchParams = useSearchParams();
 
   const template = getTemplate(params.slug);
 
@@ -44,10 +46,27 @@ export default function CheckoutPage() {
 
   const [copied, setCopied] = useState(false);
   const [currency, setCurrency] = useState<CurrencyKey>("USDT");
-  const [order, setOrder] = useState<OrderState | null>(null);
-  const [status, setStatus] = useState<OrderStatus>("idle");
+  const [order, setOrder] = useState<OrderState | null>(() => {
+    const provider = searchParams.get("payment");
+    const orderId = searchParams.get("order");
+    if (provider !== "paymegate" || !orderId || !template) return null;
+    return {
+      id: orderId,
+      payAmount: template.price.toFixed(2),
+      walletAddress: "",
+      network: "",
+      currency: "USDT",
+      expiresAt: Date.now() + 30 * 60 * 1000,
+      paymentProvider: "paymegate",
+    };
+  });
+  const [status, setStatus] = useState<OrderStatus>(() =>
+    searchParams.get("payment") === "paymegate" && searchParams.get("order") ? "waiting" : "idle"
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [paymegateError, setPaymegateError] = useState<string | null>(null);
+  const [paymegateCreating, setPaymegateCreating] = useState(false);
 
   // Every download link goes to this email the moment payment is confirmed,
   // so it has to be re-verified at checkout — the account email typed at
@@ -67,7 +86,7 @@ export default function CheckoutPage() {
     }
   }, [loading, user, router, params.slug]);
 
-  // Poll order status every 8s while waiting for on-chain confirmation.
+  // Poll order status every 8s while waiting for confirmation.
   useEffect(() => {
     if (status !== "waiting" || !order) return;
 
@@ -230,6 +249,17 @@ export default function CheckoutPage() {
     setVerificationId(null);
     setCodeInput("");
     setVerifyError(null);
+  }
+
+  async function handlePaymegateCheckout() {
+    if (emailStep !== "verified" || !verificationId) { setVerifyError("Please verify your email first."); return; }
+    setPaymegateCreating(true); setPaymegateError(null);
+    try {
+      const res = await fetch("/api/paymegate/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ templateSlug: template!.slug, buyerName: user!.name, buyerEmail: emailInput.trim(), verificationId, locale: params.locale ?? "en" }) });
+      const data = (await res.json()) as { ok: boolean; error?: string; checkoutUrl?: string };
+      if (!data.ok || !data.checkoutUrl) { setPaymegateError(data.error || "Could not start card checkout. Please try again."); setPaymegateCreating(false); return; }
+      window.location.href = data.checkoutUrl;
+    } catch { setPaymegateError("Network error. Please try again."); setPaymegateCreating(false); }
   }
 
   async function handleCreateOrder() {
@@ -406,10 +436,17 @@ export default function CheckoutPage() {
                       </button>
                     </div>
 
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-                        {t("payWithCrypto")}
-                      </p>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Pay with card or PayPal</p>
+                        <p className="mt-2 text-sm text-slate-400">Secure hosted checkout with card, PayPal, and other eligible payment methods. NEXORA never receives your card details.</p>
+                      </div>
+                      {paymegateError && <p className="text-sm text-red-400">{paymegateError}</p>}
+                      <Button className="w-full" onClick={handlePaymegateCheckout} disabled={paymegateCreating}>{paymegateCreating ? "Opening secure checkout..." : "Pay by card / PayPal"}</Button>
+                    </div>
+
+                    <div className="border-t border-white/10 pt-6">
+                      <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{t("payWithCrypto")}</p>
 
                       <div className="mt-4 flex gap-2">
                         {(Object.keys(CURRENCY_LABELS) as CurrencyKey[]).map((key) => (
@@ -444,6 +481,13 @@ export default function CheckoutPage() {
                     </Button>
                   </>
                 )}
+              </div>
+            ) : status === "waiting" && order && order.paymentProvider === "paymegate" ? (
+              <div className="mt-6 space-y-6 text-center">
+                <div className="mx-auto h-3 w-3 animate-pulse rounded-full bg-cyan-400" />
+                <p className="text-lg font-semibold text-white">Payment submitted</p>
+                <p className="text-sm text-slate-400">We&apos;re waiting for Paymegate to confirm the payment. This page checks the order automatically.</p>
+                <p className="text-xs text-slate-500">You can safely close this page. Your download will be emailed to {emailInput.trim()} after verified settlement.</p>
               </div>
             ) : status === "waiting" && order ? (
               <div className="mt-6 space-y-6">

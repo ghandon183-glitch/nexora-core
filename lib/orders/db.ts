@@ -16,6 +16,11 @@ export interface Order {
   created_at: number;
   expires_at: number;
   confirmed_at: number | null;
+  payment_provider?: "crypto" | "paymegate";
+  paymegate_order_uuid?: string | null;
+  paymegate_transaction_uuid?: string | null;
+  paymegate_transaction_ref?: string | null;
+  paymegate_event_id?: string | null;
 }
 
 export async function getOrdersDb() {
@@ -41,8 +46,10 @@ export async function insertOrder(order: Order): Promise<void> {
       `INSERT INTO orders (
         id, template_slug, template_title, base_price_usd, currency,
         wallet_address, pay_amount, buyer_name, buyer_email, status,
-        tx_hash, download_token, created_at, expires_at, confirmed_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        tx_hash, download_token, created_at, expires_at, confirmed_at,
+        payment_provider, paymegate_order_uuid, paymegate_transaction_uuid,
+        paymegate_transaction_ref, paymegate_event_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       order.id,
@@ -59,7 +66,12 @@ export async function insertOrder(order: Order): Promise<void> {
       order.download_token,
       order.created_at,
       order.expires_at,
-      order.confirmed_at
+      order.confirmed_at,
+      order.payment_provider ?? "crypto",
+      order.paymegate_order_uuid ?? null,
+      order.paymegate_transaction_uuid ?? null,
+      order.paymegate_transaction_ref ?? null,
+      order.paymegate_event_id ?? null
     )
     .run();
 }
@@ -111,21 +123,22 @@ export async function getPendingOrderCount(
 
 export async function getPendingOrders(
   currency?: "USDT" | "BTC",
-  limit = 15
+  limit = 15,
+  paymentProvider: "crypto" | "paymegate" = "crypto"
 ): Promise<Order[]> {
   const db = await getOrdersDb();
   const safeLimit = Math.max(1, Math.min(25, Math.floor(limit)));
   const stmt = currency
     ? db
         .prepare(
-          "SELECT * FROM orders WHERE status = 'pending' AND currency = ? ORDER BY created_at ASC LIMIT ?"
+          "SELECT * FROM orders WHERE status = 'pending' AND currency = ? AND payment_provider = ? ORDER BY created_at ASC LIMIT ?"
         )
-        .bind(currency, safeLimit)
+        .bind(currency, paymentProvider, safeLimit)
     : db
         .prepare(
-          "SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at ASC LIMIT ?"
+          "SELECT * FROM orders WHERE status = 'pending' AND payment_provider = ? ORDER BY created_at ASC LIMIT ?"
         )
-        .bind(safeLimit);
+        .bind(paymentProvider, safeLimit);
   const result = await stmt.all<Order>();
   return result.results ?? [];
 }
@@ -161,6 +174,59 @@ export async function markOrderConfirmed(
     .run();
 
   return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function attachPaymegateOrder(
+  id: string,
+  paymegateOrderUuid: string
+): Promise<boolean> {
+  const db = await getOrdersDb();
+  const result = await db
+    .prepare(
+      `UPDATE orders
+       SET paymegate_order_uuid = ?
+       WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
+    )
+    .bind(paymegateOrderUuid, id)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function markPaymegateConfirmed(
+  id: string,
+  transactionUuid: string,
+  transactionRef: string,
+  eventId: string,
+  downloadToken: string
+): Promise<boolean> {
+  const db = await getOrdersDb();
+  const result = await db
+    .prepare(
+      `UPDATE orders
+       SET status = 'confirmed', tx_hash = ?, download_token = ?, confirmed_at = ?,
+           paymegate_transaction_uuid = ?, paymegate_transaction_ref = ?, paymegate_event_id = ?
+       WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
+    )
+    .bind(
+      transactionRef || transactionUuid,
+      downloadToken,
+      Date.now(),
+      transactionUuid,
+      transactionRef,
+      eventId,
+      id
+    )
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function getOrderByPaymegateUuid(uuid: string): Promise<Order | null> {
+  const db = await getOrdersDb();
+  const result = await db
+    .prepare("SELECT * FROM orders WHERE paymegate_order_uuid = ?")
+    .bind(uuid)
+    .first<Order>();
+  return result ?? null;
 }
 
 export async function markOrderExpired(id: string): Promise<boolean> {
