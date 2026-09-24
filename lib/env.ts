@@ -14,6 +14,8 @@ export interface CloudflareEnv {
   TRONGRID_API_KEY?: string;
   GMAIL_USER?: string;
   GMAIL_APP_PASSWORD?: string;
+  PAYMEGATE_API_KEY?: string;
+  PAYMEGATE_WEBHOOK_SECRET?: string;
 }
 
 export type Env = NodeJS.ProcessEnv & CloudflareEnv;
@@ -30,6 +32,8 @@ const CF_ENV_KEYS = [
   "TRONGRID_API_KEY",
   "GMAIL_USER",
   "GMAIL_APP_PASSWORD",
+  "PAYMEGATE_API_KEY",
+  "PAYMEGATE_WEBHOOK_SECRET",
 ] as const;
 
 /**
