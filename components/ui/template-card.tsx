@@ -54,7 +54,7 @@ export default function TemplateCard({
 
           <div className="absolute bottom-5 left-5">
 
-            <div className="rounded-full bg-black/40 px-4 py-2 backdrop-blur-xl">
+            <div className="rounded-full bg-black/70 px-4 py-2 shadow-[0_2px_12px_rgba(0,0,0,.45)] backdrop-blur-xl">
 
               <span className="text-2xl font-black text-cyan-400">
                 ${price}
