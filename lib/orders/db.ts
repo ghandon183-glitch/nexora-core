@@ -178,17 +178,16 @@ export async function markOrderConfirmed(
 
 export async function attachPaymegateOrder(
   id: string,
-  paymegateOrderUuid: string,
-  checkoutUrl: string
+  paymegateOrderUuid: string
 ): Promise<boolean> {
   const db = await getOrdersDb();
   const result = await db
     .prepare(
       `UPDATE orders
-       SET paymegate_order_uuid = ?, pay_amount = ?, wallet_address = ?
+       SET paymegate_order_uuid = ?
        WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
     )
-    .bind(paymegateOrderUuid, paymegateOrderUuid, checkoutUrl, id)
+    .bind(paymegateOrderUuid, id)
     .run();
   return (result.meta?.changes ?? 0) > 0;
 }
