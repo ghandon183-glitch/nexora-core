@@ -168,7 +168,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const attached = await attachPaymegateOrder(orderId, orderUUID, checkoutUrl);
+    const attached = await attachPaymegateOrder(orderId, orderUUID);
     if (!attached) {
       console.error("[paymegate/create] Local order could not be linked:", orderId);
       return NextResponse.json(
