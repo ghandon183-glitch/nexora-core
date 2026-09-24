@@ -46,8 +46,23 @@ export default function CheckoutPage() {
 
   const [copied, setCopied] = useState(false);
   const [currency, setCurrency] = useState<CurrencyKey>("USDT");
-  const [order, setOrder] = useState<OrderState | null>(null);
-  const [status, setStatus] = useState<OrderStatus>("idle");
+  const [order, setOrder] = useState<OrderState | null>(() => {
+    const provider = searchParams.get("payment");
+    const orderId = searchParams.get("order");
+    if (provider !== "paymegate" || !orderId || !template) return null;
+    return {
+      id: orderId,
+      payAmount: template.price.toFixed(2),
+      walletAddress: "",
+      network: "",
+      currency: "USDT",
+      expiresAt: Date.now() + 30 * 60 * 1000,
+      paymentProvider: "paymegate",
+    };
+  });
+  const [status, setStatus] = useState<OrderStatus>(() =>
+    searchParams.get("payment") === "paymegate" && searchParams.get("order") ? "waiting" : "idle"
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [paymegateError, setPaymegateError] = useState<string | null>(null);
@@ -70,15 +85,6 @@ export default function CheckoutPage() {
       router.push(`/sign-in?next=/checkout/${params.slug}`);
     }
   }, [loading, user, router, params.slug]);
-
-  // Resume a Paymegate order after hosted checkout redirects back to NEXORA.
-  useEffect(() => {
-    const provider = searchParams.get("payment");
-    const orderId = searchParams.get("order");
-    if (provider !== "paymegate" || !orderId || !template) return;
-    setOrder({ id: orderId, payAmount: template.price.toFixed(2), walletAddress: "", network: "", currency: "USDT", expiresAt: Date.now() + 30 * 60 * 1000, paymentProvider: "paymegate" });
-    setStatus("waiting");
-  }, [searchParams, template]);
 
   // Poll order status every 8s while waiting for confirmation.
   useEffect(() => {
