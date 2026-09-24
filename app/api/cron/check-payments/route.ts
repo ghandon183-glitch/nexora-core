@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     // getPendingOrders is intentionally capped at 15. With one blockchain
     // lookup per order, this stays comfortably inside the Workers Free
     // external-subrequest ceiling while making progress on a busy queue.
-    const pendingOrders = await getPendingOrders(undefined, 15);
+    const pendingOrders = await getPendingOrders(undefined, 15, "crypto");
     results.checked = pendingOrders.length;
 
     const processOrder = async (order: (typeof pendingOrders)[number]) => {
