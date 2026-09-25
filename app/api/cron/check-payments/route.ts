@@ -47,7 +47,7 @@ async function sendOrderConfirmationEmail(
  * Crypto orders use the blockchain verifier.
  * Paymegate orders are reconciled through the merchant API as a fallback to
  * signed webhooks. This keeps card/PayPal fulfillment working even when the
- * provider has not exposed a webhook signing secret to the merchant.
+ * provider has not exposed a webhook signing secret.
  */
 export async function POST(request: Request) {
   const env = await getEnv();
@@ -82,7 +82,6 @@ export async function POST(request: Request) {
           const downloadToken = randomUUID();
           const claimed = await markOrderConfirmed(order.id, match.txHash, downloadToken);
 
-          // Only the run that wins the conditional UPDATE sends the email.
           if (!claimed) return;
 
           results.confirmed += 1;
@@ -122,12 +121,22 @@ export async function POST(request: Request) {
         const status = provider.status;
 
         if (status === "PAID" || status === "CONFIRMED" || status === "COMPLETED") {
+          // The polling fallback must enforce the same reconciliation invariants
+          // as the signed webhook before it can fulfill a local order.
+          if (
+            provider.externalId !== order.id ||
+            provider.amount !== order.base_price_usd.toFixed(2) ||
+            provider.currency !== "USD" ||
+            provider.customerEmail !== order.buyer_email.toLowerCase()
+          ) {
+            throw new Error("Paymegate paid order failed local amount/currency/customer correlation");
+          }
+
           const txReference =
             provider.transactionRef ||
             provider.transactionUuid ||
             `paymegate:${order.paymegate_order_uuid}`;
-          const transactionUuid =
-            provider.transactionUuid || txReference;
+          const transactionUuid = provider.transactionUuid || txReference;
           const downloadToken = randomUUID();
 
           const claimed = await markPaymegateConfirmed(
@@ -138,7 +147,6 @@ export async function POST(request: Request) {
             downloadToken
           );
 
-          // Only the run that wins the conditional UPDATE sends the email.
           if (!claimed) return;
 
           results.confirmed += 1;
@@ -157,16 +165,11 @@ export async function POST(request: Request) {
           return;
         }
 
-        // If Paymegate is still unpaid and our own quote window has expired,
-        // expire locally as well. This preserves NEXORA's existing 45-minute
-        // order policy even if the provider keeps an order open longer.
         if (Date.now() > order.expires_at) {
           const expired = await markOrderExpired(order.id);
           if (expired) results.expired += 1;
         }
       } catch (orderError) {
-        // Do not move a Paymegate order to "review" on a transient provider
-        // lookup failure. The next scheduled run can reconcile it again.
         console.error(
           `[cron/check-payments] Paymegate reconciliation failed for ${order.id}:`,
           orderError
