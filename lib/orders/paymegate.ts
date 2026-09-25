@@ -39,7 +39,7 @@ export async function getPaymegateOrderStatus(
     );
   }
 
-  const data = payload?.data ?? payload ?? {};
+  const data = (payload?.data ?? payload ?? {}) as Record<string, unknown>;
   const transaction = typeof data.transaction === "object" && data.transaction
     ? (data.transaction as Record<string, unknown>)
     : null;
