@@ -13,19 +13,6 @@ import { DOWNLOADS } from "@/lib/data/downloads";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { getEnv } from "@/lib/env";
 
-async function sendConfirmedEmail(
-  order: Awaited<ReturnType<typeof getPendingOrders>>[number],
-  txReference: string
-) {
-  const env = await getEnv();
-  const siteUrl = env.SITE_URL ?? "";
-  const downloadToken = randomUUID();
-  const downloadUrl = `${siteUrl}/download/${downloadToken}`;
-  const hasFile = Boolean(DOWNLOADS[order.template_slug]);
-
-  return { downloadToken, hasFile, downloadUrl, txReference };
-}
-
 async function sendOrderConfirmationEmail(
   order: Awaited<ReturnType<typeof getPendingOrders>>[number],
   downloadToken: string,
