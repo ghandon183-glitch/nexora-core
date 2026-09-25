@@ -2,10 +2,18 @@ import { getEnv } from "@/lib/env";
 
 export type PaymegateOrderStatus = {
   status: string | null;
+  amount: string | null;
+  currency: string | null;
+  customerEmail: string | null;
+  externalId: string | null;
   transactionUuid: string;
   transactionRef: string;
   raw: Record<string, unknown> | null;
 };
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
+}
 
 export async function getPaymegateOrderStatus(
   orderUuid: string
@@ -40,24 +48,32 @@ export async function getPaymegateOrderStatus(
   }
 
   const data = (payload?.data ?? payload ?? {}) as Record<string, unknown>;
-  const transaction = typeof data.transaction === "object" && data.transaction
-    ? (data.transaction as Record<string, unknown>)
-    : null;
+  const order = asRecord(data.order) ?? data;
+  const transaction = asRecord(order.transaction);
 
   return {
-    status: typeof data.status === "string" ? data.status.toUpperCase() : null,
+    status: typeof order.status === "string" ? order.status.toUpperCase() : null,
+    amount: typeof order.amount === "string" ? order.amount : null,
+    currency: typeof order.currency === "string" ? order.currency.toUpperCase() : null,
+    customerEmail:
+      typeof order.customerEmail === "string"
+        ? order.customerEmail.toLowerCase()
+        : typeof asRecord(order.customer)?.email === "string"
+          ? String(asRecord(order.customer)?.email).toLowerCase()
+          : null,
+    externalId: typeof order.externalId === "string" ? order.externalId : null,
     transactionUuid:
-      typeof data.transactionUUID === "string"
-        ? data.transactionUUID
+      typeof order.transactionUUID === "string"
+        ? order.transactionUUID
         : typeof transaction?.uuid === "string"
           ? transaction.uuid
           : "",
     transactionRef:
-      typeof data.transactionRef === "string"
-        ? data.transactionRef
+      typeof order.transactionRef === "string"
+        ? order.transactionRef
         : typeof transaction?.ref === "string"
           ? transaction.ref
           : "",
-    raw: data,
+    raw: order,
   };
 }
