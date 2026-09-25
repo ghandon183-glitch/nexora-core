@@ -5,16 +5,49 @@ import {
   markOrderConfirmed,
   markOrderExpired,
   markOrderReview,
+  markPaymegateConfirmed,
 } from "@/lib/orders/db";
 import { checkPayment } from "@/lib/orders/verify";
+import { getPaymegateOrderStatus } from "@/lib/orders/paymegate";
 import { DOWNLOADS } from "@/lib/data/downloads";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { getEnv } from "@/lib/env";
 
+async function sendOrderConfirmationEmail(
+  order: Awaited<ReturnType<typeof getPendingOrders>>[number],
+  downloadToken: string,
+  txReference: string
+) {
+  const env = await getEnv();
+  const siteUrl = env.SITE_URL ?? "";
+  const downloadUrl = `${siteUrl}/download/${downloadToken}`;
+  const hasFile = Boolean(DOWNLOADS[order.template_slug]);
+
+  await sendCustomerEmail({
+    to: order.buyer_email,
+    subject: `Your payment was confirmed — download ${order.template_title}`,
+    html: `
+      <h2>Payment confirmed, ${order.buyer_name}!</h2>
+      <p>We detected your payment for <strong>${order.template_title}</strong>.</p>
+      ${
+        hasFile
+          ? `<p><a href="${downloadUrl}">Click here to download your template</a></p>`
+          : `<p>Your access is unlocked — the download will appear in your dashboard shortly.</p>`
+      }
+      <p>Transaction: <code>${txReference}</code></p>
+      <p>— Nexora Core</p>
+    `,
+  });
+}
+
 /**
  * Polled every 5 minutes by GitHub Actions. The endpoint is protected by a
- * shared secret. Orders are checked in small parallel batches so one slow
- * blockchain/API response cannot hold the whole queue behind it.
+ * shared secret.
+ *
+ * Crypto orders use the blockchain verifier.
+ * Paymegate orders are reconciled through the merchant API as a fallback to
+ * signed webhooks. This keeps card/PayPal fulfillment working even when the
+ * provider has not exposed a webhook signing secret to the merchant.
  */
 export async function POST(request: Request) {
   const env = await getEnv();
@@ -29,17 +62,18 @@ export async function POST(request: Request) {
     expired: 0,
     review: 0,
     checked: 0,
+    paymegateChecked: 0,
+    paymegateErrors: [] as string[],
     errors: [] as string[],
   };
 
   try {
-    // getPendingOrders is intentionally capped at 15. With one blockchain
-    // lookup per order, this stays comfortably inside the Workers Free
-    // external-subrequest ceiling while making progress on a busy queue.
-    const pendingOrders = await getPendingOrders(undefined, 15, "crypto");
-    results.checked = pendingOrders.length;
+    const cryptoOrders = await getPendingOrders(undefined, 15, "crypto");
+    const paymegateOrders = await getPendingOrders(undefined, 15, "paymegate");
+    results.checked = cryptoOrders.length + paymegateOrders.length;
+    results.paymegateChecked = paymegateOrders.length;
 
-    const processOrder = async (order: (typeof pendingOrders)[number]) => {
+    const processCryptoOrder = async (order: (typeof cryptoOrders)[number]) => {
       try {
         const now = Date.now();
         const match = await checkPayment(order);
@@ -52,27 +86,7 @@ export async function POST(request: Request) {
           if (!claimed) return;
 
           results.confirmed += 1;
-
-          const siteUrl = env.SITE_URL ?? "";
-          const downloadUrl = `${siteUrl}/download/${downloadToken}`;
-          const hasFile = Boolean(DOWNLOADS[order.template_slug]);
-
-          await sendCustomerEmail({
-            to: order.buyer_email,
-            subject: `Your payment was confirmed — download ${order.template_title}`,
-            html: `
-              <h2>Payment confirmed, ${order.buyer_name}!</h2>
-              <p>We detected your on-chain payment for <strong>${order.template_title}</strong>.</p>
-              ${
-                hasFile
-                  ? `<p><a href="${downloadUrl}">Click here to download your template</a></p>`
-                  : `<p>Your access is unlocked — the download will appear in your dashboard shortly.</p>`
-              }
-              <p>Transaction: <code>${match.txHash}</code></p>
-              <p>— Nexora Core</p>
-            `,
-          });
-
+          await sendOrderConfirmationEmail(order, downloadToken, match.txHash);
           return;
         }
 
@@ -82,7 +96,7 @@ export async function POST(request: Request) {
         }
       } catch (orderError) {
         console.error(
-          `[cron/check-payments] Error checking order ${order.id}:`,
+          `[cron/check-payments] Error checking crypto order ${order.id}:`,
           orderError
         );
 
@@ -95,8 +109,78 @@ export async function POST(request: Request) {
       }
     };
 
-    // Promise.allSettled means one failed order never aborts the other checks.
-    await Promise.allSettled(pendingOrders.map(processOrder));
+    const processPaymegateOrder = async (order: (typeof paymegateOrders)[number]) => {
+      try {
+        if (!order.paymegate_order_uuid) {
+          const reviewed = await markOrderReview(order.id).catch(() => false);
+          if (reviewed) results.review += 1;
+          results.paymegateErrors.push(`${order.id}: missing Paymegate order UUID`);
+          return;
+        }
+
+        const provider = await getPaymegateOrderStatus(order.paymegate_order_uuid);
+        const status = provider.status;
+
+        if (status === "PAID" || status === "CONFIRMED" || status === "COMPLETED") {
+          const txReference =
+            provider.transactionRef ||
+            provider.transactionUuid ||
+            `paymegate:${order.paymegate_order_uuid}`;
+          const transactionUuid =
+            provider.transactionUuid || txReference;
+          const downloadToken = randomUUID();
+
+          const claimed = await markPaymegateConfirmed(
+            order.id,
+            transactionUuid,
+            txReference,
+            `poll:${order.paymegate_order_uuid}`,
+            downloadToken
+          );
+
+          // Only the run that wins the conditional UPDATE sends the email.
+          if (!claimed) return;
+
+          results.confirmed += 1;
+          await sendOrderConfirmationEmail(order, downloadToken, txReference);
+          return;
+        }
+
+        if (
+          status === "EXPIRED" ||
+          status === "CANCELLED" ||
+          status === "CANCELED" ||
+          status === "FAILED"
+        ) {
+          const expired = await markOrderExpired(order.id);
+          if (expired) results.expired += 1;
+          return;
+        }
+
+        // If Paymegate is still unpaid and our own quote window has expired,
+        // expire locally as well. This preserves NEXORA's existing 45-minute
+        // order policy even if the provider keeps an order open longer.
+        if (Date.now() > order.expires_at) {
+          const expired = await markOrderExpired(order.id);
+          if (expired) results.expired += 1;
+        }
+      } catch (orderError) {
+        // Do not move a Paymegate order to "review" on a transient provider
+        // lookup failure. The next scheduled run can reconcile it again.
+        console.error(
+          `[cron/check-payments] Paymegate reconciliation failed for ${order.id}:`,
+          orderError
+        );
+        results.paymegateErrors.push(
+          `${order.id}: ${orderError instanceof Error ? orderError.message : "unknown error"}`
+        );
+      }
+    };
+
+    await Promise.allSettled([
+      ...cryptoOrders.map(processCryptoOrder),
+      ...paymegateOrders.map(processPaymegateOrder),
+    ]);
 
     return NextResponse.json({ ok: true, ...results });
   } catch (error) {
