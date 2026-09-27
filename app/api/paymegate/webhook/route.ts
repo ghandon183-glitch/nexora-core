@@ -142,6 +142,30 @@ export async function POST(request: Request) {
     const downloadUrl = `${siteUrl}/download/${downloadToken}`;
     const hasFile = Boolean(DOWNLOADS[order.template_slug]);
 
+    const merchantNotificationEmail = env.NOTIFY_EMAIL ?? "ghandon183@gmail.com";
+
+    await sendCustomerEmail({
+      to: merchantNotificationEmail,
+      subject: `NEXORA SALE — ${order.template_title} — ${event.amount} ${event.currency}`,
+      html: `
+        <h2>New Paymegate payment confirmed</h2>
+        <p><strong>A customer has completed a verified payment.</strong></p>
+        <hr>
+        <p><strong>Product:</strong> ${order.template_title}</p>
+        <p><strong>Internal order ID:</strong> <code>${order.id}</code></p>
+        <p><strong>Customer:</strong> ${order.buyer_name}</p>
+        <p><strong>Customer email:</strong> ${order.buyer_email}</p>
+        <p><strong>Amount:</strong> ${event.amount} ${event.currency}</p>
+        <p><strong>Paymegate order UUID:</strong> <code>${event.orderUUID}</code></p>
+        <p><strong>Transaction UUID:</strong> <code>${event.transactionUUID || "—"}</code></p>
+        <p><strong>Transaction reference:</strong> <code>${event.transactionRef || "—"}</code></p>
+        <p><strong>Webhook event ID:</strong> <code>${event.id}</code></p>
+        <p><strong>Confirmed at:</strong> ${new Date().toISOString()}</p>
+        <hr>
+        <p>NEXORA CORE has recorded this payment as <strong>confirmed</strong> after validating the signed Paymegate webhook, order, amount, currency, and customer email.</p>
+      `,
+    });
+
     await sendCustomerEmail({
       to: order.buyer_email,
       subject: `Payment confirmed — download ${order.template_title}`,
