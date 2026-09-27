@@ -16,7 +16,8 @@ export default function PurchaseCard({
   demoUrl,
 }: PurchaseCardProps) {
   const t = useTranslations("ProductDetail");
-  const hasDemo = demoUrl && demoUrl !== "#";
+  const previewUrl = slug === "vesper" ? "https://nexora-core.nxora.workers.dev/en/templates/vesper/preview" : demoUrl;
+  const hasDemo = previewUrl && previewUrl !== "#";
   return (
     <aside className="xl:sticky xl:top-40 xl:self-start">
       <Card className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-xl">
@@ -56,7 +57,7 @@ export default function PurchaseCard({
             </Link>
 
             {hasDemo ? (
-              <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+              <a href={previewUrl} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" className="w-full">
                   {t("livePreview")}
                 </Button>
