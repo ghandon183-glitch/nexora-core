@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     });
 
     const origin = new URL(request.url).origin;
-    const returnUrl = `${origin}/${locale}/checkout/${encodeURIComponent(template.slug)}?payment=paymegate&order=${encodeURIComponent(orderId)}`;
+    const backUrl = `${origin}/${locale}/checkout/${encodeURIComponent(template.slug)}?payment=paymegate&order=${encodeURIComponent(orderId)}`;
 
     const providerResponse = await fetch("https://api.paymegate.com/v1/orders", {
       method: "POST",
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
         amount: template.price.toFixed(2),
         currency: "USD",
         paymentMethodsKeys: ["*"],
-        returnUrl,
+        backUrl,
         customer: {
           email: normalizedEmail,
           fullName: buyerName.trim().slice(0, 120),
