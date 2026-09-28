@@ -10,8 +10,10 @@ export async function deliverConfirmedOrderEmails(
   const env = await getEnv();
   const siteUrl = env.SITE_URL ?? "";
   const downloadToken = order.download_token ?? "";
-  const downloadUrl = siteUrl + "/download/" + downloadToken;
-  const hasFile = Boolean(DOWNLOADS[order.template_slug]);
+  const downloadUrl = order.template_slug === "all-templates"
+    ? siteUrl + "/en/download/bundle/" + downloadToken
+    : siteUrl + "/download/" + downloadToken;
+  const hasFile = order.template_slug === "all-templates" || Boolean(DOWNLOADS[order.template_slug]);
   const ownerEmail = env.NOTIFY_EMAIL ?? "ghandon183@gmail.com";
 
   const ownerClaimed = await claimOrderEmail(order.id, "owner");
