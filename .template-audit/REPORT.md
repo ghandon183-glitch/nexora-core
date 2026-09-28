@@ -1,5 +1,7 @@
 # Nexora Template Package Audit
 
+> Automated review only. External references are flagged for human license verification; dependency metadata URLs are intentionally excluded.
+
 ## Nexora-Template-12-Vesper-v1.0.0.zip
 - Archive: 104,446 bytes
 - Files: 44
@@ -18,7 +20,7 @@
 - package.json: YES
 - Asset files: 5
 - Bundled build artifacts: none
-- External asset references detected: 26
+- External asset references detected: 3
 
 ## aether.zip
 - Archive: 10,480,290 bytes
@@ -28,7 +30,7 @@
 - package.json: YES
 - Asset files: 18
 - Bundled build artifacts: none
-- External asset references detected: 30
+- External asset references detected: 6
 
 ## aurelia-store.zip
 - Archive: 1,728,403 bytes
@@ -38,7 +40,7 @@
 - package.json: YES
 - Asset files: 10
 - Bundled build artifacts: none
-- External asset references detected: 25
+- External asset references detected: 2
 
 ## creative-agency.zip
 - Archive: 85,566 bytes
@@ -48,7 +50,7 @@
 - package.json: YES
 - Asset files: 5
 - Bundled build artifacts: none
-- External asset references detected: 25
+- External asset references detected: 3
 
 ## kiln-estates.zip
 - Archive: 1,920,241 bytes
@@ -58,7 +60,7 @@
 - package.json: YES
 - Asset files: 9
 - Bundled build artifacts: none
-- External asset references detected: 26
+- External asset references detected: 4
 
 ## modern-saas.zip
 - Archive: 85,804 bytes
@@ -68,7 +70,7 @@
 - package.json: YES
 - Asset files: 5
 - Bundled build artifacts: none
-- External asset references detected: 24
+- External asset references detected: 2
 
 ## nexi-ai.zip
 - Archive: 81,516 bytes
@@ -78,7 +80,7 @@
 - package.json: YES
 - Asset files: 0
 - Bundled build artifacts: none
-- External asset references detected: 24
+- External asset references detected: 2
 
 ## premium-blog.zip
 - Archive: 28,499 bytes
@@ -98,7 +100,7 @@
 - package.json: YES
 - Asset files: 11
 - Bundled build artifacts: none
-- External asset references detected: 25
+- External asset references detected: 3
 
 ## premium-restaurant.zip
 - Archive: 23,617 bytes
@@ -118,4 +120,4 @@
 - package.json: YES
 - Asset files: 18
 - Bundled build artifacts: none
-- External asset references detected: 27
+- External asset references detected: 3
