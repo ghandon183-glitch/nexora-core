@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import {
   getPendingOrders,
+  getOrderById,
+  getOrdersNeedingEmailDelivery,
   markOrderConfirmed,
   markOrderExpired,
   markOrderReview,
@@ -12,33 +14,7 @@ import { getPaymegateOrderStatus } from "@/lib/orders/paymegate";
 import { DOWNLOADS } from "@/lib/data/downloads";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { getEnv } from "@/lib/env";
-
-async function sendOrderConfirmationEmail(
-  order: Awaited<ReturnType<typeof getPendingOrders>>[number],
-  downloadToken: string,
-  txReference: string
-) {
-  const env = await getEnv();
-  const siteUrl = env.SITE_URL ?? "";
-  const downloadUrl = `${siteUrl}/download/${downloadToken}`;
-  const hasFile = Boolean(DOWNLOADS[order.template_slug]);
-
-  await sendCustomerEmail({
-    to: order.buyer_email,
-    subject: `Your payment was confirmed — download ${order.template_title}`,
-    html: `
-      <h2>Payment confirmed, ${order.buyer_name}!</h2>
-      <p>We detected your payment for <strong>${order.template_title}</strong>.</p>
-      ${
-        hasFile
-          ? `<p><a href="${downloadUrl}">Click here to download your template</a></p>`
-          : `<p>Your access is unlocked — the download will appear in your dashboard shortly.</p>`
-      }
-      <p>Transaction: <code>${txReference}</code></p>
-      <p>— Nexora Core</p>
-    `,
-  });
-}
+import { deliverConfirmedOrderEmails } from "@/lib/orders/email-delivery";
 
 /**
  * Polled every 5 minutes by GitHub Actions. The endpoint is protected by a
@@ -64,6 +40,7 @@ export async function POST(request: Request) {
     checked: 0,
     paymegateChecked: 0,
     paymegateErrors: [] as string[],
+    emailsRetried: 0,
     errors: [] as string[],
   };
 
@@ -85,7 +62,8 @@ export async function POST(request: Request) {
           if (!claimed) return;
 
           results.confirmed += 1;
-          await sendOrderConfirmationEmail(order, downloadToken, match.txHash);
+          const confirmedOrder = await getOrderById(order.id);
+          if (confirmedOrder) await deliverConfirmedOrderEmails(confirmedOrder, { transactionRef: match.txHash, eventId: "crypto:" + order.id, orderUUID: "crypto:" + order.id, amount: order.base_price_usd.toFixed(2), currency: "USD" });
           return;
         }
 
@@ -150,7 +128,8 @@ export async function POST(request: Request) {
           if (!claimed) return;
 
           results.confirmed += 1;
-          await sendOrderConfirmationEmail(order, downloadToken, txReference);
+          const confirmedOrder = await getOrderById(order.id);
+          if (confirmedOrder) await deliverConfirmedOrderEmails(confirmedOrder, { transactionRef: txReference, eventId: "poll:" + order.paymegate_order_uuid, orderUUID: order.paymegate_order_uuid, amount: order.base_price_usd.toFixed(2), currency: "USD" });
           return;
         }
 
@@ -184,6 +163,18 @@ export async function POST(request: Request) {
       ...cryptoOrders.map(processCryptoOrder),
       ...paymegateOrders.map(processPaymegateOrder),
     ]);
+
+    const emailOrders = await getOrdersNeedingEmailDelivery(25);
+    for (const order of emailOrders) {
+      await deliverConfirmedOrderEmails(order, {
+        transactionRef: order.paymegate_transaction_ref || order.paymegate_transaction_uuid || order.tx_hash || order.id,
+        eventId: order.paymegate_event_id || "retry:" + order.id,
+        orderUUID: order.paymegate_order_uuid || "crypto:" + order.id,
+        amount: order.base_price_usd.toFixed(2),
+        currency: order.payment_provider === "paymegate" ? "USD" : order.currency,
+      });
+      results.emailsRetried += 1;
+    }
 
     return NextResponse.json({ ok: true, ...results });
   } catch (error) {
