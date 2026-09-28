@@ -9,6 +9,7 @@ import ProductTabs from "@/components/product/product-tabs";
 import PurchaseCard from "@/components/product/purchase-card";
 import RelatedTemplates from "@/components/sections/related-templates";
 import ProductGuide from "@/components/product/product-guide";
+import ProductDemoVideo from "@/components/product/product-demo-video";
 import { getTemplateGuide } from "@/lib/data/template-guides";
 import { getTemplate, getAllTemplates } from "@/lib/data/get-template";
 import { getHeadingFontClass } from "@/lib/fonts";
@@ -100,6 +101,7 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
           <div className="flex flex-col xl:flex-row xl:items-start xl:gap-16">
             <div className="min-w-0 flex-1 space-y-16">
               <ProductGallery images={template.gallery} />
+              <ProductDemoVideo src={template.videoUrl} />
               <ProductHeader
                 title={template.title}
                 description={template.description}
