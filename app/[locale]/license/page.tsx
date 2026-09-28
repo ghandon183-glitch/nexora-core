@@ -1,0 +1,13 @@
+import Navbar from "@/components/navigation/navbar";
+import Section from "@/components/ui/section";
+import Heading from "@/components/ui/heading";
+import Card from "@/components/ui/card";
+export default function LicensePage(){return <><Navbar/><Section><div className="mx-auto max-w-4xl"><Heading badge="Licensing" title="Single End Product Commercial License" description="Clear rights for building and launching real projects, with the source package kept protected from redistribution." align="center"/><div className="mt-14 space-y-6">{[
+["You may","Use the purchased source in one personal, commercial, or client-facing end product. Modify, extend, restyle, refactor, and combine it with your own code. Deploy the finished product publicly, including hosted and SaaS applications."],
+["Client work","You may build a finished website or application for a client. The client receives the finished end product, not the reusable template source as a separate product."],
+["You may not","Resell, redistribute, sublicense, publish, or share the source package itself. Do not offer it as a template, UI kit, boilerplate, starter kit, or competing marketplace product."],
+["Multiple end products","One purchase covers one end product. Independent products, separate client deliverables, or separate brands require additional licenses unless a written agreement says otherwise."],
+["Third-party assets","Fonts, photographs, icons, illustrations, logos, and other third-party materials remain subject to their own licenses. Review the package notes and replace demo assets when necessary."],
+["Updates and support","Future updates are included while the purchased template is maintained. Support covers installation and documented template behavior; custom development, hosting, third-party configuration, and bespoke integrations are outside standard support."],
+["Warranty and liability","The package is provided as source code for development use. To the maximum extent permitted by law, Nexora Core disclaims warranties for uninterrupted operation, third-party services, framework changes, and fitness for a particular purpose."],
+].map(([title,body])=><Card key={title} className="p-7 hover:-translate-y-0 hover:border-white/10"><h2 className="text-lg font-bold text-white">{title}</h2><p className="mt-3 text-sm leading-7 text-slate-400">{body}</p></Card>)}</div><p className="mt-8 text-center text-xs text-slate-600">This page is a plain-language summary. The license file delivered with each package is the controlling package-level license. Nothing here is legal advice.</p></div></Section></>}
