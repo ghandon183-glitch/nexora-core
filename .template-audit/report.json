@@ -1,14 +1,17 @@
 [
   {
     "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
-    "bytes": 104446,
-    "sha256": "5a859230cf8a72797eba391edac411a1e8866bb6b7949d59c1dec373438d93a7",
-    "files": 44,
+    "bytes": 105215,
+    "sha256": "94086c9365807d999516644ceea336886121e05540c02221d4788db850f2872a",
+    "files": 45,
     "readmes": [
       "README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "package.json"
@@ -73,14 +76,17 @@
   },
   {
     "package": "admin-dashboard.zip",
-    "bytes": 86812,
-    "sha256": "27c138bfeb4b90cfd142a1118a3d18742fc095576d9ba58e125d897528ae1d42",
-    "files": 36,
+    "bytes": 87581,
+    "sha256": "3cac7cace60c3e28e74e4ccd0ba11e930d60e12b9342c7928e4e205e8d686359",
+    "files": 37,
     "readmes": [
       "admin-dashboard-template/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "admin-dashboard-template/package.json"
@@ -133,14 +139,17 @@
   },
   {
     "package": "aether.zip",
-    "bytes": 10480290,
-    "sha256": "117890ad6fa5cd132125679060d756734b4ba659ea01c8d09f813d06c5f9589c",
-    "files": 48,
+    "bytes": 10481059,
+    "sha256": "4751224aed59b3d6d201f4a02215f79a1e8b94df659678805b1b7b9d9e6b6af3",
+    "files": 49,
     "readmes": [
       "README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "package.json"
@@ -224,14 +233,17 @@
   },
   {
     "package": "aurelia-store.zip",
-    "bytes": 1728403,
-    "sha256": "ee63dce15f32b44e8a7f1d271e2cafdf89bb49a313cd40ff4b08e1529c21d0db",
-    "files": 39,
+    "bytes": 1729172,
+    "sha256": "5a847c92ee47a8f83232078ababa30ed0266b923918169823e67d0b712152116",
+    "files": 40,
     "readmes": [
       "aurelia-store/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "aurelia-store/package.json"
@@ -293,14 +305,17 @@
   },
   {
     "package": "creative-agency.zip",
-    "bytes": 85566,
-    "sha256": "9ae8db4aa4422981239ef3d42986f40b1855d9b4ba90c4faf8ff4c8eccf5b673",
-    "files": 39,
+    "bytes": 86335,
+    "sha256": "c511d1d79335e66f51fe52045e62e2079ebccd1d9f6b33b1f6345223c206861d",
+    "files": 40,
     "readmes": [
       "creative-agency-template/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "creative-agency-template/package.json"
@@ -351,14 +366,17 @@
   },
   {
     "package": "kiln-estates.zip",
-    "bytes": 1920241,
-    "sha256": "8c2dfffd425d828de4365cbab2fc18c5cb31b2ce737d15c6aa2197fb26254ed0",
-    "files": 35,
+    "bytes": 1921010,
+    "sha256": "1341f81227ba6d1c4535d5183e652f2073e2942ed53bec6688c8f9e097b48c7b",
+    "files": 36,
     "readmes": [
       "README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "package.json"
@@ -414,14 +432,17 @@
   },
   {
     "package": "modern-saas.zip",
-    "bytes": 85804,
-    "sha256": "82c1f46dfe84e0a64b4f8cae1f66dc814c86392216b0cc3fcb8550734cd7888c",
-    "files": 40,
+    "bytes": 86573,
+    "sha256": "b5a98cef130ef2f8ce04295d6c0d95037fa00532cae2aa40f3ec951fadf6014b",
+    "files": 41,
     "readmes": [
       "modern-saas-template/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "modern-saas-template/package.json"
@@ -471,14 +492,17 @@
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 81516,
-    "sha256": "5355c6f4c40212b43f612d423beaf5ee405dcf2fd96b83d1ed7a7c9318577d2e",
-    "files": 29,
+    "bytes": 82285,
+    "sha256": "cacabef5225a214f1bb494125bd031bf50a6b5ab3dda89bd2b8db08f95c710ef",
+    "files": 30,
     "readmes": [
       "README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "package.json"
@@ -524,14 +548,17 @@
   },
   {
     "package": "premium-blog.zip",
-    "bytes": 28499,
-    "sha256": "3cbded979721cd8c2b43ba31dc1a0ec641f3db0b8fb58e2b849c9c6053615b3e",
-    "files": 31,
+    "bytes": 29268,
+    "sha256": "e9b833320dafd67178dd49a5bd2af248bc6d7abf1bcc60d7306eeb3dbdedb4d0",
+    "files": 32,
     "readmes": [
       "premium-blog/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "premium-blog/package.json"
@@ -581,14 +608,17 @@
   },
   {
     "package": "premium-portfolio.zip",
-    "bytes": 755245,
-    "sha256": "f7c16c4335b0b0db35a09ac3a2701e3853176f7c214ea610b5eea1ee3bf52862",
-    "files": 43,
+    "bytes": 756014,
+    "sha256": "a75761ea7a3347994286d9b63d70f78246c673241d1e89225fe8c9a33cddef8d",
+    "files": 44,
     "readmes": [
       "premium-portfolio/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "premium-portfolio/package.json"
@@ -655,14 +685,17 @@
   },
   {
     "package": "premium-restaurant.zip",
-    "bytes": 23617,
-    "sha256": "6022db37ee730906be58c2d8fba7af997ce960a33f137146f56c174d5c6e1d0a",
-    "files": 30,
+    "bytes": 24386,
+    "sha256": "3b93629efc293008ab90e059655af2958669f7c944a74fe7f8f04a56fc560837",
+    "files": 31,
     "readmes": [
       "premium-restaurant/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "premium-restaurant/package.json"
@@ -712,14 +745,17 @@
   },
   {
     "package": "solace-studio.zip",
-    "bytes": 13814935,
-    "sha256": "5bfa2036238f327e1ed0264a459eb94d6196eb1c32394dd337b1dd8e469025ab",
-    "files": 51,
+    "bytes": 13815704,
+    "sha256": "49d455422536f6f53f086af361c3aa37f968cb6d809ce49db2cbae956e3c937f",
+    "files": 52,
     "readmes": [
       "solace-studio/README.md"
     ],
     "licenses": [
       "LICENSE.md"
+    ],
+    "asset_manifests": [
+      "ASSET-LICENSES.md"
     ],
     "package_json": [
       "solace-studio/package.json"
