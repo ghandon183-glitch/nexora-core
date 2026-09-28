@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual, randomUUID } from "crypto";
-import { getOrderById, getOrderByPaymegateUuid, markPaymegateConfirmed, claimOrderEmail, markOrderEmailSent, markOrderEmailFailed } from "@/lib/orders/db";
-import { DOWNLOADS } from "@/lib/data/downloads";
-import { sendCustomerEmail } from "@/lib/mailer";
+import { getOrderById, getOrderByPaymegateUuid, markPaymegateConfirmed } from "@/lib/orders/db";
 import { getEnv } from "@/lib/env";
 import { deliverConfirmedOrderEmails } from "@/lib/orders/email-delivery";
 
