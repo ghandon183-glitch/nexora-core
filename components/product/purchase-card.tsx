@@ -16,7 +16,7 @@ export default function PurchaseCard({
   demoUrl,
 }: PurchaseCardProps) {
   const t = useTranslations("ProductDetail");
-  const previewUrl = slug === "vesper" ? "https://nexora-core.nxora.workers.dev/en/templates/vesper/preview" : demoUrl;
+  const previewUrl = demoUrl;
   const hasDemo = previewUrl && previewUrl !== "#";
   return (
     <aside className="xl:sticky xl:top-40 xl:self-start">
