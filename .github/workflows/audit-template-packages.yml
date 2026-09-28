@@ -7,6 +7,10 @@ on:
       - "public/downloads/**"
       - ".github/workflows/audit-template-packages.yml"
 
+concurrency:
+  group: nexora-template-audit
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -55,18 +59,27 @@ jobs:
                       try: package_data.append(json.loads(f.read(p)))
                       except: package_data.append({"parse_error":True})
                   hashes=hashlib.sha256(z.read_bytes()).hexdigest()
+                  external=set()
+                  for n in text_names:
+                      try:
+                          s=f.read(n).decode('utf-8','ignore')
+                          for m in re.findall(r'https?://[^\\s\\\"\'<>)]+' , s): external.add(m[:300])
+                          for token in ('unsplash','pexels','pixabay','fonts.googleapis','fonts.gstatic','iconify','cdnjs','jsdelivr','unpkg'):
+                              if token in s.lower(): external.add('keyword:'+token)
+                      except: pass
                   rows.append({
                     "package":z.name,"bytes":z.stat().st_size,"sha256":hashes,
                     "files":len(files),"readmes":readmes,"licenses":licenses,
                     "package_json":packages,"env_examples":[n for n in envs if not Path(n).name.startswith(".env.local")],
                     "asset_count":len(asset_files),"asset_samples":asset_files[:30],
                     "bundled_build_artifacts":suspicious,
+                    "external_asset_references": sorted(external)[:100],
                     "packages":package_data
                   })
           Path(".template-audit/report.json").write_text(json.dumps(rows,indent=2),encoding="utf-8")
           lines=["# Nexora Template Package Audit",""]
           for r in rows:
-              lines += [f"## {r['package']}",f"- Archive: {r['bytes']:,} bytes",f"- Files: {r['files']}",f"- README: {'YES' if r['readmes'] else 'NO'}",f"- License: {'YES' if r['licenses'] else 'NO'}",f"- package.json: {'YES' if r['package_json'] else 'NO'}",f"- Asset files: {r['asset_count']}",f"- Bundled build artifacts: {', '.join(r['bundled_build_artifacts'][:8]) or 'none'}",""]
+              lines += [f"## {r['package']}",f"- Archive: {r['bytes']:,} bytes",f"- Files: {r['files']}",f"- README: {'YES' if r['readmes'] else 'NO'}",f"- License: {'YES' if r['licenses'] else 'NO'}",f"- package.json: {'YES' if r['package_json'] else 'NO'}",f"- Asset files: {r['asset_count']}",f"- Bundled build artifacts: {', '.join(r['bundled_build_artifacts'][:8]) or 'none'}",f"- External asset references detected: {len(r.get('external_asset_references',[]))}",""]
           Path(".template-audit/REPORT.md").write_text("\n".join(lines),encoding="utf-8")
           PY
 
@@ -78,7 +91,7 @@ jobs:
           mkdir -p .vesper-build public/demo/vesper
           unzip -q public/downloads/Nexora-Template-12-Vesper-v1.0.0.zip -d .vesper-build
           cd .vesper-build
-          npm ci --no-fund --no-audit || npm install --no-fund --no-audit
+          npm ci --no-fund --no-audit || npm install --legacy-peer-deps --no-fund --no-audit
           npm run build
           cd ..
           test -d .vesper-build/dist
@@ -154,6 +167,16 @@ jobs:
             cp "$d/walkthrough.webm" "public/templates/video/$slug/walkthrough.webm"
           done
 
+      - name: Upload audit and capture artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-template-audit-${{ github.run_id }}
+          path: |
+            .template-audit/
+            .capture/
+          retention-days: 14
+
       - name: Commit real captures and audit report
         shell: bash
         run: |
@@ -162,5 +185,6 @@ jobs:
           git add .template-audit public/demo/vesper public/templates/gallery public/templates/video
           git diff --cached --quiet && exit 0
           git commit -m "chore: add real demo captures and package audit report"
+          git pull --rebase origin main
           git push
       
