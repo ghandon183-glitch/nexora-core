@@ -119,6 +119,7 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
                 features={template.features}
                 changelog={template.changelog}
               />
+              <ProductGuide guide={guide} />
             </div>
             <div className="mt-10 w-full xl:mt-0 xl:w-[380px] xl:flex-shrink-0">
               <PurchaseCard slug={template.slug} price={template.price} demoUrl={template.demoUrl} />
