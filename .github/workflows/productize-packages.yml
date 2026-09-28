@@ -136,18 +136,6 @@ jobs:
               shutil.move(out, z)
               shutil.rmtree(tmp, ignore_errors=True)
 
-          bundle = root / "Nexora-All-Templates-v1.0.0.zip"
-          with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as zout:
-              zout.writestr("BUNDLE-README.md", """# Nexora Core — All 12 Templates
-
-          This collection contains the twelve current Nexora Core source packages.
-
-          Each package is independently licensed under its included LICENSE.md. The bundle purchase does not permit redistribution of any package or the collection itself.
-
-          Start with the README.md inside the package you want to customize.
-          """)
-              for z in zips:
-                  zout.write(z, arcname=z.name)
           PY
 
       - name: Commit package updates
