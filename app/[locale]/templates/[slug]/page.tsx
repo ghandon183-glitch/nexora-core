@@ -8,6 +8,8 @@ import ProductHeader from "@/components/product/product-header";
 import ProductTabs from "@/components/product/product-tabs";
 import PurchaseCard from "@/components/product/purchase-card";
 import RelatedTemplates from "@/components/sections/related-templates";
+import ProductGuide from "@/components/product/product-guide";
+import { getTemplateGuide } from "@/lib/data/template-guides";
 import { getTemplate, getAllTemplates } from "@/lib/data/get-template";
 import { getHeadingFontClass } from "@/lib/fonts";
 import { routing, type Locale } from "@/i18n/routing";
@@ -60,8 +62,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function TemplateDetailsPage({ params }: PageProps) {
   const { locale, slug } = await params;
   const template = getTemplate(slug);
+  const guide = getTemplateGuide(slug);
 
-  if (!template) notFound();
+  if (!template || !guide) notFound();
 
   const env = await getEnv();
   const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;

@@ -76,7 +76,7 @@ export default function DocsPage() {
               {templates.map((template) => (
                 <Link
                   key={template.slug}
-                  href={`/templates/${template.slug}`}
+                  href={`/docs/${template.slug}`}
                   className="block"
                 >
                   <Card className="p-6 hover:-translate-y-1 hover:border-cyan-400/30">
@@ -87,7 +87,7 @@ export default function DocsPage() {
                     </p>
 
                     <p className="mt-2 text-sm text-slate-500">
-                      {t("viewTemplateDocs")}
+                      Read documentation →
                     </p>
                   </Card>
                 </Link>

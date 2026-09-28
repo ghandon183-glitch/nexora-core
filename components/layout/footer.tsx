@@ -11,11 +11,11 @@ export default function Footer() {
   const t = useTranslations("Footer");
   const productLinks = [
     { label: t("templates"), href: "/templates" }, { label: t("components"), href: "/components" },
-    { label: t("pricing"), href: "/pricing" }, { label: t("dashboard"), href: "/dashboard" },
+    { label: t("pricing"), href: "/pricing" }, { label: "Compare", href: "/templates/compare" }, { label: "All Templates", href: "/bundle" }, { label: t("dashboard"), href: "/dashboard" },
   ];
   const resourceLinks: { label: string; href?: string; disabled?: boolean }[] = [
-    { label: t("documentation"), href: "/docs" }, { label: "FAQ", href: "/faq" },
-    { label: t("guides"), disabled: true }, { label: t("blog"), disabled: true }, { label: t("support"), href: "/contact" },
+    { label: t("documentation"), href: "/docs" }, { label: "FAQ", href: "/faq" }, { label: "Support", href: "/support" }, { label: "License", href: "/license" }, { label: "Refunds", href: "/refunds" },
+    { label: t("guides"), disabled: true }, { label: t("blog"), disabled: true }, { label: "Contact", href: "/contact" },
   ];
   const companyLinks = [
     { label: t("about"), href: "/about" }, { label: t("contact"), href: "/contact" },

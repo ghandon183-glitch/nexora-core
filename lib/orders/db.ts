@@ -21,6 +21,11 @@ export interface Order {
   paymegate_transaction_uuid?: string | null;
   paymegate_transaction_ref?: string | null;
   paymegate_event_id?: string | null;
+  owner_email_status?: "pending" | "sending" | "sent";
+  customer_email_status?: "pending" | "sending" | "sent";
+  owner_email_claimed_at?: number | null;
+  customer_email_claimed_at?: number | null;
+  email_last_error?: string | null;
 }
 
 export async function getOrdersDb() {
@@ -167,7 +172,9 @@ export async function markOrderConfirmed(
   const result = await db
     .prepare(
       `UPDATE orders
-       SET status = 'confirmed', tx_hash = ?, download_token = ?, confirmed_at = ?
+       SET status = 'confirmed', tx_hash = ?, download_token = ?, confirmed_at = ?,
+           owner_email_status = 'pending', customer_email_status = 'pending',
+           owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL
        WHERE id = ? AND status = 'pending'`
     )
     .bind(txHash, downloadToken, Date.now(), id)
@@ -204,6 +211,8 @@ export async function markPaymegateConfirmed(
     .prepare(
       `UPDATE orders
        SET status = 'confirmed', tx_hash = ?, download_token = ?, confirmed_at = ?,
+           owner_email_status = 'pending', customer_email_status = 'pending',
+           owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL,
            paymegate_transaction_uuid = ?, paymegate_transaction_ref = ?, paymegate_event_id = ?
        WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
     )
@@ -260,11 +269,62 @@ export async function adminForceConfirm(
     .prepare(
       `UPDATE orders
        SET status = 'confirmed', tx_hash = COALESCE(tx_hash, 'manual-admin-override'),
-           download_token = ?, confirmed_at = ?
+           download_token = ?, confirmed_at = ?, owner_email_status = 'pending', customer_email_status = 'pending',
+           owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL
        WHERE id = ? AND status != 'confirmed'`
     )
     .bind(downloadToken, Date.now(), id)
     .run();
 
   return (result.meta?.changes ?? 0) > 0;
+}
+
+
+export async function getOrdersNeedingEmailDelivery(limit = 25): Promise<Order[]> {
+  const db = await getOrdersDb();
+  const safeLimit = Math.max(1, Math.min(50, Math.floor(limit)));
+  const result = await db.prepare(
+    `SELECT * FROM orders
+     WHERE status = 'confirmed'
+       AND (owner_email_status != 'sent' OR customer_email_status != 'sent')
+     ORDER BY confirmed_at ASC
+     LIMIT ?`
+  ).bind(safeLimit).all<Order>();
+  return result.results ?? [];
+}
+
+export async function claimOrderEmail(
+  id: string,
+  kind: "owner" | "customer"
+): Promise<boolean> {
+  const db = await getOrdersDb();
+  const now = Date.now();
+  const column = kind === "owner" ? "owner_email_status" : "customer_email_status";
+  const claimedColumn = kind === "owner" ? "owner_email_claimed_at" : "customer_email_claimed_at";
+  const result = await db.prepare(
+    `UPDATE orders
+     SET ${column} = 'sending', ${claimedColumn} = ?
+     WHERE id = ? AND status = 'confirmed'
+       AND (${column} = 'pending' OR (${column} = 'sending' AND COALESCE(${claimedColumn}, 0) < ?))`
+  ).bind(now, id, now - 10 * 60 * 1000).run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function markOrderEmailSent(
+  id: string,
+  kind: "owner" | "customer"
+): Promise<void> {
+  const db = await getOrdersDb();
+  const column = kind === "owner" ? "owner_email_status" : "customer_email_status";
+  const claimedColumn = kind === "owner" ? "owner_email_claimed_at" : "customer_email_claimed_at";
+  await db.prepare(
+    `UPDATE orders SET ${column} = 'sent', ${claimedColumn} = NULL, email_last_error = NULL WHERE id = ?`
+  ).bind(id).run();
+}
+
+export async function markOrderEmailFailed(id: string, error: string): Promise<void> {
+  const db = await getOrdersDb();
+  await db.prepare(
+    "UPDATE orders SET owner_email_status = CASE WHEN owner_email_status = 'sending' THEN 'pending' ELSE owner_email_status END, customer_email_status = CASE WHEN customer_email_status = 'sending' THEN 'pending' ELSE customer_email_status END, owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = ? WHERE id = ?"
+  ).bind(error.slice(0, 1000), id).run();
 }

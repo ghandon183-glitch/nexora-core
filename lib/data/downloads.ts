@@ -1,5 +1,6 @@
 // Templates with a real, downloadable source-code package.
 export const DOWNLOADS: Record<string, string> = {
+  "all-templates": "/downloads/Nexora-All-Templates-v1.0.0.zip",
   "modern-saas": "/downloads/modern-saas.zip",
   "admin-dashboard": "/downloads/admin-dashboard.zip",
   "creative-agency": "/downloads/creative-agency.zip",

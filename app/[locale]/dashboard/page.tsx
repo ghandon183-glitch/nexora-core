@@ -132,12 +132,13 @@ export default function DashboardPage() {
             <div className="mt-6 space-y-4">
 
               {purchases.map((purchase) => {
-                const hasPackage = getDownloadAssetPath(purchase.slug) !== null;
+                const isBundle = purchase.slug === "all-templates";
+                const hasPackage = isBundle || getDownloadAssetPath(purchase.slug) !== null;
                 // Download goes through the token-authorized endpoint — never
                 // a direct public `/downloads/<slug>.zip` URL. Purchases made
                 // before this change (no stored token) fall back to guidance.
                 const downloadHref = purchase.downloadToken
-                  ? `/api/download/${purchase.downloadToken}`
+                  ? (isBundle ? `/download/bundle/${purchase.downloadToken}` : `/api/download/${purchase.downloadToken}`)
                   : null;
 
                 return (
@@ -178,7 +179,7 @@ export default function DashboardPage() {
                       {downloadHref && (
                         <a href={downloadHref} download>
                           <Button>
-                            {t("downloadSource")}
+                            {isBundle ? "Open bundle downloads" : t("downloadSource")}
                           </Button>
                         </a>
                       )}
