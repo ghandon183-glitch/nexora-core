@@ -4,6 +4,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getOrderByToken } from "@/lib/orders/db";
 import { getDownloadAssetPath } from "@/lib/data/downloads";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getAllTemplates } from "@/lib/data/get-template";
 
 const ASSETS_ORIGIN = "https://assets.local";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -46,10 +47,15 @@ export async function GET(
     return deny();
   }
 
-  const assetPath = getDownloadAssetPath(order.template_slug);
-  if (!assetPath) {
-    return deny(404);
+  const requestedSlug = new URL(request.url).searchParams.get("slug") || order.template_slug;
+  if (order.template_slug === "all-templates") {
+    if (!getAllTemplates().some((template) => template.slug === requestedSlug)) return deny(404);
+  } else if (requestedSlug !== order.template_slug) {
+    return deny(403);
   }
+
+  const assetPath = getDownloadAssetPath(requestedSlug);
+  if (!assetPath) return deny(404);
 
   let assetResponse: Response;
   try {
@@ -73,7 +79,7 @@ export async function GET(
     return deny(404);
   }
 
-  const filename = `${order.template_slug}.zip`;
+  const filename = `${requestedSlug}.zip`;
   const headers = new Headers({
     "Content-Type": "application/zip",
     "Content-Disposition": `attachment; filename="${filename}"`,
