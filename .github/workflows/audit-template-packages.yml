@@ -48,6 +48,7 @@ jobs:
                   names=f.namelist()
                   files=[n for n in names if not n.endswith("/")]
                   text_names=[n for n in files if n.lower().endswith((".md",".txt",".ts",".tsx",".js",".jsx",".css",".html",".mjs",".cjs",".yaml",".yml",".toml")) and Path(n).name.lower() not in ("package-lock.json","pnpm-lock.yaml","yarn.lock") and "node_modules/" not in n]
+                  asset_manifests=[n for n in files if Path(n).name.lower()=="asset-licenses.md"]
                   licenses=[n for n in files if re.search(r'(^|/)(license|licence)([^/]*)(\.md|\.txt|$)',n,re.I)]
                   readmes=[n for n in files if re.search(r'(^|/)readme([^/]*)\.(md|txt)$',n,re.I)]
                   packages=[n for n in files if n.endswith("package.json")]
@@ -69,7 +70,7 @@ jobs:
                       except: pass
                   rows.append({
                     "package":z.name,"bytes":z.stat().st_size,"sha256":hashes,
-                    "files":len(files),"readmes":readmes,"licenses":licenses,
+                    "files":len(files),"readmes":readmes,"licenses":licenses,"asset_manifests":asset_manifests,
                     "package_json":packages,"env_examples":[n for n in envs if not Path(n).name.startswith(".env.local")],
                     "asset_count":len(asset_files),"asset_samples":asset_files[:30],
                     "bundled_build_artifacts":suspicious,
@@ -79,7 +80,7 @@ jobs:
           Path(".template-audit/report.json").write_text(json.dumps(rows,indent=2),encoding="utf-8")
           lines=["# Nexora Template Package Audit","","> Automated review only. External references are flagged for human license verification; dependency metadata URLs are intentionally excluded.",""]
           for r in rows:
-              lines += [f"## {r['package']}",f"- Archive: {r['bytes']:,} bytes",f"- Files: {r['files']}",f"- README: {'YES' if r['readmes'] else 'NO'}",f"- License: {'YES' if r['licenses'] else 'NO'}",f"- package.json: {'YES' if r['package_json'] else 'NO'}",f"- Asset files: {r['asset_count']}",f"- Bundled build artifacts: {', '.join(r['bundled_build_artifacts'][:8]) or 'none'}",f"- External asset references detected: {len(r.get('external_asset_references',[]))}",""]
+              lines += [f"## {r['package']}",f"- Archive: {r['bytes']:,} bytes",f"- Files: {r['files']}",f"- README: {'YES' if r['readmes'] else 'NO'}",f"- License: {'YES' if r['licenses'] else 'NO'}",f"- Asset license manifest: {'YES' if r.get('asset_manifests') else 'NO'}",f"- package.json: {'YES' if r['package_json'] else 'NO'}",f"- Asset files: {r['asset_count']}",f"- Bundled build artifacts: {', '.join(r['bundled_build_artifacts'][:8]) or 'none'}",f"- External asset references detected: {len(r.get('external_asset_references',[]))}",""]
           Path(".template-audit/REPORT.md").write_text("\n".join(lines),encoding="utf-8")
           PY
 
