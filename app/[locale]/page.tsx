@@ -2,6 +2,7 @@ import Navbar from "@/components/navigation/navbar";
 import Hero from "@/components/sections/hero-optimized";
 import TrustedBy from "@/components/sections/trusted-by";
 import FeaturedTemplates from "@/components/sections/featured-templates";
+import BundleBanner from "@/components/sections/bundle-banner";
 import ComponentsShowcase from "@/components/sections/components-showcase";
 import Pricing from "@/components/sections/pricing";
 import Testimonials from "@/components/sections/testimonials";
@@ -67,6 +68,7 @@ export default async function Home() {
         <Hero />
         <TrustedBy />
         <FeaturedTemplates />
+        <BundleBanner />
         <ComponentsShowcase />
         <DashboardPreview />
         <Pricing />
