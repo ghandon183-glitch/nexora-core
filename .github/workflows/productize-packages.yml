@@ -123,12 +123,34 @@ jobs:
                   names = set(zin.namelist())
                   for info in zin.infolist():
                       zout.writestr(info, zin.read(info.filename))
-                  additions = {
+                  asset_manifest = """# Asset & Third-Party License Manifest
+
+          This manifest is a practical review checklist for the supplied demo assets and external references. It is not a grant of rights from Nexora Core.
+
+          ## Included local assets
+          The archive may contain images, SVGs, videos, fonts, icons, or other media. Before shipping a finished website, confirm that each asset is either owned by you, licensed for your intended commercial use, or replaced with an asset whose commercial rights you control.
+
+          ## External references
+          Remote URLs, CDN resources, fonts, icon libraries, and demo content can carry separate terms. Review every external resource referenced by the source before production. Do not assume that a URL being publicly accessible means its content is licensed for redistribution.
+
+          ## Customer responsibility
+          The included source is a development template. The purchaser is responsible for the final site's content, third-party services, fonts, imagery, trademarks, and other assets used in the finished project.
+
+          ## Recommended release check
+          - Confirm image/video rights.
+          - Confirm font licenses.
+          - Confirm icon/library licenses.
+          - Replace demo testimonials, logos, and brand marks where required.
+          - Remove unused third-party references.
+          - Keep copies of relevant licenses or attribution notices when required.
+          """
+          additions = {
                       "LICENSE.md": license_text,
                       "SUPPORT.md": support,
                       "CHANGELOG.md": changelog,
                       "QUICKSTART.md": quickstart,
                       "CONTENTS.md": contents,
+                      "ASSET-LICENSES.md": asset_manifest,
                   }
                   for name, body in additions.items():
                       if name not in names:
