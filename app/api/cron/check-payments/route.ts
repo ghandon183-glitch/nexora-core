@@ -11,8 +11,6 @@ import {
 } from "@/lib/orders/db";
 import { checkPayment } from "@/lib/orders/verify";
 import { getPaymegateOrderStatus } from "@/lib/orders/paymegate";
-import { DOWNLOADS } from "@/lib/data/downloads";
-import { sendCustomerEmail } from "@/lib/mailer";
 import { getEnv } from "@/lib/env";
 import { deliverConfirmedOrderEmails } from "@/lib/orders/email-delivery";
 
