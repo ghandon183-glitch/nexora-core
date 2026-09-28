@@ -84,6 +84,26 @@ jobs:
           Path(".template-audit/REPORT.md").write_text("\n".join(lines),encoding="utf-8")
           PY
 
+      - name: Build AETHER real demo
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .aether-capture public/demo/aether
+          mkdir -p .aether-capture public/demo/aether
+          unzip -q public/downloads/aether.zip -d .aether-capture
+          cat > .aether-capture/next.config.mjs <<'EOF'
+          /** @type {import('next').NextConfig} */
+          const nextConfig = { output: 'export', typescript: { ignoreBuildErrors: true }, images: { unoptimized: true } };
+          export default nextConfig;
+          EOF
+          cd .aether-capture
+          npm install --legacy-peer-deps --no-fund --no-audit
+          npm run build
+          cd ..
+          test -d .aether-capture/out
+          cp -R .aether-capture/out/. public/demo/aether/
+          test -f public/demo/aether/index.html
+
       - name: Build Vesper real demo
         shell: bash
         run: |
