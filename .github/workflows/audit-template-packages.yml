@@ -1,0 +1,151 @@
+name: Audit and capture all template demos
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "public/downloads/**"
+      - ".github/workflows/audit-template-packages.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  audit-and-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install browser tooling
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Audit packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .template-audit .capture
+          mkdir -p .template-audit .capture
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile, json, re, hashlib, os
+
+          root=Path("public/downloads")
+          rows=[]
+          for z in sorted(root.glob("*.zip")):
+              if z.name.startswith("Nexora-All-Templates"): continue
+              with zipfile.ZipFile(z) as f:
+                  names=f.namelist()
+                  files=[n for n in names if not n.endswith("/")]
+                  text_names=[n for n in files if n.lower().endswith((".md",".txt",".json",".ts",".tsx",".js",".jsx",".css",".html",".mjs",".cjs",".yaml",".yml",".toml"))]
+                  licenses=[n for n in files if re.search(r'(^|/)(license|licence)([^/]*)(\.md|\.txt|$)',n,re.I)]
+                  readmes=[n for n in files if re.search(r'(^|/)readme([^/]*)\.(md|txt)$',n,re.I)]
+                  packages=[n for n in files if n.endswith("package.json")]
+                  envs=[n for n in files if ".env" in Path(n).name.lower()]
+                  asset_files=[n for n in files if re.search(r'\.(png|jpe?g|webp|gif|svg|mp4|webm|mov|woff2?|ttf|otf)$',n,re.I)]
+                  suspicious=[n for n in files if re.search(r'(^|/)(node_modules|\.git|dist|build|out|\.next)(/|$)',n,re.I)]
+                  package_data=[]
+                  for p in packages[:5]:
+                      try: package_data.append(json.loads(f.read(p)))
+                      except: package_data.append({"parse_error":True})
+                  hashes=hashlib.sha256(z.read_bytes()).hexdigest()
+                  rows.append({
+                    "package":z.name,"bytes":z.stat().st_size,"sha256":hashes,
+                    "files":len(files),"readmes":readmes,"licenses":licenses,
+                    "package_json":packages,"env_examples":[n for n in envs if not Path(n).name.startswith(".env.local")],
+                    "asset_count":len(asset_files),"asset_samples":asset_files[:30],
+                    "bundled_build_artifacts":suspicious,
+                    "packages":package_data
+                  })
+          Path(".template-audit/report.json").write_text(json.dumps(rows,indent=2),encoding="utf-8")
+          lines=["# Nexora Template Package Audit",""]
+          for r in rows:
+              lines += [f"## {r['package']}",f"- Archive: {r['bytes']:,} bytes",f"- Files: {r['files']}",f"- README: {'YES' if r['readmes'] else 'NO'}",f"- License: {'YES' if r['licenses'] else 'NO'}",f"- package.json: {'YES' if r['package_json'] else 'NO'}",f"- Asset files: {r['asset_count']}",f"- Bundled build artifacts: {', '.join(r['bundled_build_artifacts'][:8]) or 'none'}",""]
+          Path(".template-audit/REPORT.md").write_text("\n".join(lines),encoding="utf-8")
+          PY
+
+      - name: Build and serve existing live demos
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          demos=sorted(p for p in Path("public/demo").iterdir() if p.is_dir() and (p/"index.html").exists())
+          Path(".capture/demos.txt").write_text("\n".join(p.name for p in demos),encoding="utf-8")
+          print("Demos:", [p.name for p in demos])
+          PY
+          nohup python3 -m http.server 4173 --directory public >/tmp/nexora-http.log 2>&1 &
+          echo $! > .capture/server.pid
+          sleep 2
+
+      - name: Capture real demo screenshots and short walkthrough videos
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require("playwright");
+          const fs = require("fs");
+          const path = require("path");
+          const demos = fs.readFileSync(".capture/demos.txt","utf8").split("\n").filter(Boolean);
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            for(const slug of demos){
+              const out=path.join(".capture",slug);
+              fs.mkdirSync(out,{recursive:true});
+              const desktop=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+              await desktop.goto("http://127.0.0.1:4173/demo/"+slug+"/index.html",{waitUntil:"networkidle",timeout:30000}).catch(()=>{});
+              await desktop.screenshot({path:path.join(out,"desktop.png"),fullPage:false});
+              await desktop.evaluate(()=>window.scrollTo(0,Math.max(document.body.scrollHeight*.35,500)));
+              await desktop.waitForTimeout(700);
+              await desktop.screenshot({path:path.join(out,"desktop-mid.png"),fullPage:false});
+              await desktop.close();
+
+              const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+              await mobile.goto("http://127.0.0.1:4173/demo/"+slug+"/index.html",{waitUntil:"networkidle",timeout:30000}).catch(()=>{});
+              await mobile.screenshot({path:path.join(out,"mobile.png"),fullPage:false});
+              await mobile.close();
+
+              const videoPage=await browser.newPage({viewport:{width:1280,height:720},recordVideo:{dir:out,size:{width:1280,height:720}}});
+              await videoPage.goto("http://127.0.0.1:4173/demo/"+slug+"/index.html",{waitUntil:"domcontentloaded",timeout:30000}).catch(()=>{});
+              await videoPage.waitForTimeout(1200);
+              for(let i=0;i<5;i++){await videoPage.mouse.wheel(0,650); await videoPage.waitForTimeout(700);}
+              await videoPage.mouse.wheel(0,-900);
+              await videoPage.waitForTimeout(700);
+              await videoPage.close();
+            }
+            await browser.close();
+          })();
+          NODE
+
+      - name: Publish capture assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          find .capture -type f -name "*.webm" -exec sh -c 'd=$(dirname "$1"); mv "$1" "$d/walkthrough.webm"' _ {} \;
+          for d in .capture/*/; do
+            test -f "$d/desktop.png" || continue
+            slug=$(basename "$d")
+            mkdir -p "public/templates/gallery/$slug"
+            cp "$d/desktop.png" "public/templates/gallery/$slug/real-desktop.png"
+            cp "$d/desktop-mid.png" "public/templates/gallery/$slug/real-mid.png"
+            cp "$d/mobile.png" "public/templates/gallery/$slug/real-mobile.png"
+            mkdir -p "public/templates/video/$slug"
+            cp "$d/walkthrough.webm" "public/templates/video/$slug/walkthrough.webm"
+          done
+
+      - name: Commit real captures and audit report
+        shell: bash
+        run: |
+          git config user.name "Nexora Core"
+          git config user.email "ghandon183-glitch@users.noreply.github.com"
+          git add .template-audit public/templates/gallery public/templates/video
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: add real demo captures and package audit report"
+          git push
+      
