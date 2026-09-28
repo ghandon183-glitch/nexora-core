@@ -1,0 +1,163 @@
+name: Productize template packages
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  productize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add customer documentation and build collection archive
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile, tempfile, shutil, os
+
+          root = Path("public/downloads")
+          zips = sorted(p for p in root.glob("*.zip") if p.name != "Nexora-All-Templates-v1.0.0.zip")
+          if len(zips) < 12:
+              raise SystemExit(f"Expected at least 12 template packages, found {len(zips)}")
+
+          license_text = """# Nexora Core — Single End Product License
+
+          Copyright © 2026 Nexora Core. All rights reserved.
+
+          This package is licensed, not sold, to the purchaser. One purchase grants one license for one finished end product.
+
+          ## You may
+          - Use the source in one personal, commercial, or client-facing end product.
+          - Modify, extend, restyle, refactor, and combine the source with your own code.
+          - Deploy the finished end product publicly, including hosted and SaaS applications.
+          - Keep private development and backup copies.
+
+          ## You may not
+          - Resell, redistribute, sublicense, publish, or share the source package itself.
+          - Offer the source as a template, UI kit, boilerplate, starter kit, theme, or competing marketplace product.
+          - Give the reusable source package to a client as a standalone deliverable.
+          - Claim the original template source as your own work.
+          - Use the package to create a competing source-code marketplace or library.
+
+          ## Client work
+          You may build a finished website or application for a client. The client may receive the finished end product, but not the reusable template source as a separate product.
+
+          ## Multiple end products
+          One purchase covers one end product. Independent products or separate client deliverables require additional licenses unless a written agreement says otherwise.
+
+          ## Third-party assets
+          Fonts, photographs, icons, illustrations, logos, and other third-party assets remain subject to their own licenses. Review the project notes and replace demo assets when necessary.
+
+          ## Updates and support
+          Future updates are included while Nexora Core maintains the purchased template. Support covers installation and documented template behavior. Custom development, hosting, paid third-party services, and bespoke integrations are outside standard support.
+
+          ## Warranty and liability
+          The package is provided as source code for development use. To the maximum extent permitted by applicable law, Nexora Core disclaims warranties for uninterrupted operation, third-party services, future dependency changes, and fitness for a particular purpose.
+
+          If a written order-specific agreement conflicts with these terms, that written agreement controls.
+          """
+
+          support = """# Support & Updates
+
+          ## Included
+          - Installation and setup questions.
+          - Clarification of documented template behavior.
+          - Reasonable troubleshooting of reproducible issues in the supplied source.
+          - Published template updates while the product is maintained.
+
+          ## Not included
+          - Custom development or bespoke integrations.
+          - Copywriting, branding, photography, or content production.
+          - Hosting, domains, paid APIs, or third-party service fees.
+
+          ## For faster support
+          Include the template version, OS, Node.js version, package-manager version, the command that failed, and the complete error output.
+          """
+
+          changelog = """# Changelog
+
+          ## 1.0.0
+          - Customer-ready commercial package.
+          - Standard license and support documentation.
+          - Installation and production checklist included.
+          """
+
+          quickstart = """# Quick Start
+
+          1. Extract the package.
+          2. Read README.md and the project documentation.
+          3. Install dependencies with the package manager used by the project.
+          4. Start the development server using the documented command.
+          5. Replace demo content, branding, links, and assets.
+          6. Configure environment variables and third-party services.
+          7. Run the production build before launch.
+
+          ## Production checklist
+          - Replace demo content.
+          - Review asset licenses.
+          - Configure environment variables.
+          - Test responsive states, forms, navigation, and accessibility.
+          - Run the production build.
+          - Deploy and verify the live site.
+          """
+
+          contents = """# Package Contents
+
+          This archive contains the editable source code for the purchased template plus the documentation needed to install, customize, and deploy it.
+
+          Review README.md first. Demo branding, text, imagery, testimonials, pricing, contact details, and third-party integrations should be replaced or configured for the buyer's project.
+          """
+
+          for z in zips:
+              tmp = Path(tempfile.mkdtemp(prefix="nexora-pkg-"))
+              out = tmp / z.name
+              with zipfile.ZipFile(z, "r") as zin, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zout:
+                  names = set(zin.namelist())
+                  for info in zin.infolist():
+                      zout.writestr(info, zin.read(info.filename))
+                  additions = {
+                      "LICENSE.md": license_text,
+                      "SUPPORT.md": support,
+                      "CHANGELOG.md": changelog,
+                      "QUICKSTART.md": quickstart,
+                      "CONTENTS.md": contents,
+                  }
+                  for name, body in additions.items():
+                      if name not in names:
+                          zout.writestr(name, body)
+              shutil.move(out, z)
+              shutil.rmtree(tmp, ignore_errors=True)
+
+          bundle = root / "Nexora-All-Templates-v1.0.0.zip"
+          with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as zout:
+              zout.writestr("BUNDLE-README.md", """# Nexora Core — All 12 Templates
+
+          This collection contains the twelve current Nexora Core source packages.
+
+          Each package is independently licensed under its included LICENSE.md. The bundle purchase does not permit redistribution of any package or the collection itself.
+
+          Start with the README.md inside the package you want to customize.
+          """)
+              for z in zips:
+                  zout.write(z, arcname=z.name)
+          PY
+
+      - name: Commit package updates
+        run: |
+          git config user.name "Nexora Core"
+          git config user.email "ghandon183-glitch@users.noreply.github.com"
+          git add public/downloads
+          if git diff --cached --quiet; then
+            echo "No package changes required."
+            exit 0
+          fi
+          git commit -m "chore: productize all template packages"
+          git push
