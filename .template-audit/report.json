@@ -1,0 +1,998 @@
+[
+  {
+    "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
+    "bytes": 104446,
+    "sha256": "5a859230cf8a72797eba391edac411a1e8866bb6b7949d59c1dec373438d93a7",
+    "files": 44,
+    "readmes": [
+      "README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "package.json"
+    ],
+    "env_examples": [
+      ".env.example"
+    ],
+    "asset_count": 5,
+    "asset_samples": [
+      "src/assets/images/vesper_hero_cinematic_1790162202012.webp",
+      "src/assets/images/vesper_fashion_previs_1790162254947.webp",
+      "src/assets/images/vesper_video_frame_1790162217348.webp",
+      "src/assets/images/vesper_showcase_portrait_1790162229168.webp",
+      "src/assets/images/vesper_audio_visual_1790162242624.webp"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "http://www.w3.org/2000/",
+      "https://font",
+      "keyword:fonts.googleapis",
+      "keyword:fonts.gstatic"
+    ],
+    "packages": [
+      {
+        "name": "vesper-premium-template",
+        "private": true,
+        "version": "0.0.0",
+        "type": "module",
+        "scripts": {
+          "dev": "vite --port=3000 --host=0.0.0.0",
+          "build": "vite build",
+          "preview": "vite preview",
+          "clean": "rm -rf dist server.js",
+          "lint": "tsc --noEmit"
+        },
+        "dependencies": {
+          "@google/genai": "^2.4.0",
+          "@tailwindcss/vite": "^4.3.3",
+          "@vitejs/plugin-react": "^6.1.1",
+          "lucide-react": "^0.546.0",
+          "react": "^19.0.1",
+          "react-dom": "^19.0.1",
+          "vite": "^8.3.0",
+          "express": "^4.21.2",
+          "dotenv": "^17.2.3",
+          "motion": "^12.23.24"
+        },
+        "devDependencies": {
+          "@types/node": "^22.14.0",
+          "@types/react": "^19.3.0",
+          "@types/react-dom": "^19.3.0",
+          "autoprefixer": "^10.4.21",
+          "esbuild": "^0.25.0",
+          "tailwindcss": "^4.3.3",
+          "tsx": "^4.21.0",
+          "typescript": "^7.0.2",
+          "@types/express": "^4.17.21"
+        }
+      }
+    ]
+  },
+  {
+    "package": "admin-dashboard.zip",
+    "bytes": 86812,
+    "sha256": "27c138bfeb4b90cfd142a1118a3d18742fc095576d9ba58e125d897528ae1d42",
+    "files": 36,
+    "readmes": [
+      "admin-dashboard-template/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "admin-dashboard-template/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 5,
+    "asset_samples": [
+      "admin-dashboard-template/public/next.svg",
+      "admin-dashboard-template/public/window.svg",
+      "admin-dashboard-template/public/globe.svg",
+      "admin-dashboard-template/public/vercel.svg",
+      "admin-dashboard-template/public/file.svg"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://e",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/immer",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://rechart",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "admin-dashboard-template",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "lucide-react": "^1.23.0",
+          "next": "16.2.10",
+          "react": "19.2.4",
+          "react-dom": "19.2.4",
+          "recharts": "^3.9.2"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.10",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "aether.zip",
+    "bytes": 10480290,
+    "sha256": "117890ad6fa5cd132125679060d756734b4ba659ea01c8d09f813d06c5f9589c",
+    "files": 48,
+    "readmes": [
+      "README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 18,
+    "asset_samples": [
+      "public/placeholder-logo.png",
+      "public/icon-light-32x32.png",
+      "public/images/project-05.png",
+      "public/images/project-02.png",
+      "public/images/studio-portrait.png",
+      "public/images/project-06.png",
+      "public/images/texture-abstract.png",
+      "public/images/project-01.png",
+      "public/images/hero-fallback.png",
+      "public/images/project-04.png",
+      "public/images/project-03.png",
+      "public/placeholder-user.jpg",
+      "public/placeholder.jpg",
+      "public/apple-icon.png",
+      "public/placeholder-logo.svg",
+      "public/icon.svg",
+      "public/placeholder.svg",
+      "public/icon-dark-32x32.png"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "http://www.w3.org/2000/",
+      "https://behance.net",
+      "https://dotenvx.com",
+      "https://dribbble.com",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/yeoman/",
+      "https://in",
+      "https://linkedin.com",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/expre",
+      "https://opencollective.com/fa",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/mui-org",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/webpack",
+      "https://polar.",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://ui.",
+      "https://www.buymeacoffee.com/",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "aether-premium-creative-studio",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint ."
+        },
+        "dependencies": {
+          "@base-ui/react": "^1.5.0",
+          "@react-three/drei": "^10.7.8",
+          "@react-three/fiber": "^9.7.0",
+          "@vercel/analytics": "1.6.1",
+          "class-variance-authority": "^0.7.1",
+          "clsx": "^2.1.1",
+          "framer-motion": "^13.1.0",
+          "lucide-react": "^1.16.0",
+          "next": "16.3.0",
+          "react": "19.2.4",
+          "react-dom": "19.2.4",
+          "shadcn": "^4.8.0",
+          "tailwind-merge": "^3.3.1",
+          "three": "^0.185.1",
+          "tw-animate-css": "^1.4.0"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4.3.3",
+          "@types/node": "^24",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "@types/three": "^0.185.4",
+          "postcss": "^8.5",
+          "tailwindcss": "^4.3.3",
+          "typescript": "5.7.3"
+        },
+        "pnpm": {
+          "overrides": {
+            "hono": "4.12.25"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "package": "aurelia-store.zip",
+    "bytes": 1728403,
+    "sha256": "ee63dce15f32b44e8a7f1d271e2cafdf89bb49a313cd40ff4b08e1529c21d0db",
+    "files": 39,
+    "readmes": [
+      "aurelia-store/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "aurelia-store/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 10,
+    "asset_samples": [
+      "aurelia-store/public/images/candles-lit.jpg",
+      "aurelia-store/public/images/rings-pair.jpg",
+      "aurelia-store/public/images/ceramic-vases-colorful.jpg",
+      "aurelia-store/public/images/ring-engraved.jpg",
+      "aurelia-store/public/images/ring-bee.jpg",
+      "aurelia-store/public/images/necklace-heart.jpg",
+      "aurelia-store/public/images/vase-dried-flowers.jpg",
+      "aurelia-store/public/images/ring-cluster.jpg",
+      "aurelia-store/public/images/necklace-worn.jpg",
+      "aurelia-store/public/images/chain-macro.jpg"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://e",
+      "https://fero",
+      "https://g",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "aurelia-store",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "@fontsource/manrope": "^5.3.0",
+          "@fontsource/playfair-display": "^5.3.0",
+          "clsx": "^2.1.1",
+          "framer-motion": "^12.42.0",
+          "gsap": "^3.13.0",
+          "lucide-react": "^1.21.0",
+          "next": "16.2.9",
+          "react": "19.2.4",
+          "react-dom": "19.2.4",
+          "tailwind-merge": "^3.6.0"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.9",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "creative-agency.zip",
+    "bytes": 85566,
+    "sha256": "9ae8db4aa4422981239ef3d42986f40b1855d9b4ba90c4faf8ff4c8eccf5b673",
+    "files": 39,
+    "readmes": [
+      "creative-agency-template/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "creative-agency-template/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 5,
+    "asset_samples": [
+      "creative-agency-template/public/next.svg",
+      "creative-agency-template/public/window.svg",
+      "creative-agency-template/public/globe.svg",
+      "creative-agency-template/public/vercel.svg",
+      "creative-agency-template/public/file.svg"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "http://www.w3.org/2000/",
+      "https://e",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "creative-agency-template",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "next": "16.2.10",
+          "react": "19.2.4",
+          "react-dom": "19.2.4"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.10",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "kiln-estates.zip",
+    "bytes": 1920241,
+    "sha256": "8c2dfffd425d828de4365cbab2fc18c5cb31b2ce737d15c6aa2197fb26254ed0",
+    "files": 35,
+    "readmes": [
+      "README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 9,
+    "asset_samples": [
+      "public/next.svg",
+      "public/images/listings/holloway-ranch.jpg",
+      "public/images/listings/birchmark-cabin.jpg",
+      "public/images/listings/glasswood-house.jpg",
+      "public/images/listings/casa-del-viento.jpg",
+      "public/window.svg",
+      "public/globe.svg",
+      "public/vercel.svg",
+      "public/file.svg"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://e",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://un",
+      "https://www.patreon.com/fero",
+      "keyword:unsplash"
+    ],
+    "packages": [
+      {
+        "name": "kiln-estates",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "next": "16.2.10",
+          "react": "19.2.4",
+          "react-dom": "19.2.4"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.10",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "modern-saas.zip",
+    "bytes": 85804,
+    "sha256": "82c1f46dfe84e0a64b4f8cae1f66dc814c86392216b0cc3fcb8550734cd7888c",
+    "files": 40,
+    "readmes": [
+      "modern-saas-template/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "modern-saas-template/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 5,
+    "asset_samples": [
+      "modern-saas-template/public/next.svg",
+      "modern-saas-template/public/window.svg",
+      "modern-saas-template/public/globe.svg",
+      "modern-saas-template/public/vercel.svg",
+      "modern-saas-template/public/file.svg"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://e",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "modern-saas-template",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "next": "16.2.10",
+          "react": "19.2.4",
+          "react-dom": "19.2.4"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.10",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "nexi-ai.zip",
+    "bytes": 81516,
+    "sha256": "5355c6f4c40212b43f612d423beaf5ee405dcf2fd96b83d1ed7a7c9318577d2e",
+    "files": 29,
+    "readmes": [
+      "README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 0,
+    "asset_samples": [],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://e",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "nexi-ai",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "framer-motion": "^12.42.2",
+          "lucide-react": "^1.24.0",
+          "next": "16.2.10",
+          "react": "19.2.4",
+          "react-dom": "19.2.4"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.10",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "premium-blog.zip",
+    "bytes": 28499,
+    "sha256": "3cbded979721cd8c2b43ba31dc1a0ec641f3db0b8fb58e2b849c9c6053615b3e",
+    "files": 31,
+    "readmes": [
+      "premium-blog/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "premium-blog/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 0,
+    "asset_samples": [],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://nextj"
+    ],
+    "packages": [
+      {
+        "name": "premium-blog",
+        "version": "1.0.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "@fontsource/lora": "^5.2.5",
+          "@fontsource/inter": "^5.2.5",
+          "clsx": "^2.1.1",
+          "framer-motion": "^12.42.0",
+          "lucide-react": "^1.21.0",
+          "next": "16.2.9",
+          "react": "19.2.4",
+          "react-dom": "19.2.4",
+          "tailwind-merge": "^3.6.0"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.9",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "premium-portfolio.zip",
+    "bytes": 755245,
+    "sha256": "f7c16c4335b0b0db35a09ac3a2701e3853176f7c214ea610b5eea1ee3bf52862",
+    "files": 43,
+    "readmes": [
+      "premium-portfolio/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "premium-portfolio/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 11,
+    "asset_samples": [
+      "premium-portfolio/public/images/hero.jpg",
+      "premium-portfolio/public/images/project-4.jpg",
+      "premium-portfolio/public/images/gallery-3.jpg",
+      "premium-portfolio/public/images/gallery-1.jpg",
+      "premium-portfolio/public/images/project-1.jpg",
+      "premium-portfolio/public/images/gallery-4.jpg",
+      "premium-portfolio/public/images/gallery-2.jpg",
+      "premium-portfolio/public/images/project-3.jpg",
+      "premium-portfolio/public/images/about.jpg",
+      "premium-portfolio/public/images/hero-depth.png",
+      "premium-portfolio/public/images/project-2.jpg"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://e",
+      "https://example.com/",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/privatenumber/get-t",
+      "https://github.com/privatenumber/re",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/e",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/napi-po",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/type",
+      "https://opencollective.com/unr",
+      "https://opencollective.com/webpack",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "premium-portfolio",
+        "version": "1.0.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "@fontsource/inter": "^5.2.5",
+          "@fontsource/space-grotesk": "^5.2.8",
+          "@react-three/drei": "^10.7.8",
+          "@react-three/fiber": "^9.7.0",
+          "clsx": "^2.1.1",
+          "framer-motion": "^12.42.0",
+          "lucide-react": "^1.21.0",
+          "next": "16.2.9",
+          "react": "19.2.4",
+          "react-dom": "^19.2.4",
+          "tailwind-merge": "^3.6.0",
+          "three": "^0.180.0"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "@types/three": "^0.180.0",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.9",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "premium-restaurant.zip",
+    "bytes": 23617,
+    "sha256": "6022db37ee730906be58c2d8fba7af997ce960a33f137146f56c174d5c6e1d0a",
+    "files": 30,
+    "readmes": [
+      "premium-restaurant/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "premium-restaurant/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 0,
+    "asset_samples": [],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "https://nextj"
+    ],
+    "packages": [
+      {
+        "name": "premium-restaurant",
+        "version": "1.0.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint"
+        },
+        "dependencies": {
+          "@fontsource/cormorant-garamond": "^5.2.5",
+          "@fontsource/inter": "^5.2.5",
+          "clsx": "^2.1.1",
+          "framer-motion": "^12.42.0",
+          "lucide-react": "^1.21.0",
+          "next": "16.2.9",
+          "react": "19.2.4",
+          "react-dom": "19.2.4",
+          "tailwind-merge": "^3.6.0"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4",
+          "@types/node": "^20",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "eslint": "^9",
+          "eslint-config-next": "16.2.9",
+          "tailwindcss": "^4",
+          "typescript": "^5"
+        }
+      }
+    ]
+  },
+  {
+    "package": "solace-studio.zip",
+    "bytes": 13814935,
+    "sha256": "5bfa2036238f327e1ed0264a459eb94d6196eb1c32394dd337b1dd8e469025ab",
+    "files": 51,
+    "readmes": [
+      "solace-studio/README.md"
+    ],
+    "licenses": [
+      "LICENSE.md"
+    ],
+    "package_json": [
+      "solace-studio/package.json"
+    ],
+    "env_examples": [],
+    "asset_count": 18,
+    "asset_samples": [
+      "solace-studio/public/placeholder-logo.png",
+      "solace-studio/public/icon-light-32x32.png",
+      "solace-studio/public/images/hero-studio.png",
+      "solace-studio/public/images/trainer-3.png",
+      "solace-studio/public/images/gallery-1.png",
+      "solace-studio/public/images/gallery-5.png",
+      "solace-studio/public/images/gallery-2.png",
+      "solace-studio/public/images/trainer-2.png",
+      "solace-studio/public/images/trainer-1.png",
+      "solace-studio/public/images/gallery-3.png",
+      "solace-studio/public/images/gallery-4.png",
+      "solace-studio/public/placeholder-user.jpg",
+      "solace-studio/public/placeholder.jpg",
+      "solace-studio/public/apple-icon.png",
+      "solace-studio/public/placeholder-logo.svg",
+      "solace-studio/public/icon.svg",
+      "solace-studio/public/placeholder.svg",
+      "solace-studio/public/icon-dark-32x32.png"
+    ],
+    "bundled_build_artifacts": [],
+    "external_asset_references": [
+      "http://localho",
+      "http://www.w3.org/2000/",
+      "https://dotenvx.com",
+      "https://fero",
+      "https://github.com/",
+      "https://github.com/chalk/",
+      "https://github.com/chalk/an",
+      "https://github.com/chalk/chalk?",
+      "https://github.com/yeoman/",
+      "https://nextj",
+      "https://opencollective.com/babel",
+      "https://opencollective.com/brow",
+      "https://opencollective.com/expre",
+      "https://opencollective.com/fa",
+      "https://opencollective.com/libvip",
+      "https://opencollective.com/mui-org",
+      "https://opencollective.com/parcel",
+      "https://opencollective.com/po",
+      "https://opencollective.com/webpack",
+      "https://polar.",
+      "https://regi",
+      "https://tidelift.com/funding/github/npm/brow",
+      "https://tidelift.com/funding/github/npm/caniu",
+      "https://tidelift.com/funding/github/npm/po",
+      "https://ui.",
+      "https://www.buymeacoffee.com/",
+      "https://www.patreon.com/fero"
+    ],
+    "packages": [
+      {
+        "name": "solace-studio",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start",
+          "lint": "eslint ."
+        },
+        "dependencies": {
+          "@base-ui/react": "^1.5.0",
+          "@fontsource-variable/inter": "^5.3.0",
+          "@fontsource/fraunces": "^5.3.0",
+          "@vercel/analytics": "1.6.1",
+          "class-variance-authority": "^0.7.1",
+          "clsx": "^2.1.1",
+          "framer-motion": "^12.42.2",
+          "lucide-react": "^1.16.0",
+          "next": "^16.2.6",
+          "react": "^19",
+          "react-dom": "^19",
+          "shadcn": "^4.8.0",
+          "tailwind-merge": "^3.3.1",
+          "tw-animate-css": "^1.4.0"
+        },
+        "devDependencies": {
+          "@tailwindcss/postcss": "^4.3.3",
+          "@types/node": "^24",
+          "@types/react": "^19",
+          "@types/react-dom": "^19",
+          "postcss": "^8.5",
+          "tailwindcss": "^4.3.3",
+          "typescript": "5.7.3"
+        }
+      }
+    ]
+  }
+]
