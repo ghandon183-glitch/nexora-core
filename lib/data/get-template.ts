@@ -5,5 +5,5 @@ export function getTemplate(slug: string) {
 }
 
 export function getAllTemplates() {
-  return templates;
+  return templates.filter((template) => !template.hidden);
 }
