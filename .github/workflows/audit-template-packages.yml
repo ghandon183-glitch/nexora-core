@@ -70,6 +70,21 @@ jobs:
           Path(".template-audit/REPORT.md").write_text("\n".join(lines),encoding="utf-8")
           PY
 
+      - name: Build Vesper real demo
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .vesper-build public/demo/vesper
+          mkdir -p .vesper-build public/demo/vesper
+          unzip -q public/downloads/Nexora-Template-12-Vesper-v1.0.0.zip -d .vesper-build
+          cd .vesper-build
+          npm ci --no-fund --no-audit || npm install --no-fund --no-audit
+          npm run build
+          cd ..
+          test -d .vesper-build/dist
+          cp -R .vesper-build/dist/. public/demo/vesper/
+          test -f public/demo/vesper/index.html
+
       - name: Build and serve existing live demos
         shell: bash
         run: |
@@ -144,7 +159,7 @@ jobs:
         run: |
           git config user.name "Nexora Core"
           git config user.email "ghandon183-glitch@users.noreply.github.com"
-          git add .template-audit public/templates/gallery public/templates/video
+          git add .template-audit public/demo/vesper public/templates/gallery public/templates/video
           git diff --cached --quiet && exit 0
           git commit -m "chore: add real demo captures and package audit report"
           git push
