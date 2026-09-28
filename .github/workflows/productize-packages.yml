@@ -144,7 +144,7 @@ jobs:
           - Remove unused third-party references.
           - Keep copies of relevant licenses or attribution notices when required.
           """
-          additions = {
+                  additions = {
                       "LICENSE.md": license_text,
                       "SUPPORT.md": support,
                       "CHANGELOG.md": changelog,
