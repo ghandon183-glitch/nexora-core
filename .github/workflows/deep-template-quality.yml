@@ -75,6 +75,7 @@ jobs:
         run: |
           set +e
           python3 -m http.server 4174 --directory public >/tmp/nexora-public.log 2>&1 &
+          sleep 2
           node <<'NODE'
           const {chromium}=require('playwright'),axe=require('axe-core'),fs=require('fs'),path=require('path');
           const base='http://127.0.0.1:4174',report=JSON.parse(fs.readFileSync('.deep-audit/report.json','utf8'));
@@ -93,7 +94,7 @@ jobs:
   "solace-studio":"solace-studio"
 };
 const demos=fs.existsSync('public/demo')?fs.readdirSync('public/demo').filter(x=>fs.existsSync(path.join('public/demo',x,'index.html'))):[];
-          (async()=>{const browser=await chromium.launch({headless:true});
+          (async()=>{let browser=null; try { browser=await chromium.launch({headless:true});
             for(const r of report){const slug=r.slug, demo=demoMap[slug] && demos.includes(demoMap[slug])?demoMap[slug]:null;if(!demo)continue;r.runtime.attempted=true;
               const p=await browser.newPage({viewport:{width:1440,height:900}}),errs=[],pages=[],fails=[];
               p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});p.on('pageerror',e=>pages.push(String(e)));p.on('requestfailed',q=>fails.push({url:q.url(),error:q.failure()?.errorText||'failed'}));
@@ -103,8 +104,13 @@ const demos=fs.existsSync('public/demo')?fs.readdirSync('public/demo').filter(x=
                 r.runtime.forms=await p.$$eval('form',fs=>fs.map(f=>({action:f.action,method:f.method,inputs:f.querySelectorAll('input,textarea,select').length,hasSubmit:!!f.querySelector('button[type=submit],input[type=submit]')})));
                 await p.setViewportSize({width:390,height:844});await p.waitForTimeout(300);r.runtime.responsive.mobileOverflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2);r.runtime.ok=true;
               }catch(e){r.runtime.ok=false;pages.push(String(e))}r.runtime.consoleErrors=errs;r.runtime.pageErrors=pages;r.runtime.failedRequests=fails;if(errs.length||pages.length)r.runtime.ok=false;await p.close()
-            }await browser.close();fs.writeFileSync('.deep-audit/report.json',JSON.stringify(report,null,2))
-          })()
+            }
+          } catch (e) {
+            console.error("RUNTIME_AUDIT_FATAL", e);
+          } finally {
+            if (browser) await browser.close().catch(()=>{});
+            fs.writeFileSync('.deep-audit/report.json',JSON.stringify(report,null,2));
+          }})()
           NODE
       - name: Write report
         if: always()
