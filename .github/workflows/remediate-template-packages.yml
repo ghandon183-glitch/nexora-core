@@ -83,7 +83,7 @@ jobs:
             const pkg=walk(d).find(x=>path.basename(x)==='package.json'); if(!pkg) continue;
             const cwd=path.dirname(pkg), p=JSON.parse(fs.readFileSync(pkg,'utf8'));
             try{cp.execFileSync('bash',['-lc','npm install --legacy-peer-deps --no-fund --audit=true && chmod -R u+rx node_modules/.bin 2>/dev/null || true && chmod -R u+rx node_modules/next 2>/dev/null || true'],{cwd,stdio:'inherit',timeout:300000})}catch(e){failed=true;continue}
-            if(p.scripts?.build)try{cp.execFileSync('bash',['-lc','npm run build'],{cwd,stdio:'inherit',timeout:300000})}catch(e){failed=true}
+            if(p.scripts?.build)try{const buildCmd=p.dependencies?.next? 'node node_modules/next/dist/bin/next build' : 'npm run build'; cp.execFileSync('bash',['-lc',buildCmd],{cwd,stdio:'inherit',timeout:300000})}catch(e){failed=true}
             const audit=cp.spawnSync('bash',['-lc','npm audit --audit-level=high --omit=dev'],{cwd,encoding:'utf8',timeout:180000});
             if(audit.status!==0){console.error(audit.stdout+audit.stderr);failed=true}
           }
