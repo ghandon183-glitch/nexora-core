@@ -44,8 +44,23 @@ export default async function SeoGuidePage({ params }: PageProps) {
   const guide = seoGuides.find((item) => item.slug === slug);
   if (!guide) notFound();
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: guide.title,
+    description: guide.description,
+    mainEntityOfPage: `https://nexora-core.nxora.workers.dev/en/guides/${guide.slug}`,
+    author: { "@type": "Organization", name: "Nexora Core" },
+    publisher: { "@type": "Organization", name: "Nexora Core" },
+    dateModified: "2026-09-29",
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       <Navbar />
       <main className="min-h-screen bg-[#060B18] pt-36 pb-24">
         <Container>
