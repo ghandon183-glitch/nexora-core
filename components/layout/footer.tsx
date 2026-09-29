@@ -15,7 +15,7 @@ export default function Footer() {
   ];
   const resourceLinks: { label: string; href?: string; disabled?: boolean }[] = [
     { label: t("documentation"), href: "/docs" }, { label: "FAQ", href: "/faq" }, { label: "Support", href: "/support" }, { label: "License", href: "/license" }, { label: "Refunds", href: "/refunds" },
-    { label: t("guides"), disabled: true }, { label: t("blog"), disabled: true }, { label: "Contact", href: "/contact" },
+    { label: t("guides"), href: "/guides" }, { label: t("blog"), disabled: true }, { label: "Contact", href: "/contact" },
   ];
   const companyLinks = [
     { label: t("about"), href: "/about" }, { label: t("contact"), href: "/contact" },
