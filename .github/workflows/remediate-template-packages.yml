@@ -70,7 +70,7 @@ jobs:
               p.dependencies=deps;
               fs.writeFileSync(pkg,JSON.stringify(p,null,2)+"\n");
               try {
-                run('npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd);
+                run('rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd);\n                run('chmod -R u+rx node_modules/.bin 2>/dev/null || true; chmod -R u+rx node_modules/next 2>/dev/null || true',cwd);
               } catch(e) {
                 console.error("DEPENDENCY_UPDATE_FAILED",slug,e.message);
               }
@@ -113,7 +113,7 @@ jobs:
             const files=(function walk(x,a=[]){for(const n of fs.readdirSync(x,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(x,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a})(d);
             const pkg=files.find(x=>path.basename(x)==='package.json'); if(!pkg) continue;
             const cwd=path.dirname(pkg); const p=JSON.parse(fs.readFileSync(pkg,'utf8'));
-            execFileSync('bash',['-lc','npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false'],{cwd,stdio:'inherit',timeout:300000});
+            execFileSync('bash',['-lc','rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false && chmod -R u+rx node_modules/.bin 2>/dev/null || true && chmod -R u+rx node_modules/next 2>/dev/null || true'],{cwd,stdio:'inherit',timeout:300000});
             if(p.scripts?.build) execFileSync('bash',['-lc','npm run build'],{cwd,stdio:'inherit',timeout:300000});
             const audit=cp.spawnSync('bash',['-lc','npm audit --audit-level=high --omit=dev'],{cwd,encoding:'utf8',timeout:180000});
             if(audit.status!==0){console.error(audit.stdout+audit.stderr);process.exitCode=1}
