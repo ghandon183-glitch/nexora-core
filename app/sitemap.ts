@@ -14,11 +14,17 @@ async function getSiteUrl() {
 const staticPaths = [
   "",
   "/templates",
+  "/templates/compare",
+  "/bundle",
   "/pricing",
   "/components",
   "/about",
   "/contact",
   "/docs",
+  "/faq",
+  "/support",
+  "/license",
+  "/refunds",
   "/privacy",
   "/terms",
 ];
@@ -28,6 +34,7 @@ function buildAlternates(path: string, siteUrl: string) {
   for (const locale of routing.locales) {
     languages[locale] = `${siteUrl}/${locale}${path}`;
   }
+  languages["x-default"] = `${siteUrl}/en${path}`;
   return languages;
 }
 
@@ -39,9 +46,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const locale of routing.locales) {
       entries.push({
         url: `${siteUrl}/${locale}${path}`,
-        lastModified: new Date(),
-        changeFrequency: path === "" || path === "/templates" ? "weekly" : "monthly",
-        priority: path === "" ? 1 : path === "/templates" ? 0.9 : 0.6,
+        lastModified: new Date("2026-09-29T00:00:00Z"),
+        changeFrequency:
+          path === "" || path === "/templates" ? "weekly" : "monthly",
+        priority:
+          path === ""
+            ? 1
+            : path === "/templates"
+              ? 0.9
+              : path === "/faq" || path === "/bundle"
+                ? 0.8
+                : 0.6,
         alternates: {
           languages: buildAlternates(path, siteUrl),
         },
@@ -50,15 +65,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const templates = getAllTemplates();
+
   for (const template of templates) {
     for (const locale of routing.locales) {
       entries.push({
         url: `${siteUrl}/${locale}/templates/${template.slug}`,
-        lastModified: new Date(template.lastUpdate || Date.now()),
+        lastModified: new Date(template.lastUpdate || "2026-09-29T00:00:00Z"),
         changeFrequency: "monthly",
-        priority: 0.8,
+        priority: 0.9,
         alternates: {
           languages: buildAlternates(`/templates/${template.slug}`, siteUrl),
+        },
+      });
+
+      entries.push({
+        url: `${siteUrl}/${locale}/docs/${template.slug}`,
+        lastModified: new Date(template.lastUpdate || "2026-09-29T00:00:00Z"),
+        changeFrequency: "monthly",
+        priority: 0.7,
+        alternates: {
+          languages: buildAlternates(`/docs/${template.slug}`, siteUrl),
         },
       });
     }
