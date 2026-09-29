@@ -55,6 +55,7 @@ jobs:
 
       - name: Commit applied hero
         run: |
+          # Keep this workflow deterministic; the approved asset is already applied.
           git config user.name "Nexora Core"
           git config user.email "ghandon183-glitch@users.noreply.github.com"
           git add public/demo/premium-portfolio/images/hero.jpg public/downloads/premium-portfolio.zip
