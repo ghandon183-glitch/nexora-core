@@ -59,12 +59,16 @@ jobs:
           from pathlib import Path
           import zipfile,shutil,tempfile
           root=Path("public/downloads"); work=Path(".package-remediation/work")
+          EXCLUDE={"node_modules",".git",".next","dist","build","out"}
           for d in sorted(work.iterdir()):
               if not d.is_dir(): continue
               target=root/(d.name+".zip"); fd,tmp=tempfile.mkstemp(suffix=".zip"); Path(tmp).unlink()
               with zipfile.ZipFile(tmp,"w",zipfile.ZIP_DEFLATED) as z:
                   for p in d.rglob("*"):
-                      if p.is_file(): z.write(p,p.relative_to(d))
+                      if not p.is_file(): continue
+                      rel=p.relative_to(d)
+                      if any(part in EXCLUDE for part in rel.parts): continue
+                      z.write(p,rel)
               shutil.move(tmp,target)
           PY
 
