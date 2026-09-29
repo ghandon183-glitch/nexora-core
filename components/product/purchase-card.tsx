@@ -18,14 +18,12 @@ export default function PurchaseCard({
   const t = useTranslations("ProductDetail");
   const previewUrl = demoUrl;
   const hasDemo = previewUrl && previewUrl !== "#";
+
   return (
     <aside className="xl:sticky xl:top-40 xl:self-start">
       <Card className="rounded-3xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-xl">
-
         <div className="space-y-8">
-
           <div>
-
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
               {t("premiumLicense")}
             </p>
@@ -35,29 +33,30 @@ export default function PurchaseCard({
             </h2>
 
             <div className="mt-6 space-y-3 text-base text-slate-300">
-
               <div>✓ {t("onePayment")}</div>
-
               <div>✓ {t("lifetimeUpdates")}</div>
-
               <div>✓ {t("commercialLicense")}</div>
-
               <div>✓ {t("premiumSupport")}</div>
-
             </div>
-
           </div>
 
           <div className="space-y-4">
-
-            <Link href={`/checkout/${slug}`}>
-              <Button className="w-full">
-                {t("purchaseNow")}
-              </Button>
+            <Link
+              href={`/checkout/${slug}`}
+              data-analytics-event="checkout_start"
+              data-analytics-template={slug}
+            >
+              <Button className="w-full">{t("purchaseNow")}</Button>
             </Link>
 
             {hasDemo ? (
-              <a href={previewUrl} target="_blank" rel="noopener noreferrer">
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-analytics-event="live_demo_click"
+                data-analytics-template={slug}
+              >
                 <Button variant="outline" className="w-full">
                   {t("livePreview")}
                 </Button>
@@ -72,11 +71,8 @@ export default function PurchaseCard({
                 {t("livePreviewComingSoon")}
               </Button>
             )}
-
           </div>
-
         </div>
-
       </Card>
     </aside>
   );
