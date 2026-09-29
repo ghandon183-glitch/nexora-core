@@ -29,73 +29,42 @@ jobs:
           set -euo pipefail
           rm -rf .package-remediation
           mkdir -p .package-remediation/work
-
           python3 - <<'PY'
           from pathlib import Path
           import zipfile
-          root=Path("public/downloads")
-          work=Path(".package-remediation/work")
+          root=Path("public/downloads"); work=Path(".package-remediation/work")
           for z in sorted(root.glob("*.zip")):
-              if z.name.startswith("Nexora-All-Templates"):
-                  continue
-              d=work/z.stem
-              d.mkdir(parents=True, exist_ok=True)
-              with zipfile.ZipFile(z) as f:
-                  f.extractall(d)
+              if z.name.startswith("Nexora-All-Templates"): continue
+              d=work/z.stem; d.mkdir(parents=True, exist_ok=True)
+              with zipfile.ZipFile(z) as f: f.extractall(d)
           PY
-
           node <<'NODE'
-          const fs=require('fs'), path=require('path'), cp=require('child_process');
+          const fs=require('fs'),path=require('path'),cp=require('child_process');
           const root=path.join(process.cwd(),'.package-remediation','work');
           function walk(d,a=[]){for(const n of fs.readdirSync(d,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(d,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a}
-          function run(cmd,cwd,timeout=300000){try{return cp.execFileSync('bash',['-lc',cmd],{cwd,timeout,encoding:'utf8',stdio:['ignore','pipe','pipe']})}catch(e){throw new Error((e.stdout||'')+'\n'+(e.stderr||''))}}
+          function run(cmd,cwd,timeout=300000){return cp.execFileSync('bash',['-lc',cmd],{cwd,timeout,encoding:'utf8',stdio:['ignore','pipe','pipe']})}
           for(const slug of fs.readdirSync(root)){
-            const dir=path.join(root,slug);
-            const pkg=walk(dir).find(x=>path.basename(x)==='package.json');
+            const dir=path.join(root,slug), pkg=walk(dir).find(x=>path.basename(x)==='package.json');
             if(!pkg) continue;
-            const rel=path.relative(dir,path.dirname(pkg));
-            const cwd=path.dirname(pkg);
-            let p=JSON.parse(fs.readFileSync(pkg,'utf8'));
+            const cwd=path.dirname(pkg), p=JSON.parse(fs.readFileSync(pkg,'utf8')), deps=p.dependencies||{};
             let changed=false;
-            const deps=p.dependencies||{};
-            if(deps.next){
-              deps.next="16.3.6"; changed=true;
-              if(p.devDependencies && p.devDependencies["eslint-config-next"]) {
-                p.devDependencies["eslint-config-next"]="16.3.6";
-              }
-            }
-            if(deps.nodemailer){ deps.nodemailer="10.0.11"; changed=true; }
-            if(deps.nanoid && /^([~^]?)(3\\.)/.test(deps.nanoid)){ deps.nanoid="3.3.19"; changed=true; }
-            if(changed){
-              p.dependencies=deps;
-              fs.writeFileSync(pkg,JSON.stringify(p,null,2)+"\n");
-              try {
-                run('rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd);
-                run('chmod -R u+rx node_modules/.bin 2>/dev/null || true; chmod -R u+rx node_modules/next 2>/dev/null || true',cwd);
-              } catch(e) {
-                console.error("DEPENDENCY_UPDATE_FAILED",slug,e.message);
-              }
-            }
-            if(p.scripts?.lint){
-              try { run('npm run lint -- --fix',cwd,180000); } catch(e) {}
-            }
+            if(deps.next){deps.next="16.3.6";changed=true;if(p.devDependencies?.["eslint-config-next"])p.devDependencies["eslint-config-next"]="16.3.6"}
+            if(deps.nodemailer){deps.nodemailer="10.0.11";changed=true}
+            if(deps.nanoid && /^([~^]?)(3\.)/.test(deps.nanoid)){deps.nanoid="3.3.19";changed=true}
+            if(changed){p.dependencies=deps;fs.writeFileSync(pkg,JSON.stringify(p,null,2)+"\n");run('rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd)}
+            if(p.scripts?.lint){try{run('npm run lint -- --fix',cwd,180000)}catch(e){}}
           }
           NODE
-
           python3 - <<'PY'
           from pathlib import Path
           import zipfile,shutil,tempfile
-          root=Path("public/downloads")
-          work=Path(".package-remediation/work")
+          root=Path("public/downloads"); work=Path(".package-remediation/work")
           for d in sorted(work.iterdir()):
               if not d.is_dir(): continue
-              target=root/(d.name+".zip")
-              fd,tmp=tempfile.mkstemp(suffix=".zip")
-              Path(tmp).unlink()
+              target=root/(d.name+".zip"); fd,tmp=tempfile.mkstemp(suffix=".zip"); Path(tmp).unlink()
               with zipfile.ZipFile(tmp,"w",zipfile.ZIP_DEFLATED) as z:
                   for p in d.rglob("*"):
-                      if p.is_file():
-                          z.write(p,p.relative_to(d))
+                      if p.is_file(): z.write(p,p.relative_to(d))
               shutil.move(tmp,target)
           PY
 
@@ -105,20 +74,20 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs'),path=require('path'),cp=require('child_process'),os=require('os');
-          const {execFileSync}=cp;
           const zips=fs.readdirSync('public/downloads').filter(x=>x.endsWith('.zip')&&!x.startsWith('Nexora-All-Templates'));
-          const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'nexora-remediate-'));
+          const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'nexora-remediate-')); let failed=false;
+          function walk(x,a=[]){for(const n of fs.readdirSync(x,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(x,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a}
           for(const zip of zips){
             const d=path.join(tmp,path.basename(zip,'.zip'));fs.mkdirSync(d,{recursive:true});
-            execFileSync('python3',['-c',`import zipfile; zipfile.ZipFile(r"${path.resolve('public/downloads',zip)}").extractall(r"${d}")`]);
-            const files=(function walk(x,a=[]){for(const n of fs.readdirSync(x,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(x,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a})(d);
-            const pkg=files.find(x=>path.basename(x)==='package.json'); if(!pkg) continue;
-            const cwd=path.dirname(pkg); const p=JSON.parse(fs.readFileSync(pkg,'utf8'));
-            execFileSync('bash',['-lc','rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false && chmod -R u+rx node_modules/.bin 2>/dev/null || true && chmod -R u+rx node_modules/next 2>/dev/null || true'],{cwd,stdio:'inherit',timeout:300000});
-            if(p.scripts?.build) execFileSync('bash',['-lc','npm run build'],{cwd,stdio:'inherit',timeout:300000});
+            cp.execFileSync('python3',['-c',`import zipfile; zipfile.ZipFile(r"${path.resolve('public/downloads',zip)}").extractall(r"${d}")`]);
+            const pkg=walk(d).find(x=>path.basename(x)==='package.json'); if(!pkg) continue;
+            const cwd=path.dirname(pkg), p=JSON.parse(fs.readFileSync(pkg,'utf8'));
+            try{cp.execFileSync('bash',['-lc','npm install --legacy-peer-deps --no-fund --audit=true'],{cwd,stdio:'inherit',timeout:300000})}catch(e){failed=true;continue}
+            if(p.scripts?.build)try{cp.execFileSync('bash',['-lc','npm run build'],{cwd,stdio:'inherit',timeout:300000})}catch(e){failed=true}
             const audit=cp.spawnSync('bash',['-lc','npm audit --audit-level=high --omit=dev'],{cwd,encoding:'utf8',timeout:180000});
-            if(audit.status!==0){console.error(audit.stdout+audit.stderr);process.exitCode=1}
+            if(audit.status!==0){console.error(audit.stdout+audit.stderr);failed=true}
           }
+          if(failed) process.exit(1);
           NODE
 
       - name: Commit remediated packages
