@@ -70,7 +70,8 @@ jobs:
               p.dependencies=deps;
               fs.writeFileSync(pkg,JSON.stringify(p,null,2)+"\n");
               try {
-                run('rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd);\n                run('chmod -R u+rx node_modules/.bin 2>/dev/null || true; chmod -R u+rx node_modules/next 2>/dev/null || true',cwd);
+                run('rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd);
+                run('chmod -R u+rx node_modules/.bin 2>/dev/null || true; chmod -R u+rx node_modules/next 2>/dev/null || true',cwd);
               } catch(e) {
                 console.error("DEPENDENCY_UPDATE_FAILED",slug,e.message);
               }
