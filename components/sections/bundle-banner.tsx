@@ -1,4 +1,29 @@
 import { Link } from "@/i18n/navigation";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
-export default function BundleBanner(){return <section className="mx-auto max-w-7xl px-6 py-8"><Card className="overflow-hidden rounded-3xl border border-cyan-400/20 bg-gradient-to-r from-cyan-400/[0.08] to-white/[0.02] p-7 md:p-9"><div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300">Complete collection</p><h2 className="mt-2 text-2xl font-black text-white">All 12 templates for $199</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">One purchase for the current Nexora Core collection, with unified documentation, support, and secure delivery.</p></div><Link href="/bundle"><Button>Explore the bundle</Button></Link></div></Card></section>}
+
+export default function BundleBanner() {
+  return (
+    <section className="mx-auto max-w-7xl px-6 py-8">
+      <Card className="overflow-hidden rounded-3xl border border-cyan-400/20 bg-gradient-to-r from-cyan-400/[0.08] to-white/[0.02] p-7 md:p-9">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300">
+              Complete collection
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-white">
+              Explore all 12 templates
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Browse the full Nexora Core collection and open any template&apos;s
+              real demo, documentation, and checkout.
+            </p>
+          </div>
+          <Link href="/bundle">
+            <Button>Explore the collection</Button>
+          </Link>
+        </div>
+      </Card>
+    </section>
+  );
+}
