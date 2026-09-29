@@ -16,8 +16,6 @@ function track(event: string, params: Record<string, unknown> = {}) {
 
 export default function SiteAnalytics() {
   useEffect(() => {
-    track("page_view", { page_path: window.location.pathname });
-
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       const element = target?.closest<HTMLElement>("[data-analytics-event]");
