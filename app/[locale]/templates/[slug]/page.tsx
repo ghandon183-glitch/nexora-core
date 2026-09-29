@@ -149,6 +149,13 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
         <Container className="pb-24">
           <div className="flex flex-col xl:flex-row xl:items-start xl:gap-16">
             <div className="min-w-0 flex-1 space-y-16">
+              <div
+                data-analytics-view-item
+                data-analytics-template={template.slug}
+                data-analytics-name={template.title}
+                data-analytics-category={template.category}
+                data-analytics-price={template.price}
+              />
               <ProductGallery images={template.gallery} />
               <ProductDemoVideo src={template.videoUrl} />
               <ProductHeader
