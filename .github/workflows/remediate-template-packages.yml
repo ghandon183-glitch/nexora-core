@@ -66,6 +66,10 @@ jobs:
             }
             if(deps.nodemailer){ deps.nodemailer="10.0.11"; changed=true; }
             if(deps.nanoid && /^([~^]?)(3\\.)/.test(deps.nanoid)){ deps.nanoid="3.3.19"; changed=true; }
+            if(deps.next){
+              p.overrides={...(p.overrides||{}), sharp:"0.35.5", postcss:"8.5.28", nanoid:"3.3.19"};
+              changed=true;
+            }
             if(changed){
               p.dependencies=deps;
               fs.writeFileSync(pkg,JSON.stringify(p,null,2)+"\n");
