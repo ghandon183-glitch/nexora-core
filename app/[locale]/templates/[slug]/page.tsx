@@ -33,7 +33,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const template = getTemplate(slug);
 
   if (!template || !routing.locales.includes(locale as Locale)) {
-    return { title: "Template not found", robots: { index: false, follow: false } };
+    return {
+      title: "Template not found",
+      robots: { index: false, follow: false },
+    };
   }
 
   const env = await getEnv();
@@ -42,20 +45,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const languages: Record<string, string> = {};
 
   for (const language of routing.locales) {
-    languages[language] = `${siteUrl}/${language}/templates/${template.slug}`;
+    languages[language] =
+      `${siteUrl}/${language}/templates/${template.slug}`;
   }
   languages["x-default"] = `${siteUrl}/en/templates/${template.slug}`;
 
   return {
-    title: template.title,
+    title: `${template.title} — Premium ${template.framework} Template`,
     description: template.description,
+    keywords: [
+      template.title,
+      `${template.framework} template`,
+      `${template.category} template`,
+      ...template.tags,
+    ],
     alternates: { canonical: canonicalPath, languages },
     openGraph: {
       title: `${template.title} | Nexora Core`,
       description: template.description,
       url: canonicalPath,
       type: "website",
-      images: [{ url: template.image, alt: `${template.title} preview` }],
+      images: template.gallery.slice(0, 3).map((image, index) => ({
+        url: image,
+        alt: `${template.title} preview ${index + 1}`,
+      })),
     },
   };
 }
@@ -70,23 +83,53 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
   const env = await getEnv();
   const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;
   const pageUrl = `${siteUrl}/${locale}/templates/${template.slug}`;
+  const productImages = template.gallery.map((image) =>
+    image.startsWith("http") ? image : `${siteUrl}${image}`
+  );
 
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: template.title,
     description: template.description,
-    image: [`${siteUrl}${template.image}`],
+    image: productImages,
     url: pageUrl,
+    sku: `nexora-${template.slug}`,
     brand: { "@type": "Brand", name: "Nexora Core" },
+    category: `${template.category} website template`,
     offers: {
       "@type": "Offer",
       url: pageUrl,
       priceCurrency: "USD",
-      price: template.price,
+      price: template.price.toFixed(2),
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
     },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${siteUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Templates",
+        item: `${siteUrl}/${locale}/templates`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: template.title,
+        item: pageUrl,
+      },
+    ],
   };
 
   return (
@@ -95,7 +138,13 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <Navbar />
+
       <main className="pt-36">
         <Container className="pb-24">
           <div className="flex flex-col xl:flex-row xl:items-start xl:gap-16">
@@ -123,11 +172,19 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
               />
               <ProductGuide guide={guide} />
             </div>
+
             <div className="mt-10 w-full xl:mt-0 xl:w-[380px] xl:flex-shrink-0">
-              <PurchaseCard slug={template.slug} price={template.price} demoUrl={template.demoUrl} />
+              <PurchaseCard
+                slug={template.slug}
+                price={template.price}
+                demoUrl={template.demoUrl}
+              />
             </div>
           </div>
-          <div className="mt-24"><RelatedTemplates /></div>
+
+          <div className="mt-24">
+            <RelatedTemplates />
+          </div>
         </Container>
       </main>
     </>
