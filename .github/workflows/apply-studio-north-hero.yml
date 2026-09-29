@@ -1,0 +1,62 @@
+name: Apply approved Studio North hero
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "public/templates/studio-north-approved-hero.jpg"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replace Studio North hero in demo and customer ZIP
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          import tempfile, os, shutil
+
+          image = Path("public/templates/studio-north-approved-hero.jpg")
+          demo = Path("public/demo/premium-portfolio/images/hero.jpg")
+          package = Path("public/downloads/premium-portfolio.zip")
+
+          if not image.exists():
+              raise SystemExit("Approved Studio North hero image is missing.")
+          if not package.exists():
+              raise SystemExit("premium-portfolio.zip is missing.")
+          if not demo.parent.exists():
+              raise SystemExit("Studio North published demo image directory is missing.")
+
+          shutil.copy2(image, demo)
+
+          replacement = image.read_bytes()
+          temp = package.with_suffix(".tmp.zip")
+
+          with ZipFile(package, "r") as src, ZipFile(temp, "w", ZIP_DEFLATED) as dst:
+              target = None
+              for info in src.infolist():
+                  if info.filename.rstrip("/") == "premium-portfolio/public/images/hero.jpg":
+                      target = info.filename
+                      dst.writestr(info, replacement)
+                  else:
+                      dst.writestr(info, src.read(info.filename))
+
+              if target is None:
+                  raise SystemExit("Could not find premium-portfolio/public/images/hero.jpg inside the customer ZIP.")
+
+          temp.replace(package)
+          PY
+
+      - name: Commit applied hero
+        run: |
+          git config user.name "Nexora Core"
+          git config user.email "ghandon183-glitch@users.noreply.github.com"
+          git add public/demo/premium-portfolio/images/hero.jpg public/downloads/premium-portfolio.zip
+          git diff --cached --quiet || git commit -m "fix: replace Studio North hero with approved visual"
+          git push
