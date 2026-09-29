@@ -64,6 +64,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  const guidePaths = [
+    "/guides/nextjs-templates-for-saas",
+    "/guides/ai-saas-templates",
+    "/guides/creative-agency-website-templates",
+    "/guides/how-to-choose-a-premium-nextjs-template",
+  ];
+
+  for (const path of guidePaths) {
+    entries.push({
+      url: `${siteUrl}/en${path}`,
+      lastModified: new Date("2026-09-29T00:00:00Z"),
+      changeFrequency: "monthly",
+      priority: 0.75,
+    });
+  }
+
   const templates = getAllTemplates();
 
   for (const template of templates) {
