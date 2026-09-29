@@ -9,6 +9,7 @@ import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/lib/context/auth-context";
 import { PurchasesProvider } from "@/lib/context/purchases-context";
 import { getEnv } from "@/lib/env";
+import SiteAnalytics from "@/components/analytics/site-analytics";
 
 const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
 
@@ -34,7 +35,7 @@ export async function generateMetadata({
       template: "%s | Nexora Core",
     },
     description:
-      "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
+      "Premium Next.js templates, dashboards, landing pages and reusable UI components for startups, SaaS products, agencies and modern web applications.",
     alternates: {
       canonical: canonicalPath,
       languages,
@@ -42,7 +43,7 @@ export async function generateMetadata({
     openGraph: {
       title: "Nexora Core | Premium Next.js Templates & UI Kit",
       description:
-        "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
+        "Premium Next.js templates, dashboards, landing pages and reusable UI components for startups, SaaS products, agencies and modern web applications.",
       url: canonicalPath,
       siteName: "Nexora Core",
       images: [
@@ -59,8 +60,14 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: "Nexora Core | Premium Next.js Templates & UI Kit",
       description:
-        "A growing collection of premium templates, dashboards, landing pages and reusable UI components for startups, SaaS products and modern web applications.",
+        "Premium Next.js templates, dashboards, landing pages and reusable UI components for startups, SaaS products, agencies and modern web applications.",
       images: ["/og-image.jpg"],
+    },
+    verification: {
+      google: env.GOOGLE_SITE_VERIFICATION,
+      other: env.BING_SITE_VERIFICATION
+        ? { "msvalidate.01": env.BING_SITE_VERIFICATION }
+        : undefined,
     },
     robots: {
       index: true,
@@ -87,13 +94,35 @@ export default async function RootLayout({
   }
 
   const messages = await getMessages();
+  const env = await getEnv();
 
   return (
     <html lang={locale} className="h-full overflow-x-hidden antialiased">
       <body className="min-h-full flex flex-col overflow-x-hidden">
+        {env.GA_MEASUREMENT_ID ? (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(env.GA_MEASUREMENT_ID)}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${env.GA_MEASUREMENT_ID}', { anonymize_ip: true });
+                `,
+              }}
+            />
+          </>
+        ) : null}
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            <PurchasesProvider>{children}</PurchasesProvider>
+            <PurchasesProvider>
+              <SiteAnalytics />
+              {children}
+            </PurchasesProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
