@@ -65,9 +65,28 @@ const GENERAL_FAQS = [
   },
 ];
 
+const FAQ_SCHEMA = [...PAYMENT_FAQS, ...GENERAL_FAQS].map((faq) => ({
+  "@type": "Question",
+  name: faq.question,
+  acceptedAnswer: {
+    "@type": "Answer",
+    text: faq.answer,
+  },
+}));
+
 export default function FaqPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ_SCHEMA,
+          }),
+        }}
+      />
       <Navbar />
 
       <Section>
