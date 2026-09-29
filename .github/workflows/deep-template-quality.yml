@@ -78,9 +78,23 @@ jobs:
           node <<'NODE'
           const {chromium}=require('playwright'),axe=require('axe-core'),fs=require('fs'),path=require('path');
           const base='http://127.0.0.1:4174',report=JSON.parse(fs.readFileSync('.deep-audit/report.json','utf8'));
-          const demos=fs.existsSync('public/demo')?fs.readdirSync('public/demo').filter(x=>fs.existsSync(path.join('public/demo',x,'index.html'))):[];
+          const demoMap={
+  "Nexora-Template-12-Vesper-v1.0.0":"vesper",
+  "admin-dashboard":"admin-dashboard",
+  "aether":"aether",
+  "aurelia-store":"aurelia-store",
+  "creative-agency":"creative-agency",
+  "kiln-estates":"kiln-estates",
+  "modern-saas":"modern-saas",
+  "nexi-ai":"nexi-ai",
+  "premium-blog":"premium-blog",
+  "premium-portfolio":"premium-portfolio",
+  "premium-restaurant":"premium-restaurant",
+  "solace-studio":"solace-studio"
+};
+const demos=fs.existsSync('public/demo')?fs.readdirSync('public/demo').filter(x=>fs.existsSync(path.join('public/demo',x,'index.html'))):[];
           (async()=>{const browser=await chromium.launch({headless:true});
-            for(const r of report){const slug=r.slug, demo=demos.includes(slug)?slug:null;if(!demo)continue;r.runtime.attempted=true;
+            for(const r of report){const slug=r.slug, demo=demoMap[slug] && demos.includes(demoMap[slug])?demoMap[slug]:null;if(!demo)continue;r.runtime.attempted=true;
               const p=await browser.newPage({viewport:{width:1440,height:900}}),errs=[],pages=[],fails=[];
               p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});p.on('pageerror',e=>pages.push(String(e)));p.on('requestfailed',q=>fails.push({url:q.url(),error:q.failure()?.errorText||'failed'}));
               try{await p.goto(base+'/demo/'+demo+'/index.html',{waitUntil:'networkidle',timeout:30000});await p.waitForTimeout(700);await p.addScriptTag({content:axe.source});
