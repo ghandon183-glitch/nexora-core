@@ -1,0 +1,129 @@
+name: Remediate template packages
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/remediate-template-packages.yml"
+
+concurrency:
+  group: nexora-template-remediation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract, patch and rebuild packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .package-remediation
+          mkdir -p .package-remediation/work
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path("public/downloads")
+          work=Path(".package-remediation/work")
+          for z in sorted(root.glob("*.zip")):
+              if z.name.startswith("Nexora-All-Templates"):
+                  continue
+              d=work/z.stem
+              d.mkdir(parents=True, exist_ok=True)
+              with zipfile.ZipFile(z) as f:
+                  f.extractall(d)
+          PY
+
+          node <<'NODE'
+          const fs=require('fs'), path=require('path'), cp=require('child_process');
+          const root=path.join(process.cwd(),'.package-remediation','work');
+          function walk(d,a=[]){for(const n of fs.readdirSync(d,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(d,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a}
+          function run(cmd,cwd,timeout=300000){try{return cp.execFileSync('bash',['-lc',cmd],{cwd,timeout,encoding:'utf8',stdio:['ignore','pipe','pipe']})}catch(e){throw new Error((e.stdout||'')+'\n'+(e.stderr||''))}}
+          for(const slug of fs.readdirSync(root)){
+            const dir=path.join(root,slug);
+            const pkg=walk(dir).find(x=>path.basename(x)==='package.json');
+            if(!pkg) continue;
+            const rel=path.relative(dir,path.dirname(pkg));
+            const cwd=path.dirname(pkg);
+            let p=JSON.parse(fs.readFileSync(pkg,'utf8'));
+            let changed=false;
+            const deps=p.dependencies||{};
+            if(deps.next){
+              deps.next="16.3.6"; changed=true;
+              if(p.devDependencies && p.devDependencies["eslint-config-next"]) {
+                p.devDependencies["eslint-config-next"]="16.3.6";
+              }
+            }
+            if(deps.nodemailer){ deps.nodemailer="10.0.11"; changed=true; }
+            if(deps.nanoid && /^([~^]?)(3\\.)/.test(deps.nanoid)){ deps.nanoid="3.3.19"; changed=true; }
+            if(changed){
+              p.dependencies=deps;
+              fs.writeFileSync(pkg,JSON.stringify(p,null,2)+"\n");
+              run('npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false',cwd);
+            }
+            if(p.scripts?.lint){
+              try { run('npm run lint -- --fix',cwd,180000); } catch(e) {}
+            }
+            try { run('npm audit fix --omit=dev --no-audit',cwd,180000); } catch(e) {}
+          }
+          NODE
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile,shutil,tempfile
+          root=Path("public/downloads")
+          work=Path(".package-remediation/work")
+          for d in sorted(work.iterdir()):
+              if not d.is_dir(): continue
+              target=root/(d.name+".zip")
+              fd,tmp=tempfile.mkstemp(suffix=".zip")
+              Path(tmp).unlink()
+              with zipfile.ZipFile(tmp,"w",zipfile.ZIP_DEFLATED) as z:
+                  for p in d.rglob("*"):
+                      if p.is_file():
+                          z.write(p,p.relative_to(d))
+              shutil.move(tmp,target)
+          PY
+
+      - name: Verify package builds and security state
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),cp=require('child_process'),os=require('os');
+          const {execFileSync}=cp;
+          const zips=fs.readdirSync('public/downloads').filter(x=>x.endsWith('.zip')&&!x.startsWith('Nexora-All-Templates'));
+          const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'nexora-remediate-'));
+          for(const zip of zips){
+            const d=path.join(tmp,path.basename(zip,'.zip'));fs.mkdirSync(d,{recursive:true});
+            execFileSync('python3',['-c',`import zipfile; zipfile.ZipFile(r"${path.resolve('public/downloads',zip)}").extractall(r"${d}")`]);
+            const files=(function walk(x,a=[]){for(const n of fs.readdirSync(x,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(x,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a})(d);
+            const pkg=files.find(x=>path.basename(x)==='package.json'); if(!pkg) continue;
+            const cwd=path.dirname(pkg); const p=JSON.parse(fs.readFileSync(pkg,'utf8'));
+            execFileSync('bash',['-lc','npm install --legacy-peer-deps --no-fund --no-audit --package-lock=false'],{cwd,stdio:'inherit',timeout:300000});
+            if(p.scripts?.build) execFileSync('bash',['-lc','npm run build'],{cwd,stdio:'inherit',timeout:300000});
+            const audit=cp.spawnSync('bash',['-lc','npm audit --audit-level=high --omit=dev'],{cwd,encoding:'utf8',timeout:180000});
+            if(audit.status!==0){console.error(audit.stdout+audit.stderr);process.exitCode=1}
+          }
+          NODE
+
+      - name: Commit remediated packages
+        shell: bash
+        run: |
+          git config user.name "Nexora Core"
+          git config user.email "ghandon183-glitch@users.noreply.github.com"
+          git add public/downloads
+          git diff --cached --quiet && exit 0
+          git commit -m "fix: remediate shipped template dependencies"
+          git pull --rebase origin main
+          git push
