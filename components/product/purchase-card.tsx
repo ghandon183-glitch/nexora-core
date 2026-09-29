@@ -43,7 +43,7 @@ export default function PurchaseCard({
           <div className="space-y-4">
             <Link
               href={`/checkout/${slug}`}
-              data-analytics-event="checkout_start"
+              data-analytics-event="begin_checkout"
               data-analytics-template={slug}
             >
               <Button className="w-full">{t("purchaseNow")}</Button>
