@@ -130,3 +130,10 @@ jobs:
 
           curl -L -sS "$base/api/products.xml" > /tmp/nexora-products.xml
           grep -q 'nexora-vesper' /tmp/nexora-products.xml
+          image_code="$(curl -L -sS -o /tmp/vesper-gallery.png -w "%{http_code}" "$base/templates/gallery/vesper/real-desktop.png")"
+          test "$image_code" = "200"
+          test "$(wc -c < /tmp/vesper-gallery.png)" -gt 20000
+          video_code="$(curl -L -sS -o /tmp/vesper-walkthrough.webm -w "%{http_code}" "$base/templates/video/vesper/walkthrough.webm")"
+          test "$video_code" = "200"
+          test "$(wc -c < /tmp/vesper-walkthrough.webm)" -gt 100000
+          echo "200 Vesper gallery image and walkthrough video"
