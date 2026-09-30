@@ -1,4 +1,5 @@
 import { DOWNLOADS } from "@/lib/data/downloads";
+import { getEnv } from "@/lib/env";
 import { enqueueOrderEmail, claimEmailOutbox, getDueEmailOutbox, markEmailOutboxFailed, markEmailOutboxSent, type Order } from "@/lib/orders/db";
 
 function escapeHtml(value: string): string {
