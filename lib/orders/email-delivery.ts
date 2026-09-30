@@ -89,6 +89,7 @@ export async function processEmailOutbox(limit = 10): Promise<{
         to: item.to_email,
         subject: item.subject,
         html: item.html,
+        messageId: `<${item.id}@nexora-core.nxora.workers.dev>`,
       });
 
       if (!emailResult.sent) {
