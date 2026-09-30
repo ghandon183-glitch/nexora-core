@@ -432,17 +432,37 @@ export async function markEmailOutboxSent(id: string): Promise<void> {
      SET status = 'sent', locked_at = NULL, sent_at = ?, last_error = NULL, updated_at = ?
      WHERE id = ?`
   ).bind(now, now, id).run();
+
+  const item = await db
+    .prepare("SELECT order_id, kind FROM email_outbox WHERE id = ?")
+    .bind(id)
+    .first<{ order_id: string; kind: "owner" | "customer" }>();
+
+  if (!item) return;
+
+  const statusColumn = item.kind === "owner" ? "owner_email_status" : "customer_email_status";
+  const claimedColumn = item.kind === "owner" ? "owner_email_claimed_at" : "customer_email_claimed_at";
+
+  await db.prepare(
+    `UPDATE orders
+     SET ${statusColumn} = 'sent',
+         ${claimedColumn} = NULL,
+         email_last_error = NULL
+     WHERE id = ? AND status = 'confirmed'`
+  ).bind(item.order_id).run();
 }
 
 export async function markEmailOutboxFailed(id: string, error: string): Promise<void> {
   const db = await getOrdersDb();
   const item = await db.prepare(
-    "SELECT attempts FROM email_outbox WHERE id = ?"
-  ).bind(id).first<{ attempts: number }>();
+    "SELECT attempts, order_id, kind FROM email_outbox WHERE id = ?"
+  ).bind(id).first<{ attempts: number; order_id: string; kind: "owner" | "customer" }>();
 
   const attempts = Number(item?.attempts ?? 1);
   const delayMs = Math.min(24 * 60 * 60 * 1000, 60 * 1000 * Math.pow(2, Math.min(attempts - 1, 10)));
   const nextAttemptAt = Date.now() + delayMs;
+
+  const safeError = error.slice(0, 1000);
 
   await db.prepare(
     `UPDATE email_outbox
@@ -452,5 +472,18 @@ export async function markEmailOutboxFailed(id: string, error: string): Promise<
          last_error = ?,
          updated_at = ?
      WHERE id = ?`
-  ).bind(nextAttemptAt, error.slice(0, 1000), Date.now(), id).run();
+  ).bind(nextAttemptAt, safeError, Date.now(), id).run();
+
+  if (item) {
+    const statusColumn = item.kind === "owner" ? "owner_email_status" : "customer_email_status";
+    const claimedColumn = item.kind === "owner" ? "owner_email_claimed_at" : "customer_email_claimed_at";
+
+    await db.prepare(
+      `UPDATE orders
+       SET ${statusColumn} = 'pending',
+           ${claimedColumn} = NULL,
+           email_last_error = ?
+       WHERE id = ? AND status = 'confirmed'`
+    ).bind(safeError, item.order_id).run();
+  }
 }
