@@ -1,5 +1,8 @@
 name: Deploy to Cloudflare Workers
 
+# Keep production deployment in sync with generated demo captures committed by CI.
+
+
 on:
   push:
     branches:
