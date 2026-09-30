@@ -91,6 +91,22 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Check production Gmail configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          secrets="$(npx wrangler secret list --name nexora-core 2>/dev/null || true)"
+          echo "$secrets"
+          for key in GMAIL_USER GMAIL_APP_PASSWORD NOTIFY_EMAIL; do
+            if printf '%s\n' "$secrets" | grep -q "$key"; then
+              echo "GMAIL_CONFIG $key=present"
+            else
+              echo "GMAIL_CONFIG $key=missing"
+            fi
+          done
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Production smoke audit
         shell: bash
         run: |
