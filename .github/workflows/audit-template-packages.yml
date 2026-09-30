@@ -113,7 +113,7 @@ jobs:
           unzip -q public/downloads/Nexora-Template-12-Vesper-v1.0.0.zip -d .vesper-build
           cd .vesper-build
           npm ci --no-fund --no-audit || npm install --legacy-peer-deps --no-fund --no-audit
-          npm run build
+          npm run build -- --base=./
           cd ..
           test -d .vesper-build/dist
           cp -R .vesper-build/dist/. public/demo/vesper/
@@ -143,12 +143,13 @@ jobs:
           const path = require("path");
           const demos = fs.readFileSync(".capture/demos.txt","utf8").split("\n").filter(Boolean);
           (async()=>{
-            const browser=await chromium.launch({headless:true});
+            const browser=await chromium.launch({headless:true,args:["--enable-webgl","--use-angle=swiftshader","--disable-dev-shm-usage"]});
             for(const slug of demos){
               const out=path.join(".capture",slug);
               fs.mkdirSync(out,{recursive:true});
               const desktop=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
               await desktop.goto("http://127.0.0.1:4173/demo/"+slug+"/index.html",{waitUntil:"networkidle",timeout:30000}).catch(()=>{});
+              await desktop.waitForTimeout(2500);
               await desktop.screenshot({path:path.join(out,"desktop.png"),fullPage:false});
               await desktop.evaluate(()=>window.scrollTo(0,Math.max(document.body.scrollHeight*.35,500)));
               await desktop.waitForTimeout(700);
@@ -157,12 +158,13 @@ jobs:
 
               const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
               await mobile.goto("http://127.0.0.1:4173/demo/"+slug+"/index.html",{waitUntil:"networkidle",timeout:30000}).catch(()=>{});
+              await mobile.waitForTimeout(2500);
               await mobile.screenshot({path:path.join(out,"mobile.png"),fullPage:false});
               await mobile.close();
 
               const videoPage=await browser.newPage({viewport:{width:1280,height:720},recordVideo:{dir:out,size:{width:1280,height:720}}});
               await videoPage.goto("http://127.0.0.1:4173/demo/"+slug+"/index.html",{waitUntil:"domcontentloaded",timeout:30000}).catch(()=>{});
-              await videoPage.waitForTimeout(1200);
+              await videoPage.waitForTimeout(3000);
               for(let i=0;i<5;i++){await videoPage.mouse.wheel(0,650); await videoPage.waitForTimeout(700);}
               await videoPage.mouse.wheel(0,-900);
               await videoPage.waitForTimeout(700);
