@@ -6,6 +6,7 @@ interface SendCustomerEmailParams {
   to: string;
   subject: string;
   html: string;
+  messageId?: string;
 }
 
 /**
@@ -57,6 +58,7 @@ export async function sendCustomerEmail({
       to,
       subject,
       html,
+      ...(messageId ? { messageId } : {}),
     });
 
     return { sent: true };
