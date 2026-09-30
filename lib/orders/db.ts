@@ -328,3 +328,129 @@ export async function markOrderEmailFailed(id: string, error: string): Promise<v
     "UPDATE orders SET owner_email_status = CASE WHEN owner_email_status = 'sending' THEN 'pending' ELSE owner_email_status END, customer_email_status = CASE WHEN customer_email_status = 'sending' THEN 'pending' ELSE customer_email_status END, owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = ? WHERE id = ?"
   ).bind(error.slice(0, 1000), id).run();
 }
+
+
+export interface EmailOutboxItem {
+  id: string;
+  order_id: string;
+  kind: "owner" | "customer";
+  to_email: string;
+  subject: string;
+  html: string;
+  status: "pending" | "sending" | "sent";
+  attempts: number;
+  next_attempt_at: number;
+  locked_at: number | null;
+  sent_at: number | null;
+  last_error: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export async function enqueueOrderEmail(params: {
+  id: string;
+  orderId: string;
+  kind: "owner" | "customer";
+  toEmail: string;
+  subject: string;
+  html: string;
+}): Promise<void> {
+  const db = await getOrdersDb();
+  const now = Date.now();
+
+  await db.prepare(
+    `INSERT INTO email_outbox (
+       id, order_id, kind, to_email, subject, html, status,
+       attempts, next_attempt_at, locked_at, sent_at, last_error, created_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, ?, NULL, NULL, NULL, ?, ?)
+     ON CONFLICT(order_id, kind) DO UPDATE SET
+       to_email = excluded.to_email,
+       subject = excluded.subject,
+       html = excluded.html,
+       status = CASE WHEN email_outbox.status = 'sent' THEN 'sent' ELSE 'pending' END,
+       next_attempt_at = CASE WHEN email_outbox.status = 'sent' THEN email_outbox.next_attempt_at ELSE excluded.next_attempt_at END,
+       locked_at = CASE WHEN email_outbox.status = 'sending' THEN email_outbox.locked_at ELSE NULL END,
+       last_error = CASE WHEN email_outbox.status = 'sent' THEN NULL ELSE email_outbox.last_error END,
+       updated_at = excluded.updated_at`
+  ).bind(
+    params.id,
+    params.orderId,
+    params.kind,
+    params.toEmail,
+    params.subject,
+    params.html,
+    now,
+    now,
+    now
+  ).run();
+}
+
+export async function getDueEmailOutbox(limit = 10): Promise<EmailOutboxItem[]> {
+  const db = await getOrdersDb();
+  const safeLimit = Math.max(1, Math.min(25, Math.floor(limit)));
+  const now = Date.now();
+
+  const result = await db.prepare(
+    `SELECT * FROM email_outbox
+     WHERE (status = 'pending' AND next_attempt_at <= ?)
+        OR (status = 'sending' AND COALESCE(locked_at, 0) < ?)
+     ORDER BY next_attempt_at ASC, created_at ASC
+     LIMIT ?`
+  ).bind(now, now - 10 * 60 * 1000, safeLimit).all<EmailOutboxItem>();
+
+  return result.results ?? [];
+}
+
+export async function claimEmailOutbox(id: string): Promise<EmailOutboxItem | null> {
+  const db = await getOrdersDb();
+  const now = Date.now();
+
+  const result = await db.prepare(
+    `UPDATE email_outbox
+     SET status = 'sending',
+         attempts = attempts + 1,
+         locked_at = ?,
+         updated_at = ?
+     WHERE id = ?
+       AND (
+         (status = 'pending' AND next_attempt_at <= ?)
+         OR (status = 'sending' AND COALESCE(locked_at, 0) < ?)
+       )`
+  ).bind(now, now, id, now, now - 10 * 60 * 1000).run();
+
+  if ((result.meta?.changes ?? 0) === 0) return null;
+
+  return await db.prepare("SELECT * FROM email_outbox WHERE id = ?").bind(id).first<EmailOutboxItem>();
+}
+
+export async function markEmailOutboxSent(id: string): Promise<void> {
+  const db = await getOrdersDb();
+  const now = Date.now();
+
+  await db.prepare(
+    `UPDATE email_outbox
+     SET status = 'sent', locked_at = NULL, sent_at = ?, last_error = NULL, updated_at = ?
+     WHERE id = ?`
+  ).bind(now, now, id).run();
+}
+
+export async function markEmailOutboxFailed(id: string, error: string): Promise<void> {
+  const db = await getOrdersDb();
+  const item = await db.prepare(
+    "SELECT attempts FROM email_outbox WHERE id = ?"
+  ).bind(id).first<{ attempts: number }>();
+
+  const attempts = Number(item?.attempts ?? 1);
+  const delayMs = Math.min(24 * 60 * 60 * 1000, 60 * 1000 * Math.pow(2, Math.min(attempts - 1, 10)));
+  const nextAttemptAt = Date.now() + delayMs;
+
+  await db.prepare(
+    `UPDATE email_outbox
+     SET status = 'pending',
+         locked_at = NULL,
+         next_attempt_at = ?,
+         last_error = ?,
+         updated_at = ?
+     WHERE id = ?`
+  ).bind(nextAttemptAt, error.slice(0, 1000), Date.now(), id).run();
+}
