@@ -3,7 +3,6 @@ import { randomUUID } from "crypto";
 import {
   getPendingOrders,
   getOrderById,
-  getOrdersNeedingEmailDelivery,
   markOrderConfirmed,
   markOrderExpired,
   markOrderReview,
@@ -12,7 +11,7 @@ import {
 import { checkPayment } from "@/lib/orders/verify";
 import { getPaymegateOrderStatus } from "@/lib/orders/paymegate";
 import { getEnv } from "@/lib/env";
-import { deliverConfirmedOrderEmails } from "@/lib/orders/email-delivery";
+import { deliverConfirmedOrderEmails, processEmailOutbox } from "@/lib/orders/email-delivery";
 
 /**
  * Polled every 5 minutes by GitHub Actions. The endpoint is protected by a
@@ -162,19 +161,14 @@ export async function POST(request: Request) {
       ...paymegateOrders.map(processPaymegateOrder),
     ]);
 
-    const emailOrders = await getOrdersNeedingEmailDelivery(25);
-    for (const order of emailOrders) {
-      await deliverConfirmedOrderEmails(order, {
-        transactionRef: order.paymegate_transaction_ref || order.paymegate_transaction_uuid || order.tx_hash || order.id,
-        eventId: order.paymegate_event_id || "retry:" + order.id,
-        orderUUID: order.paymegate_order_uuid || "crypto:" + order.id,
-        amount: order.base_price_usd.toFixed(2),
-        currency: order.payment_provider === "paymegate" ? "USD" : order.currency,
-      });
-      results.emailsRetried += 1;
-    }
+    const emailOutbox = await processEmailOutbox(15);
+    results.emailsRetried = emailOutbox.sent;
 
-    return NextResponse.json({ ok: true, ...results });
+    return NextResponse.json({
+      ok: true,
+      ...results,
+      emailOutbox,
+    });
   } catch (error) {
     console.error("[cron/check-payments] Fatal error:", error);
     return NextResponse.json(
