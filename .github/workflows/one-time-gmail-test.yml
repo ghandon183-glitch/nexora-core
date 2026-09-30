@@ -1,0 +1,25 @@
+name: One-time Gmail production test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/one-time-gmail-test.yml"
+
+jobs:
+  test:
+    if: contains(github.event.head_commit.message, "test: real Gmail production delivery")
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send real production Gmail test
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -L -sS -w "\nHTTP_STATUS=%{http_code}" \
+            -X POST "https://nexora-core.nxora.workers.dev/api/verify-email/send" \
+            -H "Content-Type: application/json" \
+            --data '{"email":"ghandon183@gmail.com"}')"
+          printf '%s\n' "$response"
+          status="$(printf '%s\n' "$response" | sed -n 's/^HTTP_STATUS=//p')"
+          test "$status" = "200"
