@@ -1,8 +1,8 @@
 [
   {
     "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
-    "bytes": 105215,
-    "sha256": "94086c9365807d999516644ceea336886121e05540c02221d4788db850f2872a",
+    "bytes": 102216,
+    "sha256": "7c84bea7689e1120ea3a31ed21385287e0f1f5450907ee5a8e50b06bbe2b635b",
     "files": 45,
     "readmes": [
       "README.md"
@@ -21,11 +21,11 @@
     ],
     "asset_count": 5,
     "asset_samples": [
-      "src/assets/images/vesper_hero_cinematic_1790162202012.webp",
-      "src/assets/images/vesper_fashion_previs_1790162254947.webp",
       "src/assets/images/vesper_video_frame_1790162217348.webp",
+      "src/assets/images/vesper_fashion_previs_1790162254947.webp",
+      "src/assets/images/vesper_audio_visual_1790162242624.webp",
       "src/assets/images/vesper_showcase_portrait_1790162229168.webp",
-      "src/assets/images/vesper_audio_visual_1790162242624.webp"
+      "src/assets/images/vesper_hero_cinematic_1790162202012.webp"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -76,9 +76,9 @@
   },
   {
     "package": "admin-dashboard.zip",
-    "bytes": 87581,
-    "sha256": "3cac7cace60c3e28e74e4ccd0ba11e930d60e12b9342c7928e4e205e8d686359",
-    "files": 37,
+    "bytes": 29730,
+    "sha256": "ee671c708cb310184f9cb182da4123b91d5d04271216ef26cce8ad005df43940",
+    "files": 36,
     "readmes": [
       "admin-dashboard-template/README.md"
     ],
@@ -96,9 +96,9 @@
     "asset_samples": [
       "admin-dashboard-template/public/next.svg",
       "admin-dashboard-template/public/window.svg",
+      "admin-dashboard-template/public/file.svg",
       "admin-dashboard-template/public/globe.svg",
-      "admin-dashboard-template/public/vercel.svg",
-      "admin-dashboard-template/public/file.svg"
+      "admin-dashboard-template/public/vercel.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -119,7 +119,7 @@
         },
         "dependencies": {
           "lucide-react": "^1.23.0",
-          "next": "16.2.10",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "recharts": "^3.9.2"
@@ -130,7 +130,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.10",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -139,9 +139,9 @@
   },
   {
     "package": "aether.zip",
-    "bytes": 10481059,
-    "sha256": "4751224aed59b3d6d201f4a02215f79a1e8b94df659678805b1b7b9d9e6b6af3",
-    "files": 49,
+    "bytes": 10423021,
+    "sha256": "f0ab0770037bea2bba000b950aa9ec06d052c9d2a6903c7c418a1c4f9062ff28",
+    "files": 48,
     "readmes": [
       "README.md"
     ],
@@ -159,22 +159,22 @@
     "asset_samples": [
       "public/placeholder-logo.png",
       "public/icon-light-32x32.png",
-      "public/images/project-05.png",
-      "public/images/project-02.png",
-      "public/images/studio-portrait.png",
-      "public/images/project-06.png",
-      "public/images/texture-abstract.png",
-      "public/images/project-01.png",
-      "public/images/hero-fallback.png",
-      "public/images/project-04.png",
-      "public/images/project-03.png",
+      "public/apple-icon.png",
+      "public/icon-dark-32x32.png",
       "public/placeholder-user.jpg",
       "public/placeholder.jpg",
-      "public/apple-icon.png",
-      "public/placeholder-logo.svg",
       "public/icon.svg",
       "public/placeholder.svg",
-      "public/icon-dark-32x32.png"
+      "public/placeholder-logo.svg",
+      "public/images/project-03.png",
+      "public/images/project-05.png",
+      "public/images/project-06.png",
+      "public/images/studio-portrait.png",
+      "public/images/project-04.png",
+      "public/images/project-02.png",
+      "public/images/texture-abstract.png",
+      "public/images/hero-fallback.png",
+      "public/images/project-01.png"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -205,7 +205,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^13.1.0",
           "lucide-react": "^1.16.0",
-          "next": "16.3.0",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "shadcn": "^4.8.0",
@@ -233,9 +233,9 @@
   },
   {
     "package": "aurelia-store.zip",
-    "bytes": 1729172,
-    "sha256": "5a847c92ee47a8f83232078ababa30ed0266b923918169823e67d0b712152116",
-    "files": 40,
+    "bytes": 1675253,
+    "sha256": "471f0fa1eec5e13e81216180cc2701aa57251e3f219d4d1e2f7e63ccc82089f0",
+    "files": 39,
     "readmes": [
       "aurelia-store/README.md"
     ],
@@ -251,16 +251,16 @@
     "env_examples": [],
     "asset_count": 10,
     "asset_samples": [
-      "aurelia-store/public/images/candles-lit.jpg",
       "aurelia-store/public/images/rings-pair.jpg",
+      "aurelia-store/public/images/chain-macro.jpg",
+      "aurelia-store/public/images/vase-dried-flowers.jpg",
+      "aurelia-store/public/images/necklace-worn.jpg",
+      "aurelia-store/public/images/ring-cluster.jpg",
+      "aurelia-store/public/images/ring-bee.jpg",
+      "aurelia-store/public/images/candles-lit.jpg",
       "aurelia-store/public/images/ceramic-vases-colorful.jpg",
       "aurelia-store/public/images/ring-engraved.jpg",
-      "aurelia-store/public/images/ring-bee.jpg",
-      "aurelia-store/public/images/necklace-heart.jpg",
-      "aurelia-store/public/images/vase-dried-flowers.jpg",
-      "aurelia-store/public/images/ring-cluster.jpg",
-      "aurelia-store/public/images/necklace-worn.jpg",
-      "aurelia-store/public/images/chain-macro.jpg"
+      "aurelia-store/public/images/necklace-heart.jpg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -285,7 +285,7 @@
           "framer-motion": "^12.42.0",
           "gsap": "^3.13.0",
           "lucide-react": "^1.21.0",
-          "next": "16.2.9",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.6.0"
@@ -296,7 +296,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.9",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -305,9 +305,9 @@
   },
   {
     "package": "creative-agency.zip",
-    "bytes": 86335,
-    "sha256": "c511d1d79335e66f51fe52045e62e2079ebccd1d9f6b33b1f6345223c206861d",
-    "files": 40,
+    "bytes": 32797,
+    "sha256": "287e79ff26c1cdf0481e6ffe73a88d03198651a84ec77f23cb53660b0be7d392",
+    "files": 39,
     "readmes": [
       "creative-agency-template/README.md"
     ],
@@ -325,9 +325,9 @@
     "asset_samples": [
       "creative-agency-template/public/next.svg",
       "creative-agency-template/public/window.svg",
+      "creative-agency-template/public/file.svg",
       "creative-agency-template/public/globe.svg",
-      "creative-agency-template/public/vercel.svg",
-      "creative-agency-template/public/file.svg"
+      "creative-agency-template/public/vercel.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -347,7 +347,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.2.10",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -357,7 +357,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.10",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -366,9 +366,9 @@
   },
   {
     "package": "kiln-estates.zip",
-    "bytes": 1921010,
-    "sha256": "1341f81227ba6d1c4535d5183e652f2073e2942ed53bec6688c8f9e097b48c7b",
-    "files": 36,
+    "bytes": 1867964,
+    "sha256": "42ad72affdf0ed64c68a9576a8b74e8a6f7f8ee2d13a4b038bd6332a508593ad",
+    "files": 35,
     "readmes": [
       "README.md"
     ],
@@ -385,14 +385,14 @@
     "asset_count": 9,
     "asset_samples": [
       "public/next.svg",
-      "public/images/listings/holloway-ranch.jpg",
-      "public/images/listings/birchmark-cabin.jpg",
-      "public/images/listings/glasswood-house.jpg",
-      "public/images/listings/casa-del-viento.jpg",
       "public/window.svg",
+      "public/file.svg",
       "public/globe.svg",
       "public/vercel.svg",
-      "public/file.svg"
+      "public/images/listings/glasswood-house.jpg",
+      "public/images/listings/birchmark-cabin.jpg",
+      "public/images/listings/casa-del-viento.jpg",
+      "public/images/listings/holloway-ranch.jpg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -413,7 +413,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.2.10",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -423,7 +423,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.10",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -432,9 +432,9 @@
   },
   {
     "package": "modern-saas.zip",
-    "bytes": 86573,
-    "sha256": "b5a98cef130ef2f8ce04295d6c0d95037fa00532cae2aa40f3ec951fadf6014b",
-    "files": 41,
+    "bytes": 33456,
+    "sha256": "39135cc055c233a4dc04963331938ef8d1e192038496817fcd0d823600b3a761",
+    "files": 40,
     "readmes": [
       "modern-saas-template/README.md"
     ],
@@ -452,9 +452,9 @@
     "asset_samples": [
       "modern-saas-template/public/next.svg",
       "modern-saas-template/public/window.svg",
+      "modern-saas-template/public/file.svg",
       "modern-saas-template/public/globe.svg",
-      "modern-saas-template/public/vercel.svg",
-      "modern-saas-template/public/file.svg"
+      "modern-saas-template/public/vercel.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -473,7 +473,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.2.10",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -483,7 +483,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.10",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -492,9 +492,9 @@
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 82285,
-    "sha256": "cacabef5225a214f1bb494125bd031bf50a6b5ab3dda89bd2b8db08f95c710ef",
-    "files": 30,
+    "bytes": 30054,
+    "sha256": "d755aa538dc14c8030d68001293db80c807c72fe69ee806ce4a6875f4b04c485",
+    "files": 29,
     "readmes": [
       "README.md"
     ],
@@ -529,7 +529,7 @@
         "dependencies": {
           "framer-motion": "^12.42.2",
           "lucide-react": "^1.24.0",
-          "next": "16.2.10",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -539,7 +539,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.10",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -548,8 +548,8 @@
   },
   {
     "package": "premium-blog.zip",
-    "bytes": 29268,
-    "sha256": "e9b833320dafd67178dd49a5bd2af248bc6d7abf1bcc60d7306eeb3dbdedb4d0",
+    "bytes": 27892,
+    "sha256": "41d0ada0fecbe362a7a7530f4d9e5c65f376f9fc36c677bf3501c04017327d65",
     "files": 32,
     "readmes": [
       "premium-blog/README.md"
@@ -588,7 +588,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.0",
           "lucide-react": "^1.21.0",
-          "next": "16.2.9",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.6.0"
@@ -599,7 +599,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.9",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -608,9 +608,9 @@
   },
   {
     "package": "premium-portfolio.zip",
-    "bytes": 756014,
-    "sha256": "a75761ea7a3347994286d9b63d70f78246c673241d1e89225fe8c9a33cddef8d",
-    "files": 44,
+    "bytes": 605640,
+    "sha256": "35168566a1584412e280a6654ea1a115850e2d4bb99263984e5856bee51b190d",
+    "files": 43,
     "readmes": [
       "premium-portfolio/README.md"
     ],
@@ -626,17 +626,17 @@
     "env_examples": [],
     "asset_count": 11,
     "asset_samples": [
+      "premium-portfolio/public/images/gallery-2.jpg",
       "premium-portfolio/public/images/hero.jpg",
       "premium-portfolio/public/images/project-4.jpg",
-      "premium-portfolio/public/images/gallery-3.jpg",
+      "premium-portfolio/public/images/hero-depth.png",
       "premium-portfolio/public/images/gallery-1.jpg",
       "premium-portfolio/public/images/project-1.jpg",
-      "premium-portfolio/public/images/gallery-4.jpg",
-      "premium-portfolio/public/images/gallery-2.jpg",
-      "premium-portfolio/public/images/project-3.jpg",
+      "premium-portfolio/public/images/project-2.jpg",
       "premium-portfolio/public/images/about.jpg",
-      "premium-portfolio/public/images/hero-depth.png",
-      "premium-portfolio/public/images/project-2.jpg"
+      "premium-portfolio/public/images/project-3.jpg",
+      "premium-portfolio/public/images/gallery-4.jpg",
+      "premium-portfolio/public/images/gallery-3.jpg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -663,7 +663,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.0",
           "lucide-react": "^1.21.0",
-          "next": "16.2.9",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "^19.2.4",
           "tailwind-merge": "^3.6.0",
@@ -676,7 +676,7 @@
           "@types/react-dom": "^19",
           "@types/three": "^0.180.0",
           "eslint": "^9",
-          "eslint-config-next": "16.2.9",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -685,8 +685,8 @@
   },
   {
     "package": "premium-restaurant.zip",
-    "bytes": 24386,
-    "sha256": "3b93629efc293008ab90e059655af2958669f7c944a74fe7f8f04a56fc560837",
+    "bytes": 23466,
+    "sha256": "478f8d038f3a26b23849c99e3f10f79dd91fc0bd34eba648c4dba1016b55d34c",
     "files": 31,
     "readmes": [
       "premium-restaurant/README.md"
@@ -725,7 +725,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.0",
           "lucide-react": "^1.21.0",
-          "next": "16.2.9",
+          "next": "16.3.6",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.6.0"
@@ -736,7 +736,7 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.2.9",
+          "eslint-config-next": "16.3.6",
           "tailwindcss": "^4",
           "typescript": "^5"
         }
@@ -745,9 +745,9 @@
   },
   {
     "package": "solace-studio.zip",
-    "bytes": 13815704,
-    "sha256": "49d455422536f6f53f086af361c3aa37f968cb6d809ce49db2cbae956e3c937f",
-    "files": 52,
+    "bytes": 13767147,
+    "sha256": "5fb57c8a9546f5b028f2c353f3f231becb7bc0d8b879730efdcecc126767eccb",
+    "files": 51,
     "readmes": [
       "solace-studio/README.md"
     ],
@@ -765,22 +765,22 @@
     "asset_samples": [
       "solace-studio/public/placeholder-logo.png",
       "solace-studio/public/icon-light-32x32.png",
-      "solace-studio/public/images/hero-studio.png",
-      "solace-studio/public/images/trainer-3.png",
-      "solace-studio/public/images/gallery-1.png",
-      "solace-studio/public/images/gallery-5.png",
-      "solace-studio/public/images/gallery-2.png",
-      "solace-studio/public/images/trainer-2.png",
-      "solace-studio/public/images/trainer-1.png",
-      "solace-studio/public/images/gallery-3.png",
-      "solace-studio/public/images/gallery-4.png",
+      "solace-studio/public/apple-icon.png",
+      "solace-studio/public/icon-dark-32x32.png",
       "solace-studio/public/placeholder-user.jpg",
       "solace-studio/public/placeholder.jpg",
-      "solace-studio/public/apple-icon.png",
-      "solace-studio/public/placeholder-logo.svg",
       "solace-studio/public/icon.svg",
       "solace-studio/public/placeholder.svg",
-      "solace-studio/public/icon-dark-32x32.png"
+      "solace-studio/public/placeholder-logo.svg",
+      "solace-studio/public/images/gallery-1.png",
+      "solace-studio/public/images/trainer-1.png",
+      "solace-studio/public/images/gallery-2.png",
+      "solace-studio/public/images/trainer-2.png",
+      "solace-studio/public/images/trainer-3.png",
+      "solace-studio/public/images/hero-studio.png",
+      "solace-studio/public/images/gallery-3.png",
+      "solace-studio/public/images/gallery-4.png",
+      "solace-studio/public/images/gallery-5.png"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -808,7 +808,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.2",
           "lucide-react": "^1.16.0",
-          "next": "^16.2.6",
+          "next": "16.3.6",
           "react": "^19",
           "react-dom": "^19",
           "shadcn": "^4.8.0",
