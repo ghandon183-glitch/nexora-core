@@ -1,6 +1,5 @@
 import { DOWNLOADS } from "@/lib/data/downloads";
 import { enqueueOrderEmail, claimEmailOutbox, getDueEmailOutbox, markEmailOutboxFailed, markEmailOutboxSent, type Order } from "@/lib/orders/db";
-import { getEnv } from "@/lib/env";
 
 function escapeHtml(value: string): string {
   return value
@@ -84,7 +83,6 @@ export async function processEmailOutbox(limit = 10): Promise<{
     result.claimed += 1;
 
     try {
-      const env = await getEnv();
       const { sendCustomerEmail } = await import("@/lib/mailer");
       const emailResult = await sendCustomerEmail({
         to: item.to_email,
