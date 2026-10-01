@@ -64,7 +64,7 @@ export async function generateMetadata({
       images: ["/og-image.jpg"],
     },
     verification: {
-      google: env.GOOGLE_SITE_VERIFICATION,
+      google: env.GOOGLE_SITE_VERIFICATION || "jArXk0hgM2_pFbZqL4pwwn1hH4fEgdoKsXdDazRP8OY",
       other: env.BING_SITE_VERIFICATION
         ? { "msvalidate.01": env.BING_SITE_VERIFICATION }
         : undefined,
