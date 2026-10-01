@@ -122,6 +122,7 @@ export default async function RootLayout({
             <PurchasesProvider>
               <SiteAnalytics />
               {children}
+              <Footer />
             </PurchasesProvider>
           </AuthProvider>
         </NextIntlClientProvider>
