@@ -10,6 +10,7 @@ import { AuthProvider } from "@/lib/context/auth-context";
 import { PurchasesProvider } from "@/lib/context/purchases-context";
 import { getEnv } from "@/lib/env";
 import SiteAnalytics from "@/components/analytics/site-analytics";
+import Footer from "@/components/layout/footer";
 
 const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
 
