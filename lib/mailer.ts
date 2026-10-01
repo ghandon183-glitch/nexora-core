@@ -28,6 +28,7 @@ export async function sendCustomerEmail({
   to,
   subject,
   html,
+  messageId,
 }: SendCustomerEmailParams): Promise<{ sent: boolean; error?: string }> {
   const env = await getEnv();
 
