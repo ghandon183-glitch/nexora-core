@@ -8,7 +8,6 @@ import Pricing from "@/components/sections/pricing";
 import Testimonials from "@/components/sections/testimonials";
 import CTA from "@/components/sections/cta";
 import DashboardPreview from "@/components/dashboard/dashboard-preview";
-import Footer from "@/components/layout/footer";
 import { getAllTemplates } from "@/lib/data/get-template";
 import { getEnv } from "@/lib/env";
 
@@ -75,7 +74,6 @@ export default async function Home() {
         <Testimonials />
         <CTA />
       </main>
-      <Footer />
     </>
   );
 }
