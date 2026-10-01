@@ -12,136 +12,114 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   deep-audit:
+    name: Audit all shipped template packages
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install audit tooling
         run: |
           npm install --no-save --package-lock=false playwright@1.55.0 axe-core@4.11.0
-          node -e "require.resolve('playwright'); require.resolve('axe-core')"
           npx playwright install --with-deps chromium
-      - name: Extract and audit all packages
-        shell: bash
+      - name: Extract packages
         run: |
-          set -uo pipefail
+          set -euo pipefail
           rm -rf .deep-audit
           mkdir -p .deep-audit/packages
           python3 - <<'PY'
           from pathlib import Path
-          import zipfile,re
-          for z in sorted(Path("public/downloads").glob("*.zip")):
-              if z.name.startswith("Nexora-All-Templates"): continue
-              slug=re.sub(r'\.zip$','',z.name,flags=re.I)
-              d=Path(".deep-audit/packages")/slug
-              d.mkdir(parents=True,exist_ok=True)
-              try:
-                  with zipfile.ZipFile(z) as f: f.extractall(d)
-              except Exception as e: print("EXTRACT_FAIL",slug,e)
+          import re, zipfile
+          out = Path('.deep-audit/packages')
+          for z in sorted(Path('public/downloads').glob('*.zip')):
+              if z.name.startswith('Nexora-All-Templates'): continue
+              d = out / re.sub(r'\.zip$', '', z.name, flags=re.I)
+              d.mkdir(parents=True, exist_ok=True)
+              with zipfile.ZipFile(z) as f: f.extractall(d)
+          print('packages:', len(list(out.iterdir())))
           PY
-          node <<'NODE'
-          const fs=require('fs'),path=require('path'),cp=require('child_process');
-          const root=path.join(process.cwd(),'.deep-audit','packages'), report=[];
-          function walk(d,a=[]){for(const n of fs.readdirSync(d,{withFileTypes:true})){if(['node_modules','.git','.next','dist','build','out'].includes(n.name))continue;const p=path.join(d,n.name);n.isDirectory()?walk(p,a):a.push(p)}return a}
-          function run(cmd,cwd,timeout=180000){try{return{code:0,out:cp.execFileSync('bash',['-lc',cmd],{cwd,timeout,encoding:'utf8',stdio:['ignore','pipe','pipe']})}}catch(e){return{code:e.status??1,out:(e.stdout||'')+'\n'+(e.stderr||'')}}}
-          for(const slug of fs.readdirSync(root)){
-            const dir=path.join(root,slug), files=walk(dir), pkgPath=files.find(x=>path.basename(x)==='package.json');
-            const r={slug,package:slug+'.zip',build:{attempted:false,ok:null,out:''},typecheck:{attempted:false,ok:null,out:''},lint:{attempted:false,ok:null,out:''},audit:{attempted:false,ok:null,out:''},static:{externalUrls:[],debugPatterns:[],todoPatterns:[]},runtime:{attempted:false,ok:null,consoleErrors:[],pageErrors:[],failedRequests:[],a11y:{violations:[]},links:[],forms:[],responsive:{mobileOverflow:false}}};
-            if(!pkgPath){r.build.out='package.json missing';report.push(r);continue}
-            let pkg;try{pkg=JSON.parse(fs.readFileSync(pkgPath,'utf8'))}catch(e){r.build.out='package.json parse error: '+e.message;report.push(r);continue}
-            r.packageJson={name:pkg.name||'',scripts:pkg.scripts||{},dependencies:pkg.dependencies||{},devDependencies:pkg.devDependencies||{}};
-            const ins=run('npm install --legacy-peer-deps --no-fund --no-audit',dir,300000);
-            if(ins.code!==0){r.build.out=ins.out.slice(-12000);report.push(r);continue}
-            if(pkg.scripts?.build){r.build.attempted=true;const x=run('npm run build',dir,300000);r.build.ok=x.code===0;r.build.out=x.out.slice(-12000)}
-            if(files.some(x=>/\.(ts|tsx)$/.test(x))){r.typecheck.attempted=true;const x=run('npx tsc --noEmit',dir,180000);r.typecheck.ok=x.code===0;r.typecheck.out=x.out.slice(-12000)}
-            if(pkg.scripts?.lint){r.lint.attempted=true;const x=run('npm run lint',dir,180000);r.lint.ok=x.code===0;r.lint.out=x.out.slice(-12000)}
-            r.audit.attempted=true;const x=run('npm audit --audit-level=high --omit=dev',dir,180000);r.audit.ok=x.code===0;r.audit.out=x.out.slice(-12000)
-            for(const f of files){if(!/\.(html|css|js|jsx|ts|tsx|md|mdx|json)$/.test(f))continue;let s='';try{s=fs.readFileSync(f,'utf8')}catch{}for(const u of s.match(/https?:\/\/[^\s"'<>)}]+/g)||[])if(!/npmjs|nodejs|github\.com|w3\.org|schema\.org/.test(u))r.static.externalUrls.push(u.slice(0,240));for(const p of [/console\.log\s*\(/,/debugger\s*;/,/alert\s*\(/])if(p.test(s))r.static.debugPatterns.push(path.relative(dir,f)+':'+p);if(/TODO|FIXME|HACK/.test(s))r.static.todoPatterns.push(path.relative(dir,f))}
-            report.push(r)
-          }
-          fs.writeFileSync('.deep-audit/report.json',JSON.stringify(report,null,2))
-          NODE
-      - name: Runtime, accessibility, links, forms and responsive audit
+      - name: Run package quality checks
         shell: bash
         run: |
-          set +e
+          set -uo pipefail
+          failures=0
+          : > .deep-audit/REPORT.md
+          for dir in .deep-audit/packages/*; do
+            [ -d "$dir" ] || continue
+            name=$(basename "$dir")
+            echo "## $name" >> .deep-audit/REPORT.md
+            if [ ! -f "$dir/package.json" ]; then
+              echo '- package.json: FAIL (missing)' >> .deep-audit/REPORT.md
+              failures=$((failures+1)); continue
+            fi
+            (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit) || { echo '- npm install: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); continue; }
+            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
+              (cd "$dir" && npm run build) && echo '- build: PASS' >> .deep-audit/REPORT.md || { echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+            else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
+            if find "$dir" -type f | grep -Eq '\\.(ts|tsx)$'; then
+              (cd "$dir" && npx tsc --noEmit) && echo '- typecheck: PASS' >> .deep-audit/REPORT.md || { echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+            else echo '- typecheck: NOT RUN' >> .deep-audit/REPORT.md; fi
+            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"; then
+              (cd "$dir" && npm run lint) && echo '- lint: PASS' >> .deep-audit/REPORT.md || { echo '- lint: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+            else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
+            (cd "$dir" && npm audit --audit-level=high --omit=dev) && echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md || { echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+            echo >> .deep-audit/REPORT.md
+          done
+          echo "failures=$failures" >> .deep-audit/REPORT.md
+          test "$failures" -eq 0
+      - name: Runtime and accessibility audit of published demos
+        shell: bash
+        run: |
+          set -euo pipefail
           python3 -m http.server 4174 --directory public >/tmp/nexora-public.log 2>&1 &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
           sleep 2
           node <<'NODE'
-          const {chromium}=require('playwright'),axe=require('axe-core'),fs=require('fs'),path=require('path');
-          const base='http://127.0.0.1:4174',report=JSON.parse(fs.readFileSync('.deep-audit/report.json','utf8'));
-          const demoMap={
-  "Nexora-Template-12-Vesper-v1.0.0":"vesper",
-  "admin-dashboard":"admin-dashboard",
-  "aether":"aether",
-  "aurelia-store":"aurelia-store",
-  "creative-agency":"creative-agency",
-  "kiln-estates":"kiln-estates",
-  "modern-saas":"modern-saas",
-  "nexi-ai":"nexi-ai",
-  "premium-blog":"premium-blog",
-  "premium-portfolio":"premium-portfolio",
-  "premium-restaurant":"premium-restaurant",
-  "solace-studio":"solace-studio"
-};
-const demos=fs.existsSync('public/demo')?fs.readdirSync('public/demo').filter(x=>fs.existsSync(path.join('public/demo',x,'index.html'))):[];
-          (async()=>{let browser=null; try { browser=await chromium.launch({headless:true});
-            for(const r of report){const slug=r.slug, demo=demoMap[slug] && demos.includes(demoMap[slug])?demoMap[slug]:null;if(!demo)continue;r.runtime.attempted=true;
-              const p=await browser.newPage({viewport:{width:1440,height:900}}),errs=[],pages=[],fails=[];
-              p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});p.on('pageerror',e=>pages.push(String(e)));p.on('requestfailed',q=>fails.push({url:q.url(),error:q.failure()?.errorText||'failed'}));
-              try{await p.goto(base+'/demo/'+demo+'/index.html',{waitUntil:'networkidle',timeout:30000});await p.waitForTimeout(700);await p.addScriptTag({content:axe.source});
-                const a=await p.evaluate(async()=>await axe.run(document,{resultTypes:['violations']}));r.runtime.a11y.violations=a.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,help:v.help}));
-                r.runtime.links=await p.$$eval('a',as=>as.map(a=>({href:a.href,text:(a.innerText||'').trim().slice(0,80)})));
-                r.runtime.forms=await p.$$eval('form',fs=>fs.map(f=>({action:f.action,method:f.method,inputs:f.querySelectorAll('input,textarea,select').length,hasSubmit:!!f.querySelector('button[type=submit],input[type=submit]')})));
-                await p.setViewportSize({width:390,height:844});await p.waitForTimeout(300);r.runtime.responsive.mobileOverflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2);r.runtime.ok=true;
-              }catch(e){r.runtime.ok=false;pages.push(String(e))}r.runtime.consoleErrors=errs;r.runtime.pageErrors=pages;r.runtime.failedRequests=fails;if(errs.length||pages.length)r.runtime.ok=false;await p.close()
+          const { chromium } = require('playwright');
+          const axe = require('axe-core');
+          const fs = require('fs');
+          const demos = ['vesper','admin-dashboard','aether','aurelia-store','creative-agency','kiln-estates','modern-saas','nexi-ai','premium-blog','premium-portfolio','premium-restaurant','solace-studio'];
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            let failures = 0;
+            for (const demo of demos) {
+              const file = `public/demo/${demo}/index.html`;
+              if (!fs.existsSync(file)) { console.log(`${demo}: NOT FOUND`); continue; }
+              const page = await browser.newPage({viewport:{width:1440,height:900}});
+              const errors=[]; const pageErrors=[]; const failed=[];
+              page.on('console',m=>{if(m.type()==='error') errors.push(m.text())});
+              page.on('pageerror',e=>pageErrors.push(String(e)));
+              page.on('requestfailed',r=>failed.push(r.url()));
+              try {
+                await page.goto(`http://127.0.0.1:4174/demo/${demo}/index.html`,{waitUntil:'networkidle',timeout:30000});
+                await page.addScriptTag({content:axe.source});
+                const a11y = await page.evaluate(async()=>await axe.run(document));
+                await page.setViewportSize({width:390,height:844});
+                const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
+                const ok = errors.length===0 && pageErrors.length===0 && failed.length===0 && a11y.violations.length===0 && !overflow;
+                console.log(`${demo}: ${ok?'PASS':'FAIL'} console=${errors.length} page=${pageErrors.length} requests=${failed.length} a11y=${a11y.violations.length} overflow=${overflow}`);
+                if(!ok) failures++;
+              } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
+              await page.close();
             }
-          } catch (e) {
-            console.error("RUNTIME_AUDIT_FATAL", e);
-          } finally {
-            if (browser) await browser.close().catch(()=>{});
-            fs.writeFileSync('.deep-audit/report.json',JSON.stringify(report,null,2));
-          }})()
+            await browser.close();
+            fs.appendFileSync('.deep-audit/REPORT.md', `Runtime failures: ${failures}\n`);
+            process.exitCode = failures ? 1 : 0;
+          })();
           NODE
-      - name: Write report
-        if: always()
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          rs=json.loads(Path('.deep-audit/report.json').read_text())
-          def s(x):
-            return ('PASS' if x.get('ok') else 'FAIL') if x.get('attempted') else 'NOT RUN'
-          lines=['# Nexora — Deep Code Quality Audit','','Automated audit of all shipped template packages and their published demos.','']
-          for r in rs:
-            rt=r['runtime']
-            lines += [f"## {r['package']}",f"- Build: {s(r['build'])}",f"- TypeScript: {s(r['typecheck'])}",f"- Lint: {s(r['lint'])}",f"- npm audit (high+ production): {s(r['audit'])}",f"- Runtime demo: {s(rt)}",f"- Console errors: {len(rt['consoleErrors'])}",f"- Page errors: {len(rt['pageErrors'])}",f"- Failed requests: {len(rt['failedRequests'])}",f"- Accessibility violations: {len(rt['a11y']['violations'])}",f"- Mobile horizontal overflow: {'YES' if rt['responsive']['mobileOverflow'] else 'NO'}",f"- External URLs: {len(set(r['static']['externalUrls']))}",f"- Debug patterns: {len(r['static']['debugPatterns'])}",f"- TODO/FIXME/HACK hints: {len(r['static']['todoPatterns'])}",""]
-          Path('.deep-audit/REPORT.md').write_text('\n'.join(lines))
-          PY
-      - name: Upload audit artifact
+      - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: nexora-deep-quality-audit-${{ github.run_id }}
           path: .deep-audit/
           retention-days: 30
-      - name: Commit report
-        if: always()
-        shell: bash
-        run: |
-          git config user.name "Nexora Core"
-          git config user.email "ghandon183-glitch@users.noreply.github.com"
-          git add .deep-audit/REPORT.md .deep-audit/report.json
-          git diff --cached --quiet && exit 0
-          git commit -m "chore: deep code quality audit for all template packages"
-          git pull --rebase origin main || true
-          git push || true
