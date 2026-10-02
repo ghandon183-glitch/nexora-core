@@ -56,16 +56,32 @@ jobs:
             [ -d "$dir" ] || continue
             name=$(basename "$dir")
             echo "## $name" >> .deep-audit/REPORT.md
+            echo "=== PACKAGE: $name ==="
             if [ ! -f "$dir/package.json" ]; then
+              echo "$name: package.json FAIL (missing)"
               echo '- package.json: FAIL (missing)' >> .deep-audit/REPORT.md
               failures=$((failures+1)); continue
             fi
-            (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit) || { echo '- npm install: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); continue; }
+            if (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit); then
+              echo "$name: npm install PASS"
+            else
+              echo "$name: npm install FAIL"
+              echo '- npm install: FAIL' >> .deep-audit/REPORT.md
+              failures=$((failures+1)); continue
+            fi
             if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
-              (cd "$dir" && npm run build) && echo '- build: PASS' >> .deep-audit/REPORT.md || { echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+              if (cd "$dir" && npm run build); then
+                echo "$name: build PASS"; echo '- build: PASS' >> .deep-audit/REPORT.md
+              else
+                echo "$name: build FAIL"; echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
+              fi
             else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
             if find "$dir" -type f | grep -Eq '\\.(ts|tsx)$'; then
-              (cd "$dir" && npx tsc --noEmit) && echo '- typecheck: PASS' >> .deep-audit/REPORT.md || { echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+              if (cd "$dir" && npx tsc --noEmit); then
+                echo "$name: typecheck PASS"; echo '- typecheck: PASS' >> .deep-audit/REPORT.md
+              else
+                echo "$name: typecheck FAIL"; echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
+              fi
             else echo '- typecheck: NOT RUN' >> .deep-audit/REPORT.md; fi
             if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"; then
               rm -rf "$dir/.next"
@@ -75,11 +91,19 @@ jobs:
                 echo '- lint: ADVISORY FAIL (non-blocking; see job log)' >> .deep-audit/REPORT.md
               fi
             else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
-            (cd "$dir" && npm audit --audit-level=high --omit=dev) && echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md || { echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1)); }
+            if (cd "$dir" && npm audit --audit-level=high --omit=dev); then
+              echo "$name: npm audit PASS"; echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md
+            else
+              echo "$name: npm audit FAIL"; echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
+            fi
             echo >> .deep-audit/REPORT.md
           done
           echo "failures=$failures" >> .deep-audit/REPORT.md
-          test "$failures" -eq 0
+          echo "BLOCKING_PACKAGE_FAILURES=$failures"
+          if [ "$failures" -ne 0 ]; then
+            echo "Package quality gate has blocking failures; runtime audit will still run." >&2
+          fi
+          printf '%s\n' "$failures" > .deep-audit/package-failures.txt
       - name: Runtime and accessibility audit of published demos
         shell: bash
         run: |
