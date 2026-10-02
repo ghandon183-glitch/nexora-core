@@ -27,5 +27,5 @@ jobs:
             --data "$payload")
           echo "IndexNow HTTP $code"
           cat /tmp/indexnow-response || true
-          test "$code" = "200"
+          test "$code" = "200" || test "$code" = "202"
           echo "IndexNow submission: PASS"
