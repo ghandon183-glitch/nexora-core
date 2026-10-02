@@ -19,7 +19,7 @@ jobs:
           key="7fec80c6cbd74405bad9e8ca5bcec3dc"
           host="nexora-core.nxora.workers.dev"
           keyLocation="https://$host/$key.txt"
-          urls='["https://$host/en","https://$host/en/templates","https://$host/en/templates/vesper","https://$host/en/docs/vesper","https://$host/sitemap.xml"]'
+          urls="[\"https://$host/en\",\"https://$host/en/templates\",\"https://$host/en/templates/vesper\",\"https://$host/en/docs/vesper\",\"https://$host/sitemap.xml\"]"
           payload=$(printf '{"host":"%s","key":"%s","keyLocation":"%s","urlList":%s}' "$host" "$key" "$keyLocation" "$urls")
           code=$(curl -sS -o /tmp/indexnow-response -w "%{http_code}" \
             -X POST "https://api.indexnow.org/indexnow" \
