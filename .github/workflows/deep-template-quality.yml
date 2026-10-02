@@ -142,7 +142,8 @@ jobs:
             }
             await browser.close();
             fs.appendFileSync('.deep-audit/REPORT.md', `Runtime failures: ${failures}\n`);
-            process.exitCode = failures ? 1 : 0;
+            fs.writeFileSync('.deep-audit/runtime-failures.txt', String(failures));
+            process.exitCode = 0;
           })();
           NODE
       - name: Upload audit report
@@ -152,3 +153,20 @@ jobs:
           name: nexora-deep-quality-audit-${{ github.run_id }}
           path: .deep-audit/
           retention-days: 30
+
+      - name: Enforce final deep quality gate
+        if: always()
+        shell: bash
+        run: |
+          set -u
+          package_failures=0
+          runtime_failures=0
+          if [ -f .deep-audit/package-failures.txt ]; then package_failures=$(cat .deep-audit/package-failures.txt); fi
+          if [ -f .deep-audit/runtime-failures.txt ]; then runtime_failures=$(cat .deep-audit/runtime-failures.txt); fi
+          echo "BLOCKING_PACKAGE_FAILURES=$package_failures"
+          echo "RUNTIME_FAILURES=$runtime_failures"
+          if [ "$package_failures" -ne 0 ] || [ "$runtime_failures" -ne 0 ]; then
+            echo "DEEP QUALITY GATE: FAIL"
+            exit 1
+          fi
+          echo "DEEP QUALITY GATE: PASS"
