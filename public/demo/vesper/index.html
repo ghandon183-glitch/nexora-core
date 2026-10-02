@@ -18,6 +18,31 @@
   </head>
   <body class="bg-[#050507] text-[#e2e2e8] selection:bg-red-900/60 selection:text-white antialiased overflow-x-hidden min-h-screen">
     <div id="root"></div>
+  <script>
+(() => {
+  const applyAccessibilityLabels = () => {
+    document.querySelectorAll('button').forEach((button) => {
+      if (!button.getAttribute('aria-label') && !button.textContent.trim()) {
+        button.setAttribute('aria-label', 'Interactive control');
+      }
+    });
+    const ranges = [...document.querySelectorAll('input[type="range"]')];
+    if (ranges[0] && !ranges[0].getAttribute('aria-label')) ranges[0].setAttribute('aria-label', 'Motion');
+    if (ranges[1] && !ranges[1].getAttribute('aria-label')) ranges[1].setAttribute('aria-label', 'Guidance');
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
+      if (!input.getAttribute('aria-label')) input.setAttribute('aria-label', 'Seed');
+    });
+    document.querySelectorAll('select').forEach((select) => {
+      if (!select.getAttribute('aria-label')) select.setAttribute('aria-label', 'Mode');
+    });
+    document.querySelectorAll('aside').forEach((aside) => {
+      if (!aside.getAttribute('aria-label')) aside.setAttribute('aria-label', 'Workspace controls');
+    });
+  };
+  applyAccessibilityLabels();
+  new MutationObserver(applyAccessibilityLabels).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
   </body>
 </html>
 
