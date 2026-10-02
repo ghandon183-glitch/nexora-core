@@ -116,6 +116,7 @@ jobs:
           const { chromium } = require('playwright');
           const axe = require('axe-core');
           const fs = require('fs');
+          const base = 'http://127.0.0.1:4174';
           const demos = ['vesper','admin-dashboard','aether','aurelia-store','creative-agency','kiln-estates','modern-saas','nexi-ai','premium-blog','premium-portfolio','premium-restaurant','solace-studio'];
           (async()=>{
             const browser = await chromium.launch({headless:true});
