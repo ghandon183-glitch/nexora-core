@@ -13,6 +13,7 @@ import SiteAnalytics from "@/components/analytics/site-analytics";
 import Footer from "@/components/layout/footer";
 
 const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
+const FALLBACK_BING_SITE_VERIFICATION = "907633B99970CDD4DD16DFE8825A3E84";
 
 export async function generateMetadata({
   params,
@@ -66,9 +67,10 @@ export async function generateMetadata({
     },
     verification: {
       google: env.GOOGLE_SITE_VERIFICATION || "jArXk0hgM2_pFbZqL4pwwn1hH4fEgdoKsXdDazRP8OY",
-      other: env.BING_SITE_VERIFICATION
-        ? { "msvalidate.01": env.BING_SITE_VERIFICATION }
-        : undefined,
+      other: {
+        "msvalidate.01":
+          env.BING_SITE_VERIFICATION || FALLBACK_BING_SITE_VERIFICATION,
+      },
     },
     robots: {
       index: true,
