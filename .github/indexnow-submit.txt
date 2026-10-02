@@ -1,3 +1,4 @@
 IndexNow initial submission marker
 Date: 2026-10-02
 Purpose: submit the current important Nexora URLs after IndexNow key activation.
+Retry: fixed URL payload quoting.
