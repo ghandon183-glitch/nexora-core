@@ -135,7 +135,7 @@ jobs:
                 const a11y = await page.evaluate(async()=>await axe.run(document));
                 const importantViolations = a11y.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
                 const sameOriginFailed = failed.filter(url => url.startsWith(base));
-                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))));
+                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,html:v.nodes.slice(0,8).map(n=>n.html)}))));
                 console.log('FAILED_REQUESTS ' + demo + ' ' + JSON.stringify(sameOriginFailed));
                 await page.setViewportSize({width:390,height:844});
                 const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
