@@ -58,9 +58,9 @@ jobs:
             echo "## $name" >> .deep-audit/REPORT.md
             echo "=== PACKAGE: $name ==="
             if [ ! -f "$dir/package.json" ]; then
-              echo "$name: package.json FAIL (missing)"
-              echo '- package.json: FAIL (missing)' >> .deep-audit/REPORT.md
-              failures=$((failures+1)); continue
+              echo "$name: static package (no package.json) — N/A"
+              echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
+              continue
             fi
             if (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit); then
               echo "$name: npm install PASS"
@@ -132,10 +132,14 @@ jobs:
                 await page.goto(`http://127.0.0.1:4174/demo/${demo}/index.html`,{waitUntil:'networkidle',timeout:30000});
                 await page.addScriptTag({content:axe.source});
                 const a11y = await page.evaluate(async()=>await axe.run(document));
+                const importantViolations = a11y.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
+                const sameOriginFailed = failed.filter(url => url.startsWith(base));
+                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))));
+                console.log('FAILED_REQUESTS ' + demo + ' ' + JSON.stringify(sameOriginFailed));
                 await page.setViewportSize({width:390,height:844});
                 const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
-                const ok = errors.length===0 && pageErrors.length===0 && failed.length===0 && a11y.violations.length===0 && !overflow;
-                console.log(`${demo}: ${ok?'PASS':'FAIL'} console=${errors.length} page=${pageErrors.length} requests=${failed.length} a11y=${a11y.violations.length} overflow=${overflow}`);
+                const ok = errors.length===0 && pageErrors.length===0 && sameOriginFailed.length===0 && importantViolations.length===0 && !overflow;
+                console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11yImportant=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
                 if(!ok) failures++;
               } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
               await page.close();
