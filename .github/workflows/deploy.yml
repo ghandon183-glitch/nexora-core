@@ -112,6 +112,10 @@ jobs:
         run: |
           set -euo pipefail
           base="https://nexora-core.nxora.workers.dev"
+          key_response="$(curl -L -sS "$base/7fec80c6cbd74405bad9e8ca5bcec3dc.txt")"
+          test "$key_response" = "7fec80c6cbd74405bad9e8ca5bcec3dc"
+          echo "200 /7fec80c6cbd74405bad9e8ca5bcec3dc.txt (IndexNow key verified)"
+
           for path in /en /en/templates /en/templates/vesper /robots.txt /sitemap.xml /api/products.xml; do
             code="$(curl -L -sS -o /tmp/nexora-response -w "%{http_code}" "$base$path")"
             test "$code" = "200"
