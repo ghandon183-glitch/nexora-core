@@ -4,8 +4,68 @@ import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
 
+const PREMIUM_BLOG_ARTICLES = new Set([
+  "designing-for-the-second-glance",
+  "the-architecture-of-attention",
+  "the-economics-of-independent-publishing",
+  "the-last-paragraph",
+  "the-quiet-return-of-slow-software",
+  "what-we-learned-from-a-year-of-edge-computing",
+]);
+
+const PREMIUM_BLOG_CATEGORIES = new Set([
+  "business",
+  "culture",
+  "design",
+  "science",
+  "technology",
+]);
+
+function getLegacyDemoRedirect(pathname: string): string | null {
+  const articleMatch = pathname.match(
+    /^\/(?:en\/)?articles\/([^/]+)\/?$/
+  );
+  if (articleMatch && PREMIUM_BLOG_ARTICLES.has(articleMatch[1])) {
+    return `/demo/premium-blog/articles/${articleMatch[1]}/`;
+  }
+
+  const categoryMatch = pathname.match(
+    /^\/(?:en\/)?category\/([^/]+)\/?$/
+  );
+  if (categoryMatch && PREMIUM_BLOG_CATEGORIES.has(categoryMatch[1])) {
+    return `/demo/premium-blog/category/${categoryMatch[1]}/`;
+  }
+
+  if (pathname === "/menu" || pathname === "/en/menu") {
+    return "/demo/premium-restaurant/menu/";
+  }
+
+  if (pathname === "/reserve" || pathname === "/en/reserve") {
+    return "/demo/premium-restaurant/reserve/";
+  }
+
+  if (pathname === "/en/docs/all-templates") {
+    return "/en/docs";
+  }
+
+  if (pathname === "/en/templates/all-templates") {
+    return "/en/templates";
+  }
+
+  if (pathname === "/demo/aether/index.html") {
+    return "/demo/aether/";
+  }
+
+  return null;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const legacyRedirect = getLegacyDemoRedirect(pathname);
+  if (legacyRedirect) {
+    return NextResponse.redirect(new URL(legacyRedirect, request.url), 301);
+  }
 
   // Paid template packages live under `/downloads/*` as static assets.
   // `wrangler.jsonc` routes these paths through the Worker
