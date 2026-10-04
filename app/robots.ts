@@ -11,7 +11,18 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        // The Disallow prefix "/*/admin" also matches public pages whose path
+        // merely contains "admin" (e.g. /en/docs/admin-dashboard), so these
+        // longer Allow entries carve the public ones back out. Checkout,
+        // dashboard, sign-in/up and the admin panel stay blocked.
+        allow: [
+          "/",
+          "/*/docs/admin-dashboard",
+          "/docs/admin-dashboard",
+          "/*/templates/admin-dashboard",
+          "/templates/admin-dashboard",
+          "/demo/admin-dashboard",
+        ],
         disallow: [
           "/api/",
           "/dashboard",

@@ -13,6 +13,11 @@ import Button from "@/components/ui/button";
 import { templates } from "@/lib/data/templates";
 import { getHeadingFontClass } from "@/lib/fonts";
 
+// The `all-templates` bundle entry is hidden from the public catalog
+// (`hidden: true`) and has no product page; skip it so no dead link to
+// `/templates/all-templates` is rendered.
+const sellableTemplates = templates.filter((template) => !template.hidden);
+
 export default function PricingPage() {
   const t = useTranslations("PricingPage");
   return (
@@ -33,7 +38,7 @@ export default function PricingPage() {
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
 
-            {templates.map((template) => {
+            {sellableTemplates.map((template) => {
               const popular = template.badge === "Popular";
 
               return (

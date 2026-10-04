@@ -35,9 +35,10 @@ export default function Heading({
         </span>
       )}
 
-      <h2 className="mt-6 text-4xl font-black leading-tight text-white md:text-5xl">
+      {/* The page's single H1 — every page that renders this component has no other top-level heading. */}
+      <h1 className="mt-6 text-4xl font-black leading-tight text-white md:text-5xl">
         {title}
-      </h2>
+      </h1>
 
       {description && (
         <p className="mt-6 text-lg leading-8 text-slate-400">
