@@ -11,7 +11,7 @@
     // public access to paid ZIP assets can be denied in `middleware.ts`.
     // Other static assets continue to bypass the Worker for performance.
     // See https://developers.cloudflare.com/workers/static-assets/binding/#run_worker_first
-    "run_worker_first": ["/downloads/*"]
+    "run_worker_first": ["/downloads/*", "/demo/aether/index.html"]
   },
   "images": {
     "binding": "IMAGES"
