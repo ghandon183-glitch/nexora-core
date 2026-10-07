@@ -74,14 +74,14 @@ jobs:
           import re
 
           root = Path(".aether-build/out")
-          image_re = re.compile(r"<img\\b(?P<attrs>[^>]*?)(?P<close>/?)>", re.IGNORECASE)
+          image_re = re.compile(r"<img\b(?P<attrs>[^>]*?)(?P<close>/?)>", re.IGNORECASE)
           changed = [0]
           for html_path in root.rglob("*.html"):
               html = html_path.read_text(encoding="utf-8")
 
               def patch(match):
                   attrs = match.group("attrs")
-                  if re.search(r"\\balt\\s*=", attrs, re.IGNORECASE):
+                  if re.search(r"\balt\s*=", attrs, re.IGNORECASE):
                       return match.group(0)
                   changed[0] += 1
                   return f'<img{attrs} alt="Aether demo image"{match.group("close")}>'
@@ -179,8 +179,8 @@ jobs:
           import re
           html = Path("/tmp/aether-response").read_text(encoding="utf-8")
           missing = []
-          for match in re.finditer(r"<img\\b[^>]*>", html, re.IGNORECASE):
-              if not re.search(r"\\balt\\s*=", match.group(0), re.IGNORECASE):
+          for match in re.finditer(r"<img\b[^>]*>", html, re.IGNORECASE):
+              if not re.search(r"\balt\s*=", match.group(0), re.IGNORECASE):
                   missing.append(match.group(0)[:200])
           print(f"AETHER_SMOKE_MISSING_ALT={len(missing)}")
           if missing:
