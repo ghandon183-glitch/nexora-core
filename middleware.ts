@@ -85,5 +85,5 @@ export const config = {
   // are excluded by the dotted-path lookahead, EXCEPT `/downloads/*` which
   // we explicitly match so the deny rule above runs (requires
   // `assets.run_worker_first` in `wrangler.jsonc` to route them here).
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)", "/downloads/:path*"],
+  matcher: ["/demo/aether/index.html", "/((?!api|_next|_vercel|.*\\..*).*)", "/downloads/:path*"],
 };
