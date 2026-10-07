@@ -174,7 +174,19 @@ jobs:
           grep -Eqi '^location:.*/demo/aether/[[:space:]]*$' /tmp/aether-headers
           aether_canonical_code="$(curl -L -sS -o /tmp/aether-response -w "%{http_code}" "$base/demo/aether/")"
           test "$aether_canonical_code" = "200"
-          echo "$aether_legacy_code /demo/aether/index.html -> /demo/aether/ and canonical 200"
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("/tmp/aether-response").read_text(encoding="utf-8")
+          missing = []
+          for match in re.finditer(r"<img\\b[^>]*>", html, re.IGNORECASE):
+              if not re.search(r"\\balt\\s*=", match.group(0), re.IGNORECASE):
+                  missing.append(match.group(0)[:200])
+          print(f"AETHER_SMOKE_MISSING_ALT={len(missing)}")
+          if missing:
+              raise SystemExit("AETHER production HTML still contains image(s) without alt")
+          PY
+          echo "$aether_legacy_code /demo/aether/index.html -> /demo/aether/ and canonical 200; image alt check passed"
 
           curl -L -sS "$base/en" > /tmp/nexora-home.html
           grep -q 'template preview' /tmp/nexora-home.html
