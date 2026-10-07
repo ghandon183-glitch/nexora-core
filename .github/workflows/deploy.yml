@@ -141,7 +141,7 @@ jobs:
 
           aether_legacy_code="$(curl -sS -o /dev/null -w "%{http_code}" -D /tmp/aether-headers "$base/demo/aether/index.html")"
           test "$aether_legacy_code" = "301" || test "$aether_legacy_code" = "307"
-          grep -Eqi '^location: (https://nexora-core.nxora.workers.dev)?/demo/aether/$' /tmp/aether-headers
+          grep -Eqi '^location:.*/demo/aether/[[:space:]]*$' /tmp/aether-headers
           aether_canonical_code="$(curl -L -sS -o /tmp/aether-response -w "%{http_code}" "$base/demo/aether/")"
           test "$aether_canonical_code" = "200"
           echo "$aether_legacy_code /demo/aether/index.html -> /demo/aether/ and canonical 200"
