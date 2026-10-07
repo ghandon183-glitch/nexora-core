@@ -65,6 +65,37 @@ jobs:
           npm run build
           cd ..
           cp -R .aether-build/out/. public/demo/aether/
+
+          # Bing's crawler checks the exported AETHER HTML. Keep the generated
+          # static demo accessible while ensuring every content image has an
+          # explicit, meaningful alt attribute when the upstream template omits it.
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path(".aether-build/out")
+          image_re = re.compile(r"<img\\b(?P<attrs>[^>]*?)(?P<close>/?)>", re.IGNORECASE)
+          changed = 0
+          for html_path in root.rglob("*.html"):
+              html = html_path.read_text(encoding="utf-8")
+
+              def patch(match):
+                  nonlocal changed
+                  attrs = match.group("attrs")
+                  if re.search(r"\\balt\\s*=", attrs, re.IGNORECASE):
+                      return match.group(0)
+                  changed += 1
+                  return f'<img{attrs} alt="Aether demo image"{match.group("close")}> '
+
+              patched = image_re.sub(patch, html)
+              if patched != html:
+                  html_path.write_text(patched, encoding="utf-8")
+
+          print(f"AETHER_ALT_PATCHES={changed}")
+          if changed < 1:
+              raise SystemExit("AETHER_ALT_PATCHES=0: expected at least one missing alt in exported AETHER HTML")
+          PY
+          cp -R .aether-build/out/. public/demo/aether/
           cat > .aether-build/out/_redirects <<'EOF'
           /demo/aether/index.html /demo/aether/ 301
           /index.html / 301
