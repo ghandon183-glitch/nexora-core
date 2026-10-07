@@ -75,7 +75,7 @@ jobs:
 
           root = Path(".aether-build/out")
           image_re = re.compile(r"<img\b(?P<attrs>[^>]*?)(?P<close>/?)>", re.IGNORECASE)
-          runtime_img_re = re.compile(r'(\b(?:jsx|jsxs|jsxDEV)\(\s*["\']img["\']\s*,\s*\{)')
+          runtime_img_re = re.compile(r'(\b(?:jsx|jsxs|jsxDEV)\(\s*["\']img["\']\s*,\s*\{)(?![^}]*\balt\s*:)', re.IGNORECASE)
           changed = [0]
           html_imgs = [0]
           runtime_imgs = [0]
