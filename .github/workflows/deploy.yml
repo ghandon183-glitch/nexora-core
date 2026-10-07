@@ -65,6 +65,10 @@ jobs:
           npm run build
           cd ..
           cp -R .aether-build/out/. public/demo/aether/
+          cat > .aether-build/out/_redirects <<'EOF'
+          /demo/aether/index.html /demo/aether/ 301
+          /index.html / 301
+          EOF
           test -f public/demo/aether/index.html
 
       - name: Deploy AETHER as dedicated static Worker
