@@ -227,7 +227,7 @@ export default function HeroOptimized() {
             >
               <span className="nx-card-inner">
                 <span className="nx-face nx-front">
-                  <Image src={p.image} alt="" width={128} height={184} sizes="128px" quality={50} loading="lazy" fetchPriority={i < 3 ? "high" : "low"} />
+                  <Image src={p.image} alt={`${p.title} template preview`} width={128} height={184} sizes="128px" quality={50} loading="lazy" fetchPriority={i < 3 ? "high" : "low"} />
                   <span className="nx-shade" />
                   <span className="nx-fallback"><b>{p.title}</b><small>{p.category}</small></span>
                 </span>
