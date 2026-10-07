@@ -75,24 +75,23 @@ jobs:
 
           root = Path(".aether-build/out")
           image_re = re.compile(r"<img\\b(?P<attrs>[^>]*?)(?P<close>/?)>", re.IGNORECASE)
-          changed = 0
+          changed = [0]
           for html_path in root.rglob("*.html"):
               html = html_path.read_text(encoding="utf-8")
 
               def patch(match):
-                  nonlocal changed
                   attrs = match.group("attrs")
                   if re.search(r"\\balt\\s*=", attrs, re.IGNORECASE):
                       return match.group(0)
-                  changed += 1
-                  return f'<img{attrs} alt="Aether demo image"{match.group("close")}> '
+                  changed[0] += 1
+                  return f'<img{attrs} alt="Aether demo image"{match.group("close")}>'
 
               patched = image_re.sub(patch, html)
               if patched != html:
                   html_path.write_text(patched, encoding="utf-8")
 
-          print(f"AETHER_ALT_PATCHES={changed}")
-          if changed < 1:
+          print(f"AETHER_ALT_PATCHES={changed[0]}")
+          if changed[0] < 1:
               raise SystemExit("AETHER_ALT_PATCHES=0: expected at least one missing alt in exported AETHER HTML")
           PY
           cp -R .aether-build/out/. public/demo/aether/
