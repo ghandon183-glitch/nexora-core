@@ -80,16 +80,37 @@ jobs:
           html_imgs = [0]
           runtime_imgs = [0]
 
+          def alt_for(attrs):
+              src_match = re.search(r'\bsrc\s*=\s*["\']([^"\']+)["\']', attrs, re.IGNORECASE)
+              src = src_match.group(1).lower() if src_match else ""
+              if "hero-fallback" in src:
+                  return "AETHER creative studio hero"
+              if "texture-abstract" in src:
+                  return "Abstract texture for the AETHER creative studio"
+              return "Aether demo image"
+
           for html_path in root.rglob("*.html"):
               html = html_path.read_text(encoding="utf-8")
               html_imgs[0] += len(image_re.findall(html))
 
               def patch(match):
                   attrs = match.group("attrs")
-                  if re.search(r"\balt\s*=", attrs, re.IGNORECASE):
+                  alt_match = re.search(r'\balt\s*=\s*(["\'])(.*?)\1', attrs, re.IGNORECASE | re.DOTALL)
+                  if alt_match and alt_match.group(2).strip():
                       return match.group(0)
+
+                  alt_text = alt_for(attrs)
+                  if alt_match:
+                      new_attrs = (
+                          attrs[:alt_match.start(2)]
+                          + alt_text
+                          + attrs[alt_match.end(2):]
+                      )
+                      changed[0] += 1
+                      return f'<img{new_attrs}{match.group("close")}>'
+
                   changed[0] += 1
-                  return f'<img{attrs} alt="Aether demo image"{match.group("close")}>'
+                  return f'<img{attrs} alt="{alt_text}"{match.group("close")}>'
 
               patched = image_re.sub(patch, html)
               if patched != html:
