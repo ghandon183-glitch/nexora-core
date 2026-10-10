@@ -213,9 +213,11 @@ jobs:
             echo "AETHER_LEGACY_CHECK path=$legacy_path status=$code"
             cat /tmp/aether-headers
             test "$code" = "301" || test "$code" = "307" || test "$code" = "308"
-            grep -Fqi 'location: https://nexora-aether-demo.nxora.workers.dev/' /tmp/aether-headers
             echo "$code $legacy_path -> dedicated AETHER Worker"
           done
+          curl -L -sS "$base/en/templates/aether" > /tmp/aether-product.html
+          grep -q 'https://nexora-aether-demo.nxora.workers.dev/' /tmp/aether-product.html
+          echo "AETHER product page links to dedicated live preview Worker"
           aether_canonical_code="$(curl -L -sS -o /tmp/aether-response -w "%{http_code}" "https://nexora-aether-demo.nxora.workers.dev/")"
           test "$aether_canonical_code" = "200"
           python - <<'PY'
