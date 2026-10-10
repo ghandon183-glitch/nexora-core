@@ -159,6 +159,7 @@ jobs:
           name: nexora-deep-quality-audit-${{ github.run_id }}
           path: .deep-audit/
           retention-days: 30
+          include-hidden-files: true
 
       - name: Enforce final deep quality gate
         if: always()
