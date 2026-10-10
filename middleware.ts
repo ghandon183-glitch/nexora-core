@@ -52,8 +52,12 @@ function getLegacyDemoRedirect(pathname: string): string | null {
     return "/en/templates";
   }
 
-  if (pathname === "/demo/aether/index.html") {
-    return "/demo/aether/";
+  if (
+    pathname === "/demo/aether" ||
+    pathname === "/demo/aether/" ||
+    pathname === "/demo/aether/index.html"
+  ) {
+    return "https://nexora-aether-demo.nxora.workers.dev/";
   }
 
   return null;

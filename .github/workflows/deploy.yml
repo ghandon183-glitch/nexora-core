@@ -48,8 +48,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .aether-build public/demo/aether .aether-wrangler.jsonc
-          mkdir -p .aether-build public/demo/aether
+          rm -rf .aether-build .aether-wrangler.jsonc
+          mkdir -p .aether-build
           unzip -q public/downloads/aether.zip -d .aether-build
           cat > .aether-build/next.config.mjs <<'EOF'
           /** @type {import('next').NextConfig} */
@@ -64,7 +64,6 @@ jobs:
           npm install --no-fund --no-audit
           npm run build
           cd ..
-          cp -R .aether-build/out/. public/demo/aether/
 
           # Bing's crawler checks the exported AETHER HTML. Keep the generated
           # static demo accessible while ensuring every content image has an
@@ -135,12 +134,11 @@ jobs:
           if html_imgs[0] + runtime_imgs[0] == 0:
               print("AETHER_ALT_PATCHES=0: no static or React-runtime img elements detected; no alt patch required")
           PY
-          cp -R .aether-build/out/. public/demo/aether/
           cat > .aether-build/out/_redirects <<'EOF'
           /demo/aether/index.html /demo/aether/ 301
           /index.html / 301
           EOF
-          test -f public/demo/aether/index.html
+          test -f .aether-build/out/index.html
 
       - name: Deploy AETHER as dedicated static Worker
         run: |
@@ -210,14 +208,20 @@ jobs:
           curl -L -sS "$base/api/products.xml" > /tmp/nexora-products.xml
           grep -q 'nexora-vesper' /tmp/nexora-products.xml
 
-          aether_legacy_code="$(curl -sS -o /dev/null -w "%{http_code}" -D /tmp/aether-headers "$base/demo/aether/index.html")"
-          test "$aether_legacy_code" = "301" || test "$aether_legacy_code" = "307"
-          grep -Eqi '^location:.*/demo/aether/[[:space:]]*$' /tmp/aether-headers
-          aether_canonical_code="$(curl -L -sS -o /tmp/aether-response -w "%{http_code}" "$base/demo/aether/")"
+          for legacy_path in /demo/aether/index.html /demo/aether/; do
+            code="$(curl -sS -o /dev/null -w "%{http_code}" -D /tmp/aether-headers "$base$legacy_path")"
+            test "$code" = "301" || test "$code" = "307"
+            grep -Eqi '^location: https://nexora-aether-demo\.nxora\.workers\.dev/[[:space:]]*$' /tmp/aether-headers
+            echo "$code $legacy_path -> dedicated AETHER Worker"
+          done
+          aether_canonical_code="$(curl -L -sS -o /tmp/aether-response -w "%{http_code}" "https://nexora-aether-demo.nxora.workers.dev/")"
           test "$aether_canonical_code" = "200"
           python - <<'PY'
           from pathlib import Path
+          from urllib.parse import urljoin, urlparse
+          from urllib.request import urlopen
           import re
+          base = "https://nexora-aether-demo.nxora.workers.dev/"
           html = Path("/tmp/aether-response").read_text(encoding="utf-8")
           missing = []
           for match in re.finditer(r"<img\b[^>]*>", html, re.IGNORECASE):
@@ -226,8 +230,25 @@ jobs:
           print(f"AETHER_SMOKE_MISSING_ALT={len(missing)}")
           if missing:
               raise SystemExit("AETHER production HTML still contains image(s) without alt")
+          refs = set(re.findall(r"""(?:src|href)=["']([^"']+)["']""", html, re.IGNORECASE))
+          assets = sorted(ref for ref in refs if re.search(r"\.(?:js|css|png|jpe?g|webp|svg|ico|woff2?|webm|mp4)(?:[?#]|$)", ref, re.IGNORECASE))
+          checked = 0
+          for ref in assets:
+              url = urljoin(base, ref)
+              if urlparse(url).netloc != urlparse(base).netloc:
+                  continue
+              try:
+                  with urlopen(url, timeout=20) as response:
+                      if response.status != 200:
+                          raise RuntimeError(f"{response.status} {url}")
+                  checked += 1
+              except Exception as exc:
+                  raise SystemExit(f"AETHER asset failed: {url}: {exc}")
+          print(f"AETHER_SMOKE_ASSETS_OK={checked}")
+          if checked < 5:
+              raise SystemExit(f"Too few AETHER assets checked: {checked}")
           PY
-          echo "$aether_legacy_code /demo/aether/index.html -> /demo/aether/ and canonical 200; image alt check passed"
+          echo "AETHER dedicated Worker HTTP 200; image alt and asset checks passed"
 
           curl -L -sS "$base/en" > /tmp/nexora-home.html
           grep -q 'template preview' /tmp/nexora-home.html
