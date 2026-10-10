@@ -223,7 +223,8 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           from urllib.parse import urljoin, urlparse
-          from urllib.request import urlopen
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
           import re
           base = "https://nexora-aether-demo.nxora.workers.dev/"
           html = Path("/tmp/aether-response").read_text(encoding="utf-8")
@@ -237,18 +238,36 @@ jobs:
           refs = set(re.findall(r"""(?:src|href)=["']([^"']+)["']""", html, re.IGNORECASE))
           assets = sorted(ref for ref in refs if re.search(r"\.(?:js|css|png|jpe?g|webp|svg|ico|woff2?|webm|mp4)(?:[?#]|$)", ref, re.IGNORECASE))
           checked = 0
+          failures = []
+          browser_headers = {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+              "Accept": "*/*",
+          }
           for ref in assets:
               url = urljoin(base, ref)
               if urlparse(url).netloc != urlparse(base).netloc:
                   continue
+              request = Request(url, headers=browser_headers)
               try:
-                  with urlopen(url, timeout=20) as response:
-                      if response.status != 200:
-                          raise RuntimeError(f"{response.status} {url}")
-                  checked += 1
+                  with urlopen(request, timeout=20) as response:
+                      status = response.status
+                      content_type = response.headers.get("Content-Type", "")
+                      payload = response.read(256).decode("utf-8", errors="replace")
+                  print(f"AETHER_ASSET status={status} type={content_type} url={url}")
+                  if status != 200:
+                      failures.append(f"{status} {url} body={payload[:120]!r}")
+                  else:
+                      checked += 1
+              except HTTPError as exc:
+                  payload = exc.read(512).decode("utf-8", errors="replace")
+                  print(f"AETHER_ASSET_ERROR status={exc.code} url={url} headers={dict(exc.headers)!r} body={payload[:300]!r}")
+                  failures.append(f"{exc.code} {url}")
               except Exception as exc:
-                  raise SystemExit(f"AETHER asset failed: {url}: {exc}")
+                  print(f"AETHER_ASSET_ERROR url={url} error={exc!r}")
+                  failures.append(f"{url}: {exc}")
           print(f"AETHER_SMOKE_ASSETS_OK={checked}")
+          if failures:
+              raise SystemExit("AETHER asset failures: " + " | ".join(failures[:8]))
           if checked < 5:
               raise SystemExit(f"Too few AETHER assets checked: {checked}")
           PY
