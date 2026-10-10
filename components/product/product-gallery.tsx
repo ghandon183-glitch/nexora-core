@@ -75,7 +75,8 @@ export default function ProductGallery({
 
       </Card>
 
-      <div className="grid grid-cols-4 gap-5">
+      {images.length > 1 && (
+        <div className="grid grid-cols-4 gap-5">
 
         {images.map((image, index) => (
 
@@ -109,7 +110,8 @@ export default function ProductGallery({
 
         ))}
 
-      </div>
+        </div>
+      )}
 
     </section>
   );
