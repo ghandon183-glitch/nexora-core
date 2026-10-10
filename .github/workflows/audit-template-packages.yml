@@ -199,6 +199,7 @@ jobs:
             .template-audit/
             .capture/
           retention-days: 14
+          include-hidden-files: true
 
       - name: Commit real captures and audit report
         shell: bash
