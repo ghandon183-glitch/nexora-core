@@ -210,8 +210,7 @@ jobs:
 
           for legacy_path in /demo/aether/index.html /demo/aether/; do
             code="$(curl -sS -o /dev/null -w "%{http_code}" -D /tmp/aether-headers "$base$legacy_path")"
-            location="$(grep -i '^location:' /tmp/aether-headers | tr -d '\r' || true)"
-            echo "AETHER_LEGACY_CHECK path=$legacy_path status=$code $location"
+            echo "AETHER_LEGACY_CHECK path=$legacy_path status=$code"
             test "$code" = "301" || test "$code" = "307" || test "$code" = "308"
             grep -Fqi 'location: https://nexora-aether-demo.nxora.workers.dev/' /tmp/aether-headers
             echo "$code $legacy_path -> dedicated AETHER Worker"
