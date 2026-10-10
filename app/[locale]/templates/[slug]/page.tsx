@@ -157,7 +157,7 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
                 data-analytics-price={template.price}
               />
               <ProductGallery images={template.gallery} />
-              <ProductDemoVideo src={template.videoUrl} />
+              <ProductDemoVideo src={template.videoUrl} demoUrl={template.demoUrl} />
               <ProductHeader
                 title={template.title}
                 description={template.description}
