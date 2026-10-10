@@ -213,7 +213,7 @@ jobs:
             location="$(grep -i '^location:' /tmp/aether-headers | tr -d '\r' || true)"
             echo "AETHER_LEGACY_CHECK path=$legacy_path status=$code $location"
             test "$code" = "301" || test "$code" = "307" || test "$code" = "308"
-            grep -Eqi '^location: https://nexora-aether-demo\.nxora\.workers\.dev/[[:space:]]*
+            grep -Fqi 'location: https://nexora-aether-demo.nxora.workers.dev/' /tmp/aether-headers
             echo "$code $legacy_path -> dedicated AETHER Worker"
           done
           aether_canonical_code="$(curl -L -sS -o /tmp/aether-response -w "%{http_code}" "https://nexora-aether-demo.nxora.workers.dev/")"
