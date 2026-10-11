@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import {
   getPendingOrders,
+  getRecentlyExpiredPaymegateOrders,
   getOrderById,
   markOrderConfirmed,
   markOrderExpired,
@@ -43,7 +44,13 @@ export async function POST(request: Request) {
 
   try {
     const cryptoOrders = await getPendingOrders(undefined, 15, "crypto");
-    const paymegateOrders = await getPendingOrders(undefined, 15, "paymegate");
+    const pendingPaymegateOrders = await getPendingOrders(undefined, 15, "paymegate");
+    const expiredPaymegateOrders = await getRecentlyExpiredPaymegateOrders(15);
+    const pendingIds = new Set(pendingPaymegateOrders.map((order) => order.id));
+    const paymegateOrders = [
+      ...pendingPaymegateOrders,
+      ...expiredPaymegateOrders.filter((order) => !pendingIds.has(order.id)),
+    ];
     results.checked = cryptoOrders.length + paymegateOrders.length;
     results.paymegateChecked = paymegateOrders.length;
 
