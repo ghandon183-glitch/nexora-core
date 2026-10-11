@@ -76,9 +76,11 @@ jobs:
                 echo "$name: build FAIL"; echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
             else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
-            # Build output is generated code, not shipped source. Exclude it from typecheck/lint.
-            rm -rf "$dir/.next"
-            if find "$dir" -type f | grep -Eq '\\.(ts|tsx)              if (cd "$dir" && npx tsc --noEmit); then
+            # Next.js build already performs TypeScript validation. Do not run tsc over its generated .next output.
+            if node -e "const p=require('./$dir/package.json'); process.exit((p.dependencies?.next || p.devDependencies?.next) ? 0 : 1)"; then
+              echo '- typecheck: covered by Next.js build' >> .deep-audit/REPORT.md
+            elif find "$dir" -path "$dir/node_modules" -prune -o -path "$dir/.next" -prune -o -type f \\( -name '*.ts' -o -name '*.tsx' \\) -print | grep -q .; then
+              if (cd "$dir" && npx tsc --noEmit); then
                 echo "$name: typecheck PASS"; echo '- typecheck: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: typecheck FAIL"; echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
