@@ -23,6 +23,10 @@ export async function deliverConfirmedOrderEmails(
     : siteUrl + "/download/" + downloadToken;
   const hasFile = order.template_slug === "all-templates" || Boolean(DOWNLOADS[order.template_slug]);
   const ownerEmail = env.NOTIFY_EMAIL ?? "ghandon183@gmail.com";
+  const paymentSource = order.payment_provider === "paymegate" ? "Paymegate" : "cryptocurrency";
+  const verificationDescription = order.payment_provider === "paymegate"
+    ? "NEXORA CORE recorded this payment as confirmed after validating the signed Paymegate event, order, amount, currency, and customer email."
+    : "NEXORA CORE recorded this payment as confirmed after validating the on-chain transaction against the order.";
 
   const productTitle = escapeHtml(order.template_title);
   const orderId = escapeHtml(order.id);
@@ -42,7 +46,7 @@ export async function deliverConfirmedOrderEmails(
     toEmail: ownerEmail,
     subject: "NEXORA SALE — " + order.template_title + " — " + options.amount + " " + options.currency,
     html:
-      "<h2>New Paymegate payment confirmed</h2><p><strong>A customer has completed a verified payment.</strong></p><hr>" +
+      "<h2>New " + paymentSource + " payment confirmed</h2><p><strong>A customer has completed a verified payment.</strong></p><hr>" +
       "<p><strong>Product:</strong> " + productTitle + "</p>" +
       "<p><strong>Internal order ID:</strong> <code>" + orderId + "</code></p>" +
       "<p><strong>Customer:</strong> " + buyerName + "</p>" +
@@ -52,7 +56,7 @@ export async function deliverConfirmedOrderEmails(
       "<p><strong>Transaction reference:</strong> <code>" + transactionRef + "</code></p>" +
       "<p><strong>Webhook/event ID:</strong> <code>" + eventId + "</code></p>" +
       "<p><strong>Confirmed at:</strong> " + new Date().toISOString() + "</p><hr>" +
-      "<p>NEXORA CORE recorded this payment as confirmed after validating the signed provider event, order, amount, currency, and customer email.</p>",
+      "<p>" + verificationDescription + "</p>",
   });
 
   await enqueueOrderEmail({
