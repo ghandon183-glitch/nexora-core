@@ -386,8 +386,11 @@ export async function enqueueOrderEmail(params: {
        to_email = excluded.to_email,
        subject = excluded.subject,
        html = excluded.html,
-       status = CASE WHEN email_outbox.status = 'sent' THEN 'sent' ELSE 'pending' END,
-       next_attempt_at = CASE WHEN email_outbox.status = 'sent' THEN email_outbox.next_attempt_at ELSE excluded.next_attempt_at END,
+       status = CASE
+         WHEN email_outbox.status IN ('sent', 'sending') THEN email_outbox.status
+         ELSE 'pending'
+       END,
+       next_attempt_at = email_outbox.next_attempt_at,
        locked_at = CASE WHEN email_outbox.status = 'sending' THEN email_outbox.locked_at ELSE NULL END,
        last_error = CASE WHEN email_outbox.status = 'sent' THEN NULL ELSE email_outbox.last_error END,
        updated_at = excluded.updated_at`
