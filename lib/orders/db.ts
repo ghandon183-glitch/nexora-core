@@ -211,7 +211,7 @@ export async function attachPaymegateOrder(
     .prepare(
       `UPDATE orders
        SET paymegate_order_uuid = ?
-       WHERE id = ? AND status IN ('pending', 'expired') AND payment_provider = 'paymegate'`
+       WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
     )
     .bind(paymegateOrderUuid, id)
     .run();
@@ -233,7 +233,7 @@ export async function markPaymegateConfirmed(
            owner_email_status = 'pending', customer_email_status = 'pending',
            owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL,
            paymegate_transaction_uuid = ?, paymegate_transaction_ref = ?, paymegate_event_id = ?
-       WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
+       WHERE id = ? AND status IN ('pending', 'expired') AND payment_provider = 'paymegate'`
     )
     .bind(
       transactionRef || transactionUuid,
