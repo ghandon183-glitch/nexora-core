@@ -77,7 +77,7 @@ jobs:
               fi
             else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
             # Next.js build already performs TypeScript validation. Do not run tsc over its generated .next output.
-            if node -e "const p=require('./$dir/package.json'); process.exit((p.dependencies?.next || p.devDependencies?.next) ? 0 : 1)"; then
+            if node -e "const p=require('./$dir/package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"; then
               echo '- typecheck: covered by Next.js build' >> .deep-audit/REPORT.md
             elif find "$dir" -path "$dir/node_modules" -prune -o -path "$dir/.next" -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .; then
               if (cd "$dir" && npx tsc --noEmit); then
