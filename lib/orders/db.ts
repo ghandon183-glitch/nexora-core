@@ -148,6 +148,25 @@ export async function getPendingOrders(
   return result.results ?? [];
 }
 
+/**
+ * Recently expired Paymegate orders remain eligible for provider reconciliation.
+ * The provider's hosted link can outlive the local checkout window.
+ */
+export async function getRecentlyExpiredPaymegateOrders(limit = 15): Promise<Order[]> {
+  const db = await getOrdersDb();
+  const safeLimit = Math.max(1, Math.min(25, Math.floor(limit)));
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const result = await db.prepare(
+    `SELECT * FROM orders
+     WHERE status = 'expired'
+       AND payment_provider = 'paymegate'
+       AND expires_at >= ?
+     ORDER BY expires_at DESC
+     LIMIT ?`
+  ).bind(cutoff, safeLimit).all<Order>();
+  return result.results ?? [];
+}
+
 export async function getRecentOrders(limit = 100): Promise<Order[]> {
   const db = await getOrdersDb();
   const safeLimit = Math.max(1, Math.min(200, Math.floor(limit)));
@@ -214,7 +233,7 @@ export async function markPaymegateConfirmed(
            owner_email_status = 'pending', customer_email_status = 'pending',
            owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL,
            paymegate_transaction_uuid = ?, paymegate_transaction_ref = ?, paymegate_event_id = ?
-       WHERE id = ? AND status = 'pending' AND payment_provider = 'paymegate'`
+       WHERE id = ? AND status IN ('pending', 'expired') AND payment_provider = 'paymegate'`
     )
     .bind(
       transactionRef || transactionUuid,

@@ -22,30 +22,18 @@ interface PaymegatePaidEvent {
 function verifySignature(rawBody: string, timestamp: string, signature: string, secret: string): boolean {
   const timestampSeconds = Number(timestamp);
   if (!Number.isFinite(timestampSeconds)) return false;
-  if (Math.abs(Math.floor(Date.now() / 1000) - timestampSeconds) > MAX_CLOCK_SKEW_SECONDS) {
-    return false;
-  }
-
-  const expected = createHmac("sha256", secret)
-    .update(`${timestamp}.${rawBody}`, "utf8")
-    .digest("base64url");
-
-  const candidates = signature
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .flatMap((part) => {
-      const separator = part.indexOf("=");
-      return separator > -1 ? [part.slice(separator + 1)] : [part];
-    });
-
+  if (Math.abs(Math.floor(Date.now() / 1000) - timestampSeconds) > MAX_CLOCK_SKEW_SECONDS) return false;
+  const expected = createHmac("sha256", secret).update(`${timestamp}.${rawBody}`, "utf8").digest("base64url");
+  const candidates = signature.split(",").map((part) => part.trim()).filter(Boolean).flatMap((part) => {
+    const separator = part.indexOf("=");
+    return separator > -1 ? [part.slice(separator + 1)] : [part];
+  });
   return candidates.some((candidate) => {
     const a = Buffer.from(candidate);
     const b = Buffer.from(expected);
     return a.length === b.length && timingSafeEqual(a, b);
   });
 }
-
 
 function sameMoney(amount: string, expected: number): boolean {
   const parsed = Number(amount);
@@ -65,11 +53,7 @@ export async function POST(request: Request) {
   const eventHeader = request.headers.get("x-paymegate-event") ?? "";
   const eventIdHeader = request.headers.get("x-paymegate-event-id") ?? "";
 
-  if (
-    !timestamp ||
-    !signature ||
-    !verifySignature(rawBody, timestamp, signature, env.PAYMEGATE_WEBHOOK_SECRET)
-  ) {
+  if (!timestamp || !signature || !verifySignature(rawBody, timestamp, signature, env.PAYMEGATE_WEBHOOK_SECRET)) {
     return NextResponse.json({ ok: false, error: "Invalid webhook signature" }, { status: 401 });
   }
 
@@ -81,19 +65,14 @@ export async function POST(request: Request) {
   }
 
   const eventType = event.type || eventHeader;
-  if (eventType !== "order.paid" || event.status !== "PAID") {
-    return NextResponse.json({ ok: true, ignored: true });
-  }
-
+  if (eventType !== "order.paid" || event.status !== "PAID") return NextResponse.json({ ok: true, ignored: true });
   if (!event.id || (eventIdHeader && event.id !== eventIdHeader) || !event.orderUUID) {
     return NextResponse.json({ ok: false, error: "Invalid webhook event" }, { status: 400 });
   }
 
   try {
-    const order =
-      (await getOrderByPaymegateUuid(event.orderUUID)) ??
+    const order = (await getOrderByPaymegateUuid(event.orderUUID)) ??
       (event.externalId ? await getOrderById(event.externalId) : null);
-
     if (!order || order.payment_provider !== "paymegate") {
       console.warn("[paymegate/webhook] Unknown order:", event.orderUUID, event.externalId);
       return NextResponse.json({ ok: true, ignored: true });
@@ -110,43 +89,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, duplicate: true, emailDeliveryRetried: true });
     }
 
+    // A verified provider payment may arrive after Nexora's local 24-hour expiry.
+    // Expiry closes the checkout locally; it must not strand money already paid.
     if (
-      order.status !== "pending" ||
+      !["pending", "expired"].includes(order.status) ||
       !sameMoney(event.amount, order.base_price_usd) ||
       event.currency !== "USD"
     ) {
       console.warn("[paymegate/webhook] Order mismatch:", {
-        orderId: order.id,
-        status: order.status,
-        amount: event.amount,
-        expected: order.base_price_usd,
-        currency: event.currency,
+        orderId: order.id, status: order.status, amount: event.amount,
+        expected: order.base_price_usd, currency: event.currency,
       });
       return NextResponse.json({ ok: false, error: "Order mismatch" }, { status: 409 });
     }
 
-    if (
-      event.customerEmail &&
-      event.customerEmail.toLowerCase() !== order.buyer_email.toLowerCase()
-    ) {
+    if (event.customerEmail && event.customerEmail.toLowerCase() !== order.buyer_email.toLowerCase()) {
       return NextResponse.json({ ok: false, error: "Customer mismatch" }, { status: 409 });
     }
 
     const downloadToken = randomUUID();
     const claimed = await markPaymegateConfirmed(
-      order.id,
-      event.transactionUUID ?? "",
-      event.transactionRef ?? "",
-      event.id,
-      downloadToken
+      order.id, event.transactionUUID ?? "", event.transactionRef ?? "", event.id, downloadToken
     );
+    if (!claimed) return NextResponse.json({ ok: true, duplicate: true });
 
-    if (!claimed) {
-      return NextResponse.json({ ok: true, duplicate: true });
-    }
-
-    await deliverConfirmedOrderEmails({ ...order, status: "confirmed", download_token: downloadToken }, { transactionRef: event.transactionRef ?? event.transactionUUID ?? event.id, eventId: event.id, orderUUID: event.orderUUID, amount: event.amount, currency: event.currency });
-
+    await deliverConfirmedOrderEmails(
+      { ...order, status: "confirmed", download_token: downloadToken },
+      { transactionRef: event.transactionRef ?? event.transactionUUID ?? event.id, eventId: event.id,
+        orderUUID: event.orderUUID, amount: event.amount, currency: event.currency }
+    );
     return NextResponse.json({ ok: true, processed: true });
   } catch (error) {
     console.error("[paymegate/webhook] Processing failed:", error);
