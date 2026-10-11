@@ -78,6 +78,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, ignored: true });
     }
 
+    // Validate every signed paid event before either confirming an order or
+    // retrying its email delivery. A duplicate event must not bypass correlation.
+    if (
+      (event.externalId && event.externalId !== order.id) ||
+      (order.paymegate_order_uuid && order.paymegate_order_uuid !== event.orderUUID) ||
+      !sameMoney(event.amount, order.base_price_usd) ||
+      event.currency !== "USD"
+    ) {
+      console.warn("[paymegate/webhook] Order mismatch:", {
+        orderId: order.id, status: order.status, externalId: event.externalId,
+        orderUUID: event.orderUUID, amount: event.amount,
+        expected: order.base_price_usd, currency: event.currency,
+      });
+      return NextResponse.json({ ok: false, error: "Order mismatch" }, { status: 409 });
+    }
+
+    if (event.customerEmail && event.customerEmail.toLowerCase() !== order.buyer_email.toLowerCase()) {
+      return NextResponse.json({ ok: false, error: "Customer mismatch" }, { status: 409 });
+    }
+
     if (order.status === "confirmed") {
       await deliverConfirmedOrderEmails(order, {
         transactionRef: order.paymegate_transaction_ref || order.paymegate_transaction_uuid || event.transactionRef || event.transactionUUID || event.id,
@@ -91,20 +111,8 @@ export async function POST(request: Request) {
 
     // A verified provider payment may arrive after Nexora's local 24-hour expiry.
     // Expiry closes the checkout locally; it must not strand money already paid.
-    if (
-      !["pending", "expired"].includes(order.status) ||
-      !sameMoney(event.amount, order.base_price_usd) ||
-      event.currency !== "USD"
-    ) {
-      console.warn("[paymegate/webhook] Order mismatch:", {
-        orderId: order.id, status: order.status, amount: event.amount,
-        expected: order.base_price_usd, currency: event.currency,
-      });
+    if (!["pending", "expired"].includes(order.status)) {
       return NextResponse.json({ ok: false, error: "Order mismatch" }, { status: 409 });
-    }
-
-    if (event.customerEmail && event.customerEmail.toLowerCase() !== order.buyer_email.toLowerCase()) {
-      return NextResponse.json({ ok: false, error: "Customer mismatch" }, { status: 409 });
     }
 
     const downloadToken = randomUUID();
