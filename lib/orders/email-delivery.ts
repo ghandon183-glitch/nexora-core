@@ -52,9 +52,9 @@ export async function deliverConfirmedOrderEmails(
       "<p><strong>Customer:</strong> " + buyerName + "</p>" +
       "<p><strong>Customer email:</strong> " + buyerEmail + "</p>" +
       "<p><strong>Amount:</strong> " + amount + " " + currency + "</p>" +
-      "<p><strong>Paymegate order UUID:</strong> <code>" + orderUUID + "</code></p>" +
+      "<p><strong>Payment provider/order reference:</strong> <code>" + orderUUID + "</code></p>" +
       "<p><strong>Transaction reference:</strong> <code>" + transactionRef + "</code></p>" +
-      "<p><strong>Webhook/event ID:</strong> <code>" + eventId + "</code></p>" +
+      "<p><strong>Payment verification event ID:</strong> <code>" + eventId + "</code></p>" +
       "<p><strong>Confirmed at:</strong> " + new Date().toISOString() + "</p><hr>" +
       "<p>" + verificationDescription + "</p>",
   });
