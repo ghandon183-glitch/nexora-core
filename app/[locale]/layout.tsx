@@ -24,11 +24,6 @@ export async function generateMetadata({
   const env = await getEnv();
   const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;
   const canonicalPath = `/${locale}`;
-  const languages: Record<string, string> = {};
-
-  for (const language of routing.locales) {
-    languages[language] = `${siteUrl}/${language}`;
-  }
 
   return {
     metadataBase: new URL(siteUrl),
@@ -38,10 +33,6 @@ export async function generateMetadata({
     },
     description:
       "Premium Next.js templates, dashboards, landing pages and reusable UI components for startups, SaaS products, agencies and modern web applications.",
-    alternates: {
-      canonical: canonicalPath,
-      languages,
-    },
     openGraph: {
       title: "Nexora Core | Premium Next.js Templates & UI Kit",
       description:

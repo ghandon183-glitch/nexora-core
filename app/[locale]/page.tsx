@@ -1,3 +1,14 @@
+import type { Metadata } from "next";
+import { localeAlternates } from "@/lib/seo/locale-alternates";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale, "") };
+}
 import Navbar from "@/components/navigation/navbar";
 import Hero from "@/components/sections/hero-optimized";
 import TrustedBy from "@/components/sections/trusted-by";
