@@ -24,11 +24,6 @@ export async function generateMetadata({
   const env = await getEnv();
   const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;
   const canonicalPath = `/${locale}`;
-  const languages: Record<string, string> = {};
-
-  for (const language of routing.locales) {
-    languages[language] = `${siteUrl}/${language}`;
-  }
 
   return {
     metadataBase: new URL(siteUrl),
