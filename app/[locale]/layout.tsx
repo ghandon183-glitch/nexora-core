@@ -38,10 +38,6 @@ export async function generateMetadata({
     },
     description:
       "Premium Next.js templates, dashboards, landing pages and reusable UI components for startups, SaaS products, agencies and modern web applications.",
-    alternates: {
-      canonical: canonicalPath,
-      languages,
-    },
     openGraph: {
       title: "Nexora Core | Premium Next.js Templates & UI Kit",
       description:
