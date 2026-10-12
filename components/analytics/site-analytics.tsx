@@ -5,11 +5,21 @@ import { useEffect } from "react";
 declare global {
   interface Window {
     dataLayer?: Array<Record<string, unknown>>;
+    gtag?: (command: "event", eventName: string, params?: Record<string, unknown>) => void;
   }
 }
 
 function track(event: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
+
+  // The site installs the direct Google tag (gtag.js), not Google Tag Manager.
+  // Send analytics events through gtag's command API so GA4 actually receives them.
+  if (typeof window.gtag === "function") {
+    window.gtag("event", event, params);
+    return;
+  }
+
+  // Keep events observable in the data layer when GA4 is not configured yet.
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event, ...params });
 }
