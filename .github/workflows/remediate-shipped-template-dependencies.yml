@@ -90,6 +90,7 @@ jobs:
             test -n "$project"
             echo "===== $name: install ====="
             (cd "$project" && npm install --legacy-peer-deps --no-fund)
+            if [ "$name" = "aether" ]; then (cd "$project" && npm ls next-intl); fi
             echo "===== $name: production dependency audit ====="
             (cd "$project" && npm audit --audit-level=high --omit=dev)
             echo "===== $name: build ====="
