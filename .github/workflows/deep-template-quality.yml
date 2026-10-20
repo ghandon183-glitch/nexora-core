@@ -6,6 +6,7 @@ on:
     paths:
       - "public/downloads/**"
       - ".github/workflows/deep-template-quality.yml"
+      - "public/demo/vesper/**"
 
 concurrency:
   group: nexora-deep-template-quality
