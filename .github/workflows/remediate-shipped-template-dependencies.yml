@@ -66,7 +66,7 @@ jobs:
               # runtime dependency explicit in the shipped package rather than relying
               # on the monorepo's root node_modules to make its build pass.
               if name == "aether":
-                  pkg.setdefault("dependencies", {}).setdefault("next-intl", "^4.13.2")
+                  pkg.setdefault("dependencies", {})["next-intl"] = "^4.13.2"
               # shadcn is a build-time CLI, not a runtime dependency. Moving it out
               # of dependencies removes its vulnerable CLI dependency tree from the
               # shipped production install without forcing a breaking CLI major.
