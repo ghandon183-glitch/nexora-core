@@ -29,6 +29,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Fulfilment regressions must not reach production: these tests cover the
+      # payment/webhook state machine and the email outbox retry path.
+      - name: Regression tests
+        run: npm test
+
       # The Worker code depends on the production D1 schema. A migration
       # failure must block deployment; otherwise a new Worker can go live
       # against an older schema and fail at runtime.

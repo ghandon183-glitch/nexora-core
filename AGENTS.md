@@ -47,6 +47,13 @@ root). To serve correctly with Python's http.server, serve FROM `public/`:
 - `eslint.config.mjs` was a pre-existing bug (TS syntax in .mjs) — fixed with
   valid ESM `defineConfig`.
 
+## Testing
+`npm test` runs the dependency-free regression suite on the built-in Node test
+runner (`test/*.test.ts`). Tests import the real route handlers and data layer;
+`test/harness/` replaces only the Cloudflare bindings (`D1` via `node:sqlite`),
+`next/server`, the mailer and `lib/env`. Nothing is sent to a real provider,
+wallet or inbox.
+
 ## Environment Notes
 - No `zip` binary — use Python `zipfile` module.
 - Headless browser (Chromium) lacks reliable WebGL; screenshots of WebGL
