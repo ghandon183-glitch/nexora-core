@@ -29,6 +29,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Payment, webhook and outbox regression tests
+        run: npm test
+
       - name: Dependency audit
         continue-on-error: true
         run: npm audit --audit-level=high
