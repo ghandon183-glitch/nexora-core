@@ -7,6 +7,7 @@ on:
     paths:
       - "public/downloads/**"
       - "public/demo/vesper/**"
+      - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
   pull_request:
     paths:
