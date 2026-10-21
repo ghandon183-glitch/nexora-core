@@ -9,7 +9,8 @@
     "lint": "eslint",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./test/harness/register.mjs --test test/*.test.ts"
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",
