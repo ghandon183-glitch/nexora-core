@@ -29,6 +29,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Payment state, webhook, retry and outbox regressions must pass before any production mutation.
+      - name: Payment, webhook and outbox regression tests
+        run: npm test
+
       # The Worker code depends on the production D1 schema. A migration
       # failure must block deployment; otherwise a new Worker can go live
       # against an older schema and fail at runtime.
