@@ -11,7 +11,7 @@ describe("download entitlement", () => {
     setupDatabase();
     testState.assets = {
       fetch: async (request: Request) => {
-        assert.equal(new URL(request.url).pathname, "/downloads/vesper.zip");
+        assert.equal(new URL(request.url).pathname, "/downloads/Nexora-Template-12-Vesper-v1.0.0.zip");
         return new Response("zip-payload", {
           status: 200,
           headers: { "content-type": "application/zip", "content-length": "11" },
