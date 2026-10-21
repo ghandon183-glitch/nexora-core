@@ -14,7 +14,7 @@ on:
       - ".github/workflows/deep-template-quality.yml"
 
 concurrency:
-  group: nexora-deep-template-quality
+  group: nexora-deep-template-quality-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
