@@ -119,6 +119,54 @@ jobs:
           cp -R .vesper-build/dist/. public/demo/vesper/
           test -f public/demo/vesper/index.html
 
+      - name: Preserve Vesper semantic heading and accessible controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path("public/demo/vesper")
+          html_path = root / "index.html"
+          html = html_path.read_text(encoding="utf-8")
+          heading = "Vesper — The Generative Directing System for Cinematic Reality"
+          if heading not in html:
+              replacement = '<div id="root"><h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">' + heading + '</h1></div>'
+              html, count = re.subn(r'<div id="root"></div>', replacement, html, count=1)
+              if count != 1:
+                  raise SystemExit("Vesper root mount point changed; refusing to skip semantic H1 patch")
+              html_path.write_text(html, encoding="utf-8")
+
+          js_files = list((root / "assets").glob("*.js"))
+          if not js_files:
+              raise SystemExit("Vesper build produced no JavaScript assets")
+
+          replacements = [
+              (r'type:`range`,min:`0\.5`,max:`10\.0`', '"aria-label":`Camera Velocity Vector`,type:`range`,min:`0.5`,max:`10.0`'),
+              (r'type:`range`,min:`1\.0`,max:`15\.0`', '"aria-label":`Latent Guidance (CFG)`,type:`range`,min:`1.0`,max:`15.0`'),
+              (r'type:`number`,value:c,onChange:e=>l\(parseInt\(e\.target\.value\)\|\|0\)', '"aria-label":`Deterministic Seed`,type:`number`,value:c,onChange:e=>l(parseInt(e.target.value)||0)'),
+              (r'\(0,O\.jsxs\)\(`select`,\{value:f,onChange:e=>p\(e\.target\.value\)', '(0,O.jsxs)(`select`,{"aria-label":`Film Emulsion`,value:f,onChange:e=>p(e.target.value)'),
+              (r'type:`button`,onClick:\(\)=>ee\(!b\),className:`w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center text-white hover:text-red-400 hover:border-red-500/40 transition-colors`', 'type:`button`,"aria-label":`Toggle preview playback`,onClick:()=>ee(!b),className:`w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center text-white hover:text-red-400 hover:border-red-500/40 transition-colors`'),
+          ]
+
+          combined = "".join(p.read_text(encoding="utf-8", errors="ignore") for p in js_files)
+          for pattern, replacement in replacements:
+              count = len(re.findall(pattern, combined))
+              if count < 1:
+                  raise SystemExit(f"Vesper accessibility patch pattern not found: {pattern}")
+              remaining = count
+              for path in js_files:
+                  source = path.read_text(encoding="utf-8", errors="ignore")
+                  updated, n = re.subn(pattern, replacement, source)
+                  if n:
+                      path.write_text(updated, encoding="utf-8")
+                      remaining -= n
+              if remaining != 0:
+                  raise SystemExit(f"Vesper accessibility patch count mismatch: {pattern}; remaining={remaining}")
+          print(f"VESPER_ACCESSIBILITY_PATCHED assets={len(js_files)}")
+          PY
+
       - name: Build and serve existing live demos
         shell: bash
         run: |
