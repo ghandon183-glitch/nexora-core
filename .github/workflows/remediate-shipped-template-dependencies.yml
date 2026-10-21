@@ -33,14 +33,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .remediate
-          mkdir -p .remediate
+          rm -rf /tmp/nexora-remediate
+          mkdir -p /tmp/nexora-remediate
           python3 - <<'PY'
           from pathlib import Path
           import json, zipfile
 
           targets = ["aether", "kiln-estates", "nexi-ai"]
-          root = Path(".remediate")
+          root = Path("/tmp/nexora-remediate")
           for name in targets:
               archive = Path("public/downloads") / f"{name}.zip"
               destination = root / name
@@ -73,7 +73,7 @@ jobs:
           set -euo pipefail
           for name in aether kiln-estates nexi-ai; do
             echo "=== VERIFY $name ==="
-            cd "$GITHUB_WORKSPACE/.remediate/$name"
+            cd "/tmp/nexora-remediate/$name"
             npm install --legacy-peer-deps --no-fund --no-audit
             npm run build
             npm audit --audit-level=high --omit=dev
@@ -89,7 +89,7 @@ jobs:
           import zipfile
 
           for name in ["aether", "kiln-estates", "nexi-ai"]:
-              source = Path(".remediate") / name
+              source = Path("/tmp/nexora-remediate") / name
               target = Path("public/downloads") / f"{name}.zip"
               temporary = target.with_suffix(".zip.tmp")
               with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
