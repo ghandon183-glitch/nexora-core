@@ -252,11 +252,39 @@ jobs:
       - name: Commit real captures and audit report
         shell: bash
         run: |
+          set -euo pipefail
           git config user.name "Nexora Core"
           git config user.email "ghandon183-glitch@users.noreply.github.com"
-          git add .template-audit public/demo/vesper public/templates/gallery public/templates/video
-          git diff --cached --quiet && exit 0
-          git commit -m "chore: add real demo captures and package audit report"
-          git pull --rebase origin main
-          git push
+
+          # Preserve generated outputs, then apply them on top of the newest main
+          # instead of rebasing binary screenshots/videos over concurrent updates.
+          snapshot="$(mktemp -d)"
+          cp -a .template-audit "$snapshot/template-audit"
+          cp -a public/demo/vesper "$snapshot/vesper"
+          cp -a public/templates/gallery "$snapshot/gallery"
+          cp -a public/templates/video "$snapshot/video"
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p .template-audit public/demo/vesper public/templates/gallery public/templates/video
+            cp -a "$snapshot/template-audit/." .template-audit/
+            rm -rf public/demo/vesper
+            cp -a "$snapshot/vesper" public/demo/vesper
+            cp -a "$snapshot/gallery/." public/templates/gallery/
+            cp -a "$snapshot/video/." public/templates/video/
+            git add .template-audit public/demo/vesper public/templates/gallery public/templates/video
+            if git diff --cached --quiet; then
+              echo "No capture or audit changes to commit."
+              exit 0
+            fi
+            git commit -m "chore: add real demo captures and package audit report"
+            if git push origin HEAD:main; then
+              echo "Capture assets and audit report committed to latest main."
+              exit 0
+            fi
+            echo "Push raced with another main update; retrying against latest main."
+          done
+          echo "Unable to commit captures after three attempts." >&2
+          exit 1
       
