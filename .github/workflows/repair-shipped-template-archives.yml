@@ -52,7 +52,7 @@ jobs:
                   if "next" not in manifest.get(section, {}):
                       raise SystemExit(f"{archive_name}: Next.js dependency not declared")
                   manifest[section]["next"] = "16.4.2"
-                  manifests[0].write_text(json.dumps(manifest, indent=2) + "\\n")
+                  manifests[0].write_text(json.dumps(manifest, indent=2) + "\n")
                   lock = package_dir / "package-lock.json"
                   if lock.exists():
                       lock.unlink()
