@@ -140,7 +140,7 @@
   {
     "package": "aether.zip",
     "bytes": 10477297,
-    "sha256": "1b0fd97c6e012cef0a014ab55429eb492a3001259412ac80bcfa9f37fc1a4220",
+    "sha256": "d12c75528f5e0b9f6a325806b5412c420363ad21c00a0aa94f0951fdb86a83b0",
     "files": 50,
     "readmes": [
       "README.md"
@@ -367,8 +367,8 @@
   },
   {
     "package": "kiln-estates.zip",
-    "bytes": 1918537,
-    "sha256": "258ff2f95d865708e2d60238e6563b3ba07de47b265ba0acdfe18155a503b80b",
+    "bytes": 1918541,
+    "sha256": "468b1fb764bb6b8fe46f127ce2e19531f540936d831d2a7389b3c3237beec691",
     "files": 36,
     "readmes": [
       "README.md"
@@ -493,8 +493,8 @@
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 81182,
-    "sha256": "833c367cfe1c4c6cc7957fce88637e8801280c35115c1d8b08117708219fd6f6",
+    "bytes": 81183,
+    "sha256": "6e4ba94fd51885cf98a645543ee4719a153893b363a2312fea7a0af0d4504c60",
     "files": 30,
     "readmes": [
       "README.md"

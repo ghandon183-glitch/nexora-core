@@ -58,7 +58,7 @@
 - External asset references detected: 3
 
 ## kiln-estates.zip
-- Archive: 1,918,537 bytes
+- Archive: 1,918,541 bytes
 - Files: 36
 - README: YES
 - License: YES
@@ -80,7 +80,7 @@
 - External asset references detected: 2
 
 ## nexi-ai.zip
-- Archive: 81,182 bytes
+- Archive: 81,183 bytes
 - Files: 30
 - README: YES
 - License: YES
