@@ -14,12 +14,14 @@ export type TestEnv = Record<string, string | undefined>;
 export const testState: {
   env: TestEnv;
   db: unknown;
+  assets: unknown;
   mailerCalls: MailerCall[];
   mailerFailuresRemaining: number;
   mailerError: string;
 } = {
   env: {},
   db: null,
+  assets: null,
   mailerCalls: [],
   mailerFailuresRemaining: 0,
   mailerError: "smtp failure",
