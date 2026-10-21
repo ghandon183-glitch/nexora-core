@@ -8,6 +8,8 @@ const USDT_TRC20_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 export interface MatchResult {
   matched: boolean;
   txHash?: string;
+  /** On-chain timestamp of the matching transfer, used to bound late payments. */
+  txTimestampMs?: number;
 }
 
 /**
@@ -53,7 +55,11 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
     if (!isOnOrAfterOrder(transfer.block_timestamp, order)) continue;
 
     if (BigInt(transfer.value) === wanted) {
-      return { matched: true, txHash: transfer.transaction_id };
+      return {
+        matched: true,
+        txHash: transfer.transaction_id,
+        txTimestampMs: transfer.block_timestamp,
+      };
     }
   }
 
@@ -104,7 +110,7 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
       if (output.scriptpubkey_address !== order.wallet_address) continue;
 
       if (BigInt(output.value) === wantedSats) {
-        return { matched: true, txHash: tx.txid };
+        return { matched: true, txHash: tx.txid, txTimestampMs: blockTimeMs };
       }
     }
   }

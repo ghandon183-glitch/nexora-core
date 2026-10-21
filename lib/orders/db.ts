@@ -167,6 +167,28 @@ export async function getRecentlyExpiredPaymegateOrders(limit = 15): Promise<Ord
   return result.results ?? [];
 }
 
+/**
+ * A crypto transfer can be broadcast just before the local checkout window
+ * closes and only be indexed after the cron run that expired the order. Those
+ * orders stay eligible for reconciliation for a day (enough for any indexing
+ * delay); the verifier still has to match the exact fingerprinted amount and
+ * the cron bounds how late the transfer may be (see LATE_CRYPTO_GRACE_MS).
+ */
+export async function getRecentlyExpiredCryptoOrders(limit = 15): Promise<Order[]> {
+  const db = await getOrdersDb();
+  const safeLimit = Math.max(1, Math.min(25, Math.floor(limit)));
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const result = await db.prepare(
+    `SELECT * FROM orders
+     WHERE status = 'expired'
+       AND payment_provider = 'crypto'
+       AND expires_at >= ?
+     ORDER BY expires_at DESC
+     LIMIT ?`
+  ).bind(cutoff, safeLimit).all<Order>();
+  return result.results ?? [];
+}
+
 export async function getRecentOrders(limit = 100): Promise<Order[]> {
   const db = await getOrdersDb();
   const safeLimit = Math.max(1, Math.min(200, Math.floor(limit)));
@@ -178,25 +200,38 @@ export async function getRecentOrders(limit = 100): Promise<Order[]> {
 }
 
 /**
- * Atomically claims a pending order for confirmation. Returning false means
- * another cron invocation already changed the order, so callers must not
- * send a duplicate email or overwrite its download token.
+ * Atomically claims an order for confirmation. Returning false means another
+ * cron invocation already changed the order, so callers must not send a
+ * duplicate email or overwrite its download token.
+ *
+ * A confirmed on-chain transaction may only ever fulfil one order, so the
+ * update also refuses to run when the transaction hash is already attached to
+ * a different order. Expired crypto orders can be claimed when the caller has
+ * proven the payment was broadcast inside the late-payment window.
  */
 export async function markOrderConfirmed(
   id: string,
   txHash: string,
-  downloadToken: string
+  downloadToken: string,
+  options: { includeExpired?: boolean } = {}
 ): Promise<boolean> {
   const db = await getOrdersDb();
+  const statusPredicate = options.includeExpired
+    ? "status IN ('pending', 'expired')"
+    : "status = 'pending'";
   const result = await db
     .prepare(
       `UPDATE orders
        SET status = 'confirmed', tx_hash = ?, download_token = ?, confirmed_at = ?,
            owner_email_status = 'pending', customer_email_status = 'pending',
            owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL
-       WHERE id = ? AND status = 'pending'`
+       WHERE id = ? AND ${statusPredicate}
+         AND NOT EXISTS (
+           SELECT 1 FROM orders AS claimed_tx
+           WHERE claimed_tx.tx_hash = ? AND claimed_tx.id <> ?
+         )`
     )
-    .bind(txHash, downloadToken, Date.now(), id)
+    .bind(txHash, downloadToken, Date.now(), id, txHash, id)
     .run();
 
   return (result.meta?.changes ?? 0) > 0;
@@ -366,23 +401,23 @@ export interface EmailOutboxItem {
   updated_at: number;
 }
 
-export async function enqueueOrderEmail(params: {
-  id: string;
-  orderId: string;
-  kind: "owner" | "customer";
-  toEmail: string;
-  subject: string;
-  html: string;
-}): Promise<void> {
+export async function enqueueOrderEmail(
+  params: {
+    id: string;
+    orderId: string;
+    kind: "owner" | "customer";
+    toEmail: string;
+    subject: string;
+    html: string;
+  },
+  options: { createOnly?: boolean } = {}
+): Promise<void> {
   const db = await getOrdersDb();
   const now = Date.now();
 
-  await db.prepare(
-    `INSERT INTO email_outbox (
-       id, order_id, kind, to_email, subject, html, status,
-       attempts, next_attempt_at, locked_at, sent_at, last_error, created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, ?, NULL, NULL, NULL, ?, ?)
-     ON CONFLICT(order_id, kind) DO UPDATE SET
+  const conflictClause = options.createOnly
+    ? "ON CONFLICT(order_id, kind) DO NOTHING"
+    : `ON CONFLICT(order_id, kind) DO UPDATE SET
        to_email = excluded.to_email,
        subject = excluded.subject,
        html = excluded.html,
@@ -393,7 +428,14 @@ export async function enqueueOrderEmail(params: {
        next_attempt_at = email_outbox.next_attempt_at,
        locked_at = CASE WHEN email_outbox.status = 'sending' THEN email_outbox.locked_at ELSE NULL END,
        last_error = CASE WHEN email_outbox.status = 'sent' THEN NULL ELSE email_outbox.last_error END,
-       updated_at = excluded.updated_at`
+       updated_at = excluded.updated_at`;
+
+  await db.prepare(
+    `INSERT INTO email_outbox (
+       id, order_id, kind, to_email, subject, html, status,
+       attempts, next_attempt_at, locked_at, sent_at, last_error, created_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, ?, NULL, NULL, NULL, ?, ?)
+     ${conflictClause}`
   ).bind(
     params.id,
     params.orderId,

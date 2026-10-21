@@ -15,6 +15,8 @@ const STUBS = {
   "@opennextjs/cloudflare": path.join(STUB_DIR, "cloudflare.mjs"),
   "@/lib/env": path.join(STUB_DIR, "env.mjs"),
   "@/lib/mailer": path.join(STUB_DIR, "mailer.mjs"),
+  "resend": path.join(STUB_DIR, "resend.mjs"),
+  "next/headers": path.join(STUB_DIR, "next-headers.mjs"),
 };
 
 const EXTENSIONS = [".ts", ".tsx", ".mjs", ".js", ".json"];
