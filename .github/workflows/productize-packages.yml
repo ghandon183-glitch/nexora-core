@@ -155,8 +155,12 @@ jobs:
                   for name, body in additions.items():
                       if name not in names:
                           zout.writestr(name, body)
-              shutil.move(out, z)
-              shutil.rmtree(tmp, ignore_errors=True)
+              if all(name in names for name in additions):
+                  print(f"{z.name}: already productized; preserving archive bytes")
+                  shutil.rmtree(tmp, ignore_errors=True)
+              else:
+                  shutil.move(out, z)
+                  shutil.rmtree(tmp, ignore_errors=True)
 
           PY
 

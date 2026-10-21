@@ -1,0 +1,84 @@
+name: Repair shipped template dependency archives
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/repair-shipped-template-archives.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repair-shipped-template-archives
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Repair, build, audit, and repack affected shipped packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, shutil, subprocess, tempfile, zipfile
+
+          targets = ["aether.zip", "kiln-estates.zip", "nexi-ai.zip"]
+          root = Path.cwd()
+          for archive_name in targets:
+              archive = root / "public" / "downloads" / archive_name
+              if not archive.exists():
+                  raise SystemExit(f"Required shipped archive missing: {archive}")
+              with tempfile.TemporaryDirectory(prefix="nexora-package-") as tmp:
+                  work = Path(tmp)
+                  with zipfile.ZipFile(archive) as zf:
+                      zf.extractall(work)
+                  manifests = list(work.rglob("package.json"))
+                  manifests = [p for p in manifests if "node_modules" not in p.parts and ".next" not in p.parts]
+                  if len(manifests) != 1:
+                      raise SystemExit(f"{archive_name}: expected one package.json, found {len(manifests)}")
+                  package_dir = manifests[0].parent
+                  manifest = json.loads(manifests[0].read_text())
+                  section = "dependencies" if "next" in manifest.get("dependencies", {}) else "devDependencies"
+                  if "next" not in manifest.get(section, {}):
+                      raise SystemExit(f"{archive_name}: Next.js dependency not declared")
+                  manifest[section]["next"] = "16.4.2"
+                  manifests[0].write_text(json.dumps(manifest, indent=2) + "\n")
+                  lock = package_dir / "package-lock.json"
+                  if lock.exists():
+                      lock.unlink()
+                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "audit", "fix", "--omit=dev"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "run", "build"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "audit", "--audit-level=high", "--omit=dev"], cwd=package_dir, check=True)
+                  rebuilt = archive.with_suffix(".zip.tmp")
+                  with zipfile.ZipFile(rebuilt, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+                      for path in sorted(work.rglob("*")):
+                          if path.is_file() and "node_modules" not in path.parts and ".next" not in path.parts:
+                              zf.write(path, path.relative_to(work).as_posix())
+                  rebuilt.replace(archive)
+                  print(f"REPAIRED AND AUDITED: {archive_name}")
+          PY
+      - name: Commit repaired archives only after every build and audit passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/downloads/aether.zip public/downloads/kiln-estates.zip public/downloads/nexi-ai.zip
+          if git diff --cached --quiet; then
+            echo "No archive changes to commit."
+          else
+            git commit -m "fix(security): rebuild shipped templates with patched Next.js"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
