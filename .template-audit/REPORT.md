@@ -25,15 +25,15 @@
 - External asset references detected: 3
 
 ## aether.zip
-- Archive: 10,423,021 bytes
-- Files: 48
+- Archive: 10,477,297 bytes
+- Files: 50
 - README: YES
 - License: YES
 - Asset license manifest: YES
 - package.json: YES
 - Asset files: 18
 - Bundled build artifacts: none
-- External asset references detected: 6
+- External asset references detected: 7
 
 ## aurelia-store.zip
 - Archive: 1,675,253 bytes
@@ -58,8 +58,8 @@
 - External asset references detected: 3
 
 ## kiln-estates.zip
-- Archive: 1,867,964 bytes
-- Files: 35
+- Archive: 1,918,537 bytes
+- Files: 36
 - README: YES
 - License: YES
 - Asset license manifest: YES
@@ -80,8 +80,8 @@
 - External asset references detected: 2
 
 ## nexi-ai.zip
-- Archive: 30,054 bytes
-- Files: 29
+- Archive: 81,182 bytes
+- Files: 30
 - README: YES
 - License: YES
 - Asset license manifest: YES

@@ -139,9 +139,9 @@
   },
   {
     "package": "aether.zip",
-    "bytes": 10423021,
-    "sha256": "f0ab0770037bea2bba000b950aa9ec06d052c9d2a6903c7c418a1c4f9062ff28",
-    "files": 48,
+    "bytes": 10477297,
+    "sha256": "1b0fd97c6e012cef0a014ab55429eb492a3001259412ac80bcfa9f37fc1a4220",
+    "files": 50,
     "readmes": [
       "README.md"
     ],
@@ -157,24 +157,24 @@
     "env_examples": [],
     "asset_count": 18,
     "asset_samples": [
-      "public/placeholder-logo.png",
-      "public/icon-light-32x32.png",
       "public/apple-icon.png",
       "public/icon-dark-32x32.png",
-      "public/placeholder-user.jpg",
-      "public/placeholder.jpg",
+      "public/icon-light-32x32.png",
       "public/icon.svg",
-      "public/placeholder.svg",
-      "public/placeholder-logo.svg",
+      "public/images/hero-fallback.png",
+      "public/images/project-01.png",
+      "public/images/project-02.png",
       "public/images/project-03.png",
+      "public/images/project-04.png",
       "public/images/project-05.png",
       "public/images/project-06.png",
       "public/images/studio-portrait.png",
-      "public/images/project-04.png",
-      "public/images/project-02.png",
       "public/images/texture-abstract.png",
-      "public/images/hero-fallback.png",
-      "public/images/project-01.png"
+      "public/placeholder-logo.png",
+      "public/placeholder-logo.svg",
+      "public/placeholder-user.jpg",
+      "public/placeholder.jpg",
+      "public/placeholder.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -183,7 +183,8 @@
       "https://behance.net",
       "https://dribbble.com",
       "https://in",
-      "https://linkedin.com"
+      "https://linkedin.com",
+      "https://nextj"
     ],
     "packages": [
       {
@@ -205,10 +206,9 @@
           "clsx": "^2.1.1",
           "framer-motion": "^13.1.0",
           "lucide-react": "^1.16.0",
-          "next": "16.3.6",
+          "next": "16.4.2",
           "react": "19.2.4",
           "react-dom": "19.2.4",
-          "shadcn": "^4.8.0",
           "tailwind-merge": "^3.3.1",
           "three": "^0.185.1",
           "tw-animate-css": "^1.4.0"
@@ -221,7 +221,8 @@
           "@types/three": "^0.185.4",
           "postcss": "^8.5",
           "tailwindcss": "^4.3.3",
-          "typescript": "5.7.3"
+          "typescript": "5.7.3",
+          "shadcn": "^4.8.0"
         },
         "pnpm": {
           "overrides": {
@@ -366,9 +367,9 @@
   },
   {
     "package": "kiln-estates.zip",
-    "bytes": 1867964,
-    "sha256": "42ad72affdf0ed64c68a9576a8b74e8a6f7f8ee2d13a4b038bd6332a508593ad",
-    "files": 35,
+    "bytes": 1918537,
+    "sha256": "258ff2f95d865708e2d60238e6563b3ba07de47b265ba0acdfe18155a503b80b",
+    "files": 36,
     "readmes": [
       "README.md"
     ],
@@ -384,15 +385,15 @@
     "env_examples": [],
     "asset_count": 9,
     "asset_samples": [
-      "public/next.svg",
-      "public/window.svg",
       "public/file.svg",
       "public/globe.svg",
-      "public/vercel.svg",
-      "public/images/listings/glasswood-house.jpg",
       "public/images/listings/birchmark-cabin.jpg",
       "public/images/listings/casa-del-viento.jpg",
-      "public/images/listings/holloway-ranch.jpg"
+      "public/images/listings/glasswood-house.jpg",
+      "public/images/listings/holloway-ranch.jpg",
+      "public/next.svg",
+      "public/vercel.svg",
+      "public/window.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
@@ -413,7 +414,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.3.6",
+          "next": "16.4.2",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -492,9 +493,9 @@
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 30054,
-    "sha256": "d755aa538dc14c8030d68001293db80c807c72fe69ee806ce4a6875f4b04c485",
-    "files": 29,
+    "bytes": 81182,
+    "sha256": "833c367cfe1c4c6cc7957fce88637e8801280c35115c1d8b08117708219fd6f6",
+    "files": 30,
     "readmes": [
       "README.md"
     ],
@@ -529,7 +530,7 @@
         "dependencies": {
           "framer-motion": "^12.42.2",
           "lucide-react": "^1.24.0",
-          "next": "16.3.6",
+          "next": "16.4.2",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
