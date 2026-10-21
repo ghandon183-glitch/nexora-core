@@ -7,6 +7,11 @@ on:
       - "public/downloads/**"
       - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
+  pull_request:
+    paths:
+      - "public/downloads/**"
+      - "public/demo/vesper/**"
+      - ".github/workflows/deep-template-quality.yml"
 
 concurrency:
   group: nexora-deep-template-quality
