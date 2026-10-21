@@ -48,10 +48,13 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: NotifyPurchaseBody;
+  // JSON.parse accepts `null`, arrays and primitives, so a syntactically valid
+  // body can still be structurally invalid. Reject those explicitly instead of
+  // reading properties off it (which would surface as an uncaught TypeError).
+  let payload: unknown;
 
   try {
-    body = await request.json();
+    payload = await request.json();
   } catch {
     return NextResponse.json(
       { ok: false, error: "Invalid request body" },
@@ -59,6 +62,14 @@ export async function POST(request: Request) {
     );
   }
 
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    return NextResponse.json(
+      { ok: false, error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
+  const body = payload as Partial<Record<keyof NotifyPurchaseBody, unknown>>;
   const orderId = typeof body.orderId === "string" ? body.orderId : "";
   const claimedEmail =
     typeof body.buyerEmail === "string" ? body.buyerEmail.trim().toLowerCase() : "";
@@ -113,7 +124,7 @@ export async function POST(request: Request) {
     try {
       const resend = new Resend(apiKey);
 
-      await resend.emails.send({
+      const result = await resend.emails.send({
         from: "Nexora Core <onboarding@resend.dev>",
         to: notifyEmail,
         subject: `New payment confirmation: ${order.template_title} ($${price})`,
@@ -129,9 +140,29 @@ export async function POST(request: Request) {
         `,
       });
 
-      ownerEmailSent = true;
+      if (result.error) {
+        // Resend can reject a message without throwing (validation, quota,
+        // restrictions). That is a failed notification, not a delivered one.
+        // Log only the provider error code/status: never recipients or body.
+        console.error(
+          "[notify-purchase] Resend rejected the owner notification:",
+          result.error.name,
+          result.error.statusCode
+        );
+      } else if (!result.data?.id) {
+        console.error(
+          "[notify-purchase] Resend returned no message id for order",
+          order.id
+        );
+      } else {
+        ownerEmailSent = true;
+      }
     } catch (error) {
-      console.error("[notify-purchase] Failed to email owner:", error);
+      // The thrown error can echo provider request details; keep it to a name.
+      console.error(
+        "[notify-purchase] Failed to email owner:",
+        error instanceof Error ? error.name : "unknown error"
+      );
     }
   } else {
     // Never log the buyer's details: the order ID is enough for support.

@@ -112,14 +112,16 @@ export async function POST(request: Request) {
     // owner of that fingerprint).
     const processLateCryptoOrder = async (order: (typeof expiredCryptoOrders)[number]) => {
       try {
-        const match = await checkPayment(order);
+        // The verifier itself refuses transfers outside the late-payment
+        // window, so a reused amount fingerprint can never be credited here
+        // and an in-window transfer is still found when the wallet also holds
+        // a newer, unrelated transfer of the same amount.
+        const windowEnd = order.expires_at + LATE_CRYPTO_GRACE_MS;
+        const match = await checkPayment(order, { notAfterMs: windowEnd });
         if (!match.matched || !match.txHash) return;
 
         const txTimestampMs = match.txTimestampMs;
-        if (
-          txTimestampMs === undefined ||
-          txTimestampMs > order.expires_at + LATE_CRYPTO_GRACE_MS
-        ) {
+        if (txTimestampMs === undefined || txTimestampMs > windowEnd) {
           // The amount fingerprint was recycled by a later order; the transfer
           // is not evidence for this expired order.
           console.warn(
@@ -132,6 +134,8 @@ export async function POST(request: Request) {
         const claimed = await markOrderConfirmed(order.id, match.txHash, downloadToken, {
           includeExpired: true,
         });
+        // markOrderConfirmed also refuses a transaction hash already attached
+        // to another order, so one transfer can never fulfil two orders.
         if (!claimed) return;
 
         results.confirmed += 1;

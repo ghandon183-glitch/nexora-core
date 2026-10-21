@@ -1,6 +1,8 @@
 import { testState } from "../state.ts";
 
-// Records Resend sends instead of contacting the provider.
+// Records Resend sends instead of contacting the provider. When
+// `testState.resendError` is set the call resolves with a provider error
+// object (the SDK's non-throwing failure shape) instead of a message id.
 export class Resend {
   constructor(apiKey) {
     this.apiKey = apiKey;
@@ -14,7 +16,12 @@ export class Resend {
         subject: message.subject,
         html: message.html,
       });
-      return { data: { id: "resend_test_message" }, error: null };
+
+      if (testState.resendError) {
+        return { data: null, error: testState.resendError, headers: null };
+      }
+
+      return { data: { id: "resend_test_message" }, error: null, headers: null };
     },
   };
 }

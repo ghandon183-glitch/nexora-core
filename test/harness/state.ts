@@ -18,6 +18,11 @@ export interface ResendCall {
 
 export type TestEnv = Record<string, string | undefined>;
 
+export interface ResendError {
+  name: string;
+  statusCode: number | null;
+}
+
 export const testState: {
   env: TestEnv;
   db: unknown;
@@ -26,6 +31,8 @@ export const testState: {
   resendCalls: ResendCall[];
   mailerFailuresRemaining: number;
   mailerError: string;
+  /** When set, the Resend double resolves an error object instead of throwing. */
+  resendError: ResendError | null;
   /** Signed admin session returned by the `next/headers` double. */
   adminSession: string | null;
 } = {
@@ -36,6 +43,7 @@ export const testState: {
   resendCalls: [],
   mailerFailuresRemaining: 0,
   mailerError: "smtp failure",
+  resendError: null,
   adminSession: null,
 };
 
@@ -44,5 +52,6 @@ export function resetMailer(): void {
   testState.resendCalls = [];
   testState.mailerFailuresRemaining = 0;
   testState.mailerError = "smtp failure";
+  testState.resendError = null;
   testState.adminSession = null;
 }
