@@ -1,0 +1,127 @@
+name: Remediate shipped template dependencies
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/remediate-shipped-template-dependencies.yml"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: remediate-shipped-template-dependencies
+  cancel-in-progress: false
+
+jobs:
+  remediate:
+    name: Patch and verify vulnerable shipped ZIPs
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Extract and patch vulnerable package manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .remediate
+          mkdir -p .remediate
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, zipfile
+
+          targets = ["aether", "kiln-estates", "nexi-ai"]
+          root = Path(".remediate")
+          for name in targets:
+              archive = Path("public/downloads") / f"{name}.zip"
+              destination = root / name
+              destination.mkdir(parents=True)
+              with zipfile.ZipFile(archive) as zf:
+                  zf.extractall(destination)
+              manifest = destination / "package.json"
+              if not manifest.exists():
+                  raise SystemExit(f"{name}: package.json missing at archive root")
+              data = json.loads(manifest.read_text(encoding="utf-8"))
+              deps = data.setdefault("dependencies", {})
+              dev = data.setdefault("devDependencies", {})
+              if "next" not in deps and "next" not in dev:
+                  raise SystemExit(f"{name}: Next.js dependency missing")
+              if "next" in deps:
+                  deps["next"] = "16.4.2"
+              else:
+                  dev["next"] = "16.4.2"
+              # shadcn is a development CLI, not a runtime dependency.
+              # Moving it avoids shipping CLI-only vulnerable transitive packages.
+              if "shadcn" in deps:
+                  dev["shadcn"] = deps.pop("shadcn")
+              manifest.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+              print(f"{name}: manifest patched")
+          PY
+
+      - name: Install, build and audit each patched package
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in aether kiln-estates nexi-ai; do
+            echo "=== VERIFY $name ==="
+            cd "$GITHUB_WORKSPACE/.remediate/$name"
+            npm install --legacy-peer-deps --no-fund --no-audit
+            npm run build
+            npm audit --audit-level=high --omit=dev
+            cd "$GITHUB_WORKSPACE"
+          done
+
+      - name: Repack verified ZIPs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+
+          for name in ["aether", "kiln-estates", "nexi-ai"]:
+              source = Path(".remediate") / name
+              target = Path("public/downloads") / f"{name}.zip"
+              temporary = target.with_suffix(".zip.tmp")
+              with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+                  for file in sorted(source.rglob("*")):
+                      if not file.is_file():
+                          continue
+                      relative = file.relative_to(source)
+                      if any(part in {"node_modules", ".next", ".git"} for part in relative.parts):
+                          continue
+                      zf.write(file, relative.as_posix())
+              temporary.replace(target)
+              print(f"Repacked {target} ({target.stat().st_size} bytes)")
+          PY
+
+      - name: Create pull request with verified ZIP updates
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/remediate-shipped-template-dependencies
+          delete-branch: true
+          title: "fix(templates): patch high-severity shipped dependency vulnerabilities"
+          commit-message: "fix(templates): patch vulnerable shipped dependencies"
+          body: |
+            Automated remediation for the Deep Template Quality findings.
+
+            - Updates shipped AETHER, Kiln Estates, and Nexi AI packages to Next.js 16.4.2.
+            - Moves the shadcn CLI to devDependencies where it was a runtime dependency.
+            - Rebuilds each package and runs the high-severity production dependency audit.
+            - Repackages ZIPs only after all validations succeed.
+
+            Review the ZIP contents and CI before merging.
+          add-paths: |
+            public/downloads/aether.zip
+            public/downloads/kiln-estates.zip
+            public/downloads/nexi-ai.zip
