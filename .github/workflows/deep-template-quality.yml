@@ -161,7 +161,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: nexora-deep-quality-audit-${{ github.run_id }}
-          path: .deep-audit/
+          path: |
+            .deep-audit/REPORT.md
+            .deep-audit/package-failures.txt
+            .deep-audit/runtime-failures.txt
           retention-days: 30
 
           include-hidden-files: true
