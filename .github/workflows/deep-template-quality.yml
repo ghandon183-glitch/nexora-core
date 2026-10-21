@@ -7,7 +7,6 @@ on:
     paths:
       - "public/downloads/**"
       - "public/demo/vesper/**"
-      - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
   pull_request:
     paths:
@@ -51,7 +50,15 @@ jobs:
               if z.name.startswith('Nexora-All-Templates'): continue
               d = out / re.sub(r'\.zip$', '', z.name, flags=re.I)
               d.mkdir(parents=True, exist_ok=True)
-              with zipfile.ZipFile(z) as f: f.extractall(d)
+              with zipfile.ZipFile(z) as archive:
+                  # Reject Zip Slip paths and symlinks before extracting untrusted archive members.
+                  for member in archive.infolist():
+                      member_path = Path(member.filename)
+                      if member_path.is_absolute() or '..' in member_path.parts:
+                          raise SystemExit(f'Unsafe archive path in {z.name}: {member.filename!r}')
+                      if (member.external_attr >> 16) & 0o170000 == 0o120000:
+                          raise SystemExit(f'Symlink entry is not allowed in {z.name}: {member.filename!r}')
+                  archive.extractall(d)
           print('packages:', len(list(out.iterdir())))
           PY
       - name: Run package quality checks
