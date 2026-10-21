@@ -63,6 +63,9 @@ jobs:
               # Moving it avoids shipping CLI-only vulnerable transitive packages.
               if "shadcn" in deps:
                   dev["shadcn"] = deps.pop("shadcn")
+              # AETHER imports next-intl in middleware and routing; keep it explicit.
+              if (destination / "middleware.ts").exists() and (destination / "i18n" / "routing.ts").exists():
+                  deps["next-intl"] = "^4.13.2"
               manifest.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
               print(f"{name}: manifest patched")
           PY
