@@ -25,7 +25,7 @@
 - External asset references detected: 3
 
 ## aether.zip
-- Archive: 10,477,297 bytes
+- Archive: 10,476,133 bytes
 - Files: 50
 - README: YES
 - License: YES
@@ -58,7 +58,7 @@
 - External asset references detected: 3
 
 ## kiln-estates.zip
-- Archive: 1,918,541 bytes
+- Archive: 1,917,678 bytes
 - Files: 36
 - README: YES
 - License: YES
@@ -80,7 +80,7 @@
 - External asset references detected: 2
 
 ## nexi-ai.zip
-- Archive: 81,183 bytes
+- Archive: 80,332 bytes
 - Files: 30
 - README: YES
 - License: YES
