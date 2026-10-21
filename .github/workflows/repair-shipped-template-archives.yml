@@ -58,6 +58,7 @@ jobs:
                       lock.unlink()
                   subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
                   subprocess.run(["npm", "audit", "fix", "--omit=dev"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
                   subprocess.run(["npm", "run", "build"], cwd=package_dir, check=True)
                   subprocess.run(["npm", "audit", "--audit-level=high", "--omit=dev"], cwd=package_dir, check=True)
                   rebuilt = archive.with_suffix(".zip.tmp")
