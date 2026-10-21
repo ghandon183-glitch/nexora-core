@@ -1,4 +1,5 @@
 name: Deep code quality audit - all template packages
+# Re-run this blocking gate after shipped archive rebuilds and demo accessibility fixes.
 
 on:
   workflow_dispatch:
