@@ -4,6 +4,9 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "GA_MEASUREMENT_ID": "G-BPZQ7DGKWQ"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
