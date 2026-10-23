@@ -94,10 +94,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const templates = getAllTemplates();
 
   for (const template of templates) {
+    const templateLastModified = new Date(
+      Math.max(
+        new Date(template.lastUpdate || "2026-09-29T00:00:00Z").getTime(),
+        INTERNAL_LINKS_UPDATED_AT.getTime(),
+      ),
+    );
+
     for (const locale of routing.locales) {
       entries.push({
         url: `${siteUrl}/${locale}/templates/${template.slug}`,
-        lastModified: new Date(Math.max(new Date(template.lastUpdate || "2026-09-29T00:00:00Z").getTime(), INTERNAL_LINKS_UPDATED_AT.getTime())),
+        lastModified: templateLastModified,
         changeFrequency: "monthly",
         priority: 0.9,
         alternates: {
