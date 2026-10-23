@@ -51,10 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       entries.push({
         url: `${siteUrl}/${locale}${path}`,
-        lastModified:
-          path === "/guides"
-            ? INTERNAL_LINKS_UPDATED_AT
-            : new Date("2026-09-29T00:00:00Z"),
+        lastModified: new Date("2026-09-29T00:00:00Z"),
         changeFrequency:
           path === "" || path === "/templates" ? "weekly" : "monthly",
         priority:
