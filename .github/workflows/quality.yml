@@ -26,15 +26,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency security gate
+        run: npm run audit:security
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
       - name: Lint
         run: npm run lint
 
       - name: Payment, webhook and outbox regression tests
         run: npm test
 
-      - name: Dependency audit
-        continue-on-error: true
-        run: npm audit --audit-level=high
-
       - name: Production build
         run: npm run build
+
+      - name: OpenNext Cloudflare Worker build
+        run: npm run cf:build
