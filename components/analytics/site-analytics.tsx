@@ -2,33 +2,15 @@
 
 import { useEffect } from "react";
 
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
-    gtag?: (command: "event", eventName: string, params?: Record<string, unknown>) => void;
-  }
-}
+import { trackAnalyticsEvent } from "@/lib/analytics/track-event";
 
-function track(event: string, params: Record<string, unknown> = {}) {
-  if (typeof window === "undefined") return;
 
-  // The site installs the direct Google tag (gtag.js), not Google Tag Manager.
-  // Send analytics events through gtag's command API so GA4 actually receives them.
-  if (typeof window.gtag === "function") {
-    window.gtag("event", event, params);
-    return;
-  }
-
-  // Keep events observable in the data layer when GA4 is not configured yet.
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ event, ...params });
-}
 
 export default function SiteAnalytics() {
   useEffect(() => {
     const view = document.querySelector<HTMLElement>("[data-analytics-view-item]");
     if (view) {
-      track("view_item", {
+      trackAnalyticsEvent("view_item", {
         template_slug: view.dataset.analyticsTemplate,
         currency: "USD",
         value: Number(view.dataset.analyticsPrice || 0),
@@ -52,7 +34,7 @@ export default function SiteAnalytics() {
       const name = element.dataset.analyticsEvent;
       if (!name) return;
 
-      track(name, {
+      trackAnalyticsEvent(name, {
         template_slug: element.dataset.analyticsTemplate || undefined,
         destination: element.getAttribute("href") || undefined,
       });
