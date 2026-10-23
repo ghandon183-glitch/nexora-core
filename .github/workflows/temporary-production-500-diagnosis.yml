@@ -1,0 +1,31 @@
+name: Temporary production 500 diagnosis
+
+on:
+  push:
+    branches:
+      - codex/production-smoke-retries-2026-10-23
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Capture public response metadata for failed routes
+        shell: bash
+        run: |
+          set -u
+          base="https://nexora-core.nxora.workers.dev"
+          for path in /en /en/templates /en/templates/vesper /api/products.xml; do
+            headers="$(mktemp)"
+            body="$(mktemp)"
+            code="$(curl --connect-timeout 10 --max-time 25 -sS -D "$headers" -o "$body" -w "%{http_code}" "$base$path" || true)"
+            content_type="$(grep -i '^content-type:' "$headers" | tail -1 | tr -d '\r' || true)"
+            cf_ray="$(grep -i '^cf-ray:' "$headers" | tail -1 | tr -d '\r' || true)"
+            sample="$(head -c 600 "$body" | tr '\n' ' ' | tr '\r' ' ' | sed 's/[^[:print:]]/?/g')"
+            echo "PROD_DIAG path=$path status=$code $content_type $cf_ray"
+            echo "PROD_DIAG_BODY path=$path sample=$sample"
+            rm -f "$headers" "$body"
+          done
