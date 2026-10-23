@@ -34,10 +34,8 @@
     "vaul": "^1.1.2"
   },
   "overrides": {
-    "@opennextjs/aws": {
-      "@node-minify/core": {
-        "glob": "10.5.0"
-      }
+    "@node-minify/core": {
+      "glob": "10.5.0"
     }
   },
   "devDependencies": {
