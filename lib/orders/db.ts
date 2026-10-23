@@ -277,6 +277,7 @@ export async function markPaymegateConfirmed(
                (? <> '' AND existing.paymegate_transaction_uuid = ?)
                OR (? <> '' AND existing.paymegate_transaction_ref = ?)
                OR (? <> '' AND existing.tx_hash = ?)
+               OR (? <> '' AND existing.paymegate_event_id = ?)
              )
          )`
     )
@@ -294,7 +295,9 @@ export async function markPaymegateConfirmed(
       transactionRef,
       transactionRef,
       transactionHash,
-      transactionHash
+      transactionHash,
+      eventId,
+      eventId
     )
     .run();
   return (result.meta?.changes ?? 0) > 0;
