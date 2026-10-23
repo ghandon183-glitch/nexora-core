@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/admin/auth";
 import { getEnv } from "@/lib/env";
 import { sendCustomerEmail } from "@/lib/mailer";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -22,6 +23,23 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "Unauthorized" },
       { status: 401, headers: NO_STORE },
+    );
+  }
+
+  const { allowed, retryAfterSeconds } = checkRateLimit(`admin-email-test:${getClientIp(request)}`, {
+    max: 1,
+    windowMs: 60 * 1000,
+  });
+  if (!allowed) {
+    return NextResponse.json(
+      { ok: false, error: "A test email was sent recently. Wait before trying again." },
+      {
+        status: 429,
+        headers: {
+          ...NO_STORE,
+          "Retry-After": String(retryAfterSeconds ?? 60),
+        },
+      },
     );
   }
 
