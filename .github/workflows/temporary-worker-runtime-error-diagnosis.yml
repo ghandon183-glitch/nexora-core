@@ -29,7 +29,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -u
-          timeout 30s npx wrangler tail nexora-core --format json --status error --sampling-rate 1 > /tmp/worker-tail.log 2>&1 &
+          timeout 30s npx wrangler tail nexora-core --format json --status error > /tmp/worker-tail.log 2>&1 &
           tail_pid=$!
           sleep 5
           curl --connect-timeout 10 --max-time 20 -sS -o /dev/null "https://nexora-core.nxora.workers.dev/en/templates/vesper" || true
