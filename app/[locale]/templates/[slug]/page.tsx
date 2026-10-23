@@ -190,7 +190,7 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
           </div>
 
           <div className="mt-24">
-            <RelatedTemplates />
+            <RelatedTemplates currentSlug={template.slug} />
           </div>
         </Container>
       </main>

@@ -1,5 +1,6 @@
 export interface SeoGuide {
   slug: string;
+  relatedTemplateSlugs: string[];
   title: string;
   description: string;
   eyebrow: string;
@@ -10,6 +11,7 @@ export interface SeoGuide {
 export const seoGuides: SeoGuide[] = [
   {
     slug: "nextjs-templates-for-saas",
+    relatedTemplateSlugs: ["modern-saas", "admin-dashboard", "nexi-ai"],
     title: "Next.js Templates for SaaS Products",
     description:
       "A practical comparison of premium Next.js templates for SaaS launches, product marketing sites, dashboards, and AI products.",
@@ -44,6 +46,7 @@ export const seoGuides: SeoGuide[] = [
   },
   {
     slug: "ai-saas-templates",
+    relatedTemplateSlugs: ["nexi-ai", "vesper", "aether"],
     title: "AI SaaS Website Templates",
     description:
       "Compare Nexora Core templates designed for AI SaaS, agent products, automation tools, and creative AI interfaces.",
@@ -77,6 +80,7 @@ export const seoGuides: SeoGuide[] = [
   },
   {
     slug: "creative-agency-website-templates",
+    relatedTemplateSlugs: ["creative-agency", "premium-portfolio", "aether"],
     title: "Creative Agency Website Templates",
     description:
       "Compare premium creative-agency and portfolio templates for studios, production teams, directors, and visual brands.",
@@ -108,6 +112,7 @@ export const seoGuides: SeoGuide[] = [
   },
   {
     slug: "how-to-choose-a-premium-nextjs-template",
+    relatedTemplateSlugs: ["modern-saas", "admin-dashboard", "nexi-ai"],
     title: "How to Choose a Premium Next.js Template",
     description:
       "A practical checklist for evaluating a premium Next.js template before buying: code quality, demo fidelity, documentation, licensing, performance, and integrations.",

@@ -1,10 +1,10 @@
 import { useTranslations } from "next-intl";
 import TemplateCard from "@/components/ui/template-card";
-import { getAllTemplates } from "@/lib/data/get-template";
+import { getAllTemplates, getRelatedTemplates } from "@/lib/data/get-template";
 
-export default function RelatedTemplates() {
+export default function RelatedTemplates({ currentSlug }: { currentSlug?: string }) {
   const t = useTranslations("ProductDetail");
-  const templates = getAllTemplates();
+  const templates = currentSlug ? getRelatedTemplates(currentSlug) : getAllTemplates().slice(0, 3);
 
   return (
     <section className="mt-24">
