@@ -29,6 +29,9 @@ jobs:
       - name: Dependency security gate
         run: npm run audit:security
 
+      - name: TypeScript
+        run: npx tsc --noEmit
+
       - name: Lint
         run: npm run lint
 
@@ -37,3 +40,6 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: OpenNext Cloudflare Worker build
+        run: npm run cf:build
