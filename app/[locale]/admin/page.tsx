@@ -48,6 +48,8 @@ export default function AdminPage() {
   const [webhook, setWebhook] = useState<PaymegateWebhookStatus | null>(null);
   const [webhookLoading, setWebhookLoading] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
+  const [emailTestLoading, setEmailTestLoading] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   async function fetchOrders() {
     setLoadingOrders(true);
@@ -133,6 +135,30 @@ export default function AdminPage() {
       setWebhookError("Could not reach Paymegate webhook setup.");
     } finally {
       setWebhookLoading(false);
+    }
+  }
+
+  async function handleEmailTest() {
+    setEmailTestLoading(true);
+    setEmailTestResult(null);
+    try {
+      const res = await fetch("/api/admin/email/test", { method: "POST" });
+      const data = (await res.json()) as { ok: boolean; message?: string; error?: string };
+      if (res.status === 401) {
+        setAuthenticated(false);
+        return;
+      }
+      setEmailTestResult({
+        ok: res.ok && data.ok,
+        message: data.message || data.error || "The email test returned no status message.",
+      });
+    } catch {
+      setEmailTestResult({
+        ok: false,
+        message: "Could not reach the production email test endpoint.",
+      });
+    } finally {
+      setEmailTestLoading(false);
     }
   }
 
@@ -242,6 +268,28 @@ export default function AdminPage() {
                 </p>
               )}
             </div>
+          )}
+        </Card>
+
+        <Card className="mt-6 p-6 hover:-translate-y-0 hover:border-white/10">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-white">Production email test</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                Send one test message to the configured owner inbox through the same Gmail SMTP transport used by purchase notifications.
+                This does not create an order, send a customer email, or trigger a payment.
+              </p>
+            </div>
+            <Button onClick={handleEmailTest} disabled={emailTestLoading}>
+              {emailTestLoading ? "Sending test..." : "Send test email"}
+            </Button>
+          </div>
+          {emailTestResult && (
+            <p className={`mt-4 rounded-lg border p-3 text-sm ${emailTestResult.ok
+              ? "border-cyan-400/20 bg-cyan-400/5 text-cyan-200"
+              : "border-red-400/20 bg-red-400/5 text-red-300"}`}>
+              {emailTestResult.message}
+            </p>
           )}
         </Card>
 
