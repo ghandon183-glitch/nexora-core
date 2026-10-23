@@ -68,7 +68,7 @@ const hasExpectedAdvisory = Boolean(
       typeof item === "object" &&
       item !== null &&
       typeof item.url === "string" &&
-      item.url.toUpperCase().includes(ALLOWED_ADVISORY)
+      item.url.toLowerCase().includes(ALLOWED_ADVISORY.toLowerCase())
   )
 );
 
@@ -83,7 +83,7 @@ const exceptionIsExact =
         item &&
         typeof item === "object" &&
         typeof item.url === "string" &&
-        item.url.toUpperCase().includes(ALLOWED_ADVISORY)
+        item.url.toLowerCase().includes(ALLOWED_ADVISORY.toLowerCase())
       );
     });
   });
