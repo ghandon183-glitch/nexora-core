@@ -1,0 +1,44 @@
+name: One-time OpenNext lockfile refresh
+
+on:
+  push:
+    branches:
+      - codex/opennext-latest-patch-2026-10-23
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout OpenNext update branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Regenerate lockfile without package lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          set +e
+          npm audit fix --package-lock-only --ignore-scripts --no-fund
+          fix_status=$?
+          set -e
+          echo "npm audit fix exit status: $fix_status"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "No package-lock changes were produced."
+            exit 1
+          fi
+          git commit -m "chore(deps): refresh OpenNext lockfile [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
