@@ -1,0 +1,29 @@
+name: Emergency rollback to last smoke-green NEXORA version
+
+on:
+  push:
+    branches:
+      - codex/production-smoke-retries-2026-10-23
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Roll back NEXORA to the last version with a green production smoke audit
+        run: npx wrangler rollback b5dee798-61bd-449a-8329-184e0cdff5a7 --name nexora-core
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
