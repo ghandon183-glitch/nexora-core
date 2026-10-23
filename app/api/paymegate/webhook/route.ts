@@ -36,8 +36,17 @@ function verifySignature(rawBody: string, timestamp: string, signature: string, 
 }
 
 function sameMoney(amount: string, expected: number): boolean {
-  const parsed = Number(amount);
-  return Number.isFinite(parsed) && parsed.toFixed(2) === expected.toFixed(2);
+  // USD checkout amounts have cent precision. Do not accept values such as
+  // "79.004" merely because floating-point rounding makes them display as 79.00.
+  if (typeof amount !== "string" || !/^(0|[1-9]\d*)(?:\.(\d{1,2}))?$/.test(amount)) {
+    return false;
+  }
+  const [whole, fraction = ""] = amount.split(".");
+  const actualCents = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
+  const expectedCents = Math.round(expected * 100);
+  return Number.isSafeInteger(actualCents) &&
+    Number.isSafeInteger(expectedCents) &&
+    actualCents === expectedCents;
 }
 
 export async function POST(request: Request) {
