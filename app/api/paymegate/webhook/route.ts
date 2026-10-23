@@ -128,7 +128,20 @@ export async function POST(request: Request) {
     const claimed = await markPaymegateConfirmed(
       order.id, event.transactionUUID ?? "", event.transactionRef ?? "", event.id, downloadToken
     );
-    if (!claimed) return NextResponse.json({ ok: true, duplicate: true });
+    if (!claimed) {
+      const currentOrder = await getOrderById(order.id);
+      if (currentOrder?.status === "confirmed") {
+        return NextResponse.json({ ok: true, duplicate: true });
+      }
+      // A valid provider event must never let one transaction fulfil multiple
+      // orders. Return a non-2xx response so the mismatch remains visible for
+      // reconciliation instead of silently acknowledging a second entitlement.
+      console.warn("[paymegate/webhook] Confirmation claim rejected", { orderId: order.id });
+      return NextResponse.json(
+        { ok: false, error: "Transaction already used or order state changed" },
+        { status: 409 }
+      );
+    }
 
     await deliverConfirmedOrderEmails(
       { ...order, status: "confirmed", download_token: downloadToken },
