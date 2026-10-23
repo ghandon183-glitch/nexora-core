@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useRouter, Link } from "@/i18n/navigation";
+import { trackAnalyticsEvent } from "@/lib/analytics/track-event";
 
 import { getTemplate } from "@/lib/data/get-template";
 import { useAuth } from "@/lib/context/auth-context";
@@ -131,23 +132,19 @@ export default function CheckoutPage() {
     }
 
     purchaseTrackedRef.current = true;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "purchase",
-      ecommerce: {
-        transaction_id: order.id,
-        value: template.price,
-        currency: "USD",
-        items: [
-          {
-            item_id: `nexora-${template.slug}`,
-            item_name: template.title,
-            item_category: template.category,
-            price: template.price,
-            quantity: 1,
-          },
-        ],
-      },
+    trackAnalyticsEvent("purchase", {
+      transaction_id: order.id,
+      value: template.price,
+      currency: "USD",
+      items: [
+        {
+          item_id: `nexora-${template.slug}`,
+          item_name: template.title,
+          item_category: template.category,
+          price: template.price,
+          quantity: 1,
+        },
+      ],
     });
   }, [status, order, template]);
 
