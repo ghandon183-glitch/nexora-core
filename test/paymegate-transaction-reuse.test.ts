@@ -15,7 +15,7 @@ import {
 test("PayMeGate transaction identifiers cannot confirm two different orders", async () => {
   const db = setupDatabase();
   const firstOrder = await insertOrderRow(makeOrder());
-  const secondOrder = await insertOrderRow(makeOrder());
+  const secondOrder = await insertOrderRow(makeOrder({ pay_amount: "49.01" }));
 
   const firstResponse = await POST(
     signedWebhookRequest(
