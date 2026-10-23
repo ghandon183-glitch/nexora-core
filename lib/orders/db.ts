@@ -261,6 +261,7 @@ export async function markPaymegateConfirmed(
   downloadToken: string
 ): Promise<boolean> {
   const db = await getOrdersDb();
+  const transactionHash = transactionRef || transactionUuid;
   const result = await db
     .prepare(
       `UPDATE orders
@@ -268,16 +269,32 @@ export async function markPaymegateConfirmed(
            owner_email_status = 'pending', customer_email_status = 'pending',
            owner_email_claimed_at = NULL, customer_email_claimed_at = NULL, email_last_error = NULL,
            paymegate_transaction_uuid = ?, paymegate_transaction_ref = ?, paymegate_event_id = ?
-       WHERE id = ? AND status IN ('pending', 'expired') AND payment_provider = 'paymegate'`
+       WHERE id = ? AND status IN ('pending', 'expired') AND payment_provider = 'paymegate'
+         AND NOT EXISTS (
+           SELECT 1 FROM orders AS existing
+           WHERE existing.id <> ?
+             AND (
+               (? <> '' AND existing.paymegate_transaction_uuid = ?)
+               OR (? <> '' AND existing.paymegate_transaction_ref = ?)
+               OR (? <> '' AND existing.tx_hash = ?)
+             )
+         )`
     )
     .bind(
-      transactionRef || transactionUuid,
+      transactionHash,
       downloadToken,
       Date.now(),
       transactionUuid,
       transactionRef,
       eventId,
-      id
+      id,
+      id,
+      transactionUuid,
+      transactionUuid,
+      transactionRef,
+      transactionRef,
+      transactionHash,
+      transactionHash
     )
     .run();
   return (result.meta?.changes ?? 0) > 0;
