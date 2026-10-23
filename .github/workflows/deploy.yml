@@ -213,9 +213,38 @@ jobs:
           test "$key_response" = "7fec80c6cbd74405bad9e8ca5bcec3dc"
           echo "200 /7fec80c6cbd74405bad9e8ca5bcec3dc.txt (IndexNow key verified)"
 
-          for path in /en /en/templates /en/templates/vesper /robots.txt /sitemap.xml /api/products.xml; do
+          for path in \
+            /en /en/templates /en/templates/vesper /en/about /en/contact /en/docs /en/guides \
+            /en/guides/nextjs-templates-for-saas /en/guides/ai-saas-templates \
+            /en/guides/creative-agency-website-templates /en/guides/how-to-choose-a-premium-nextjs-template \
+            /en/faq /en/support /en/license /en/refunds /en/privacy /en/terms /en/pricing \
+            /de /de/about /de/templates /de/docs /de/contact /de/faq /de/support \
+            /de/license /de/refunds /de/privacy /de/terms /de/pricing \
+            /robots.txt /sitemap.xml /api/products.xml; do
             fetch_200 "$base$path" /tmp/nexora-response
           done
+
+          fetch_200 "$base/en" /tmp/nexora-home.html
+          if grep -qi 'googletagmanager.com/gtag/js?id=G-' /tmp/nexora-home.html; then
+            echo "GA4_TAG_PRESENT"
+          else
+            echo "::warning::GA4_TAG_MISSING — set the real GA_MEASUREMENT_ID Worker variable to enable analytics"
+          fi
+          if grep -qi 'google-site-verification' /tmp/nexora-home.html; then
+            echo "GOOGLE_VERIFICATION_META_PRESENT"
+          else
+            echo "::warning::GOOGLE_VERIFICATION_META_MISSING"
+          fi
+          if grep -qi 'msvalidate\.01' /tmp/nexora-home.html; then
+            echo "BING_VERIFICATION_META_PRESENT"
+          else
+            echo "::warning::BING_VERIFICATION_META_MISSING"
+          fi
+
+          fetch_200 "$base/en/guides/nextjs-templates-for-saas" /tmp/nexora-guide.html
+          grep -q 'Templates related to this guide' /tmp/nexora-guide.html
+          grep -q '/en/templates/nexi-ai' /tmp/nexora-guide.html
+          echo "SEO_GUIDE_INTERNAL_LINKS_OK"
 
           fetch_200 "$base/en/templates/vesper" /tmp/nexora-product.html
           grep -q '"@type":"Product"' /tmp/nexora-product.html
@@ -224,6 +253,12 @@ jobs:
           fetch_200 "$base/sitemap.xml" /tmp/nexora-sitemap.xml
           grep -q '/en/templates/vesper' /tmp/nexora-sitemap.xml
           grep -q '/en/docs/vesper' /tmp/nexora-sitemap.xml
+          grep -q '/en/guides/nextjs-templates-for-saas' /tmp/nexora-sitemap.xml
+          if grep -q '/de/guides' /tmp/nexora-sitemap.xml; then
+            echo "SITEMAP_ERROR: English-only guide URLs must not be listed under /de" >&2
+            exit 1
+          fi
+          echo "SITEMAP_GUIDE_LOCALE_CHECK_OK"
 
           fetch_200 "$base/robots.txt" /tmp/nexora-robots.txt
           grep -q 'sitemap.xml' /tmp/nexora-robots.txt
