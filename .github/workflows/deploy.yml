@@ -246,6 +246,14 @@ jobs:
           grep -q '/en/templates/nexi-ai' /tmp/nexora-guide.html
           echo "SEO_GUIDE_INTERNAL_LINKS_OK"
 
+          email_test_status="$(curl -sS --connect-timeout 5 --max-time 20 -o /tmp/nexora-email-test-auth.json -w '%{http_code}' -X POST "$base/api/admin/email/test" -H "Origin: $base" -H "Content-Type: application/json")"
+          if [ "$email_test_status" != "401" ]; then
+            echo "SMOKE_FAILURE: unauthenticated admin email test should return 401, got $email_test_status" >&2
+            cat /tmp/nexora-email-test-auth.json >&2 || true
+            exit 1
+          fi
+          echo "ADMIN_EMAIL_TEST_AUTH_OK"
+
           fetch_200 "$base/en/templates/vesper" /tmp/nexora-product.html
           grep -q '"@type":"Product"' /tmp/nexora-product.html
           grep -q 'nexora-vesper' /tmp/nexora-product.html
