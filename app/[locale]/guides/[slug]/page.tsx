@@ -6,6 +6,7 @@ import Container from "@/components/ui/container";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import { seoGuides } from "@/lib/data/seo-guides";
+import { getTemplate } from "@/lib/data/get-template";
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -43,6 +44,10 @@ export default async function SeoGuidePage({ params }: PageProps) {
 
   const guide = seoGuides.find((item) => item.slug === slug);
   if (!guide) notFound();
+
+  const relatedTemplates = guide.relatedTemplateSlugs
+    .map((templateSlug) => getTemplate(templateSlug))
+    .filter((template): template is NonNullable<typeof template> => Boolean(template && !template.hidden));
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -92,6 +97,24 @@ export default async function SeoGuidePage({ params }: PageProps) {
                 </Card>
               ))}
             </div>
+
+            <section className="mt-10" aria-labelledby="related-guide-templates">
+              <h2 id="related-guide-templates" className="text-2xl font-bold text-white">
+                Templates related to this guide
+              </h2>
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
+                {relatedTemplates.map((template) => (
+                  <Card key={template.slug} className="flex flex-col p-5">
+                    <h3 className="text-lg font-bold text-white">{template.title}</h3>
+                    <p className="mt-3 flex-1 text-sm leading-6 text-slate-400">{template.description}</p>
+                    <p className="mt-4 font-semibold text-cyan-300">${template.price.toFixed(2)} USD</p>
+                    <Link href={`/templates/${template.slug}`} className="mt-4 inline-block">
+                      <Button>View template</Button>
+                    </Link>
+                  </Card>
+                ))}
+              </div>
+            </section>
 
             <Card className="mt-10 p-7">
               <h2 className="text-xl font-bold text-white">
