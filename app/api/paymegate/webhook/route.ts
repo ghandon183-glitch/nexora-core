@@ -36,8 +36,17 @@ function verifySignature(rawBody: string, timestamp: string, signature: string, 
 }
 
 function sameMoney(amount: string, expected: number): boolean {
-  const parsed = Number(amount);
-  return Number.isFinite(parsed) && parsed.toFixed(2) === expected.toFixed(2);
+  // USD checkout amounts have cent precision. Do not accept values such as
+  // "79.004" merely because floating-point rounding makes them display as 79.00.
+  if (typeof amount !== "string" || !/^(0|[1-9]\d*)(?:\.(\d{1,2}))?$/.test(amount)) {
+    return false;
+  }
+  const [whole, fraction = ""] = amount.split(".");
+  const actualCents = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
+  const expectedCents = Math.round(expected * 100);
+  return Number.isSafeInteger(actualCents) &&
+    Number.isSafeInteger(expectedCents) &&
+    actualCents === expectedCents;
 }
 
 export async function POST(request: Request) {
@@ -119,7 +128,20 @@ export async function POST(request: Request) {
     const claimed = await markPaymegateConfirmed(
       order.id, event.transactionUUID ?? "", event.transactionRef ?? "", event.id, downloadToken
     );
-    if (!claimed) return NextResponse.json({ ok: true, duplicate: true });
+    if (!claimed) {
+      const currentOrder = await getOrderById(order.id);
+      if (currentOrder?.status === "confirmed") {
+        return NextResponse.json({ ok: true, duplicate: true });
+      }
+      // A valid provider event must never let one transaction fulfil multiple
+      // orders. Return a non-2xx response so the mismatch remains visible for
+      // reconciliation instead of silently acknowledging a second entitlement.
+      console.warn("[paymegate/webhook] Confirmation claim rejected", { orderId: order.id });
+      return NextResponse.json(
+        { ok: false, error: "Transaction already used or order state changed" },
+        { status: 409 }
+      );
+    }
 
     await deliverConfirmedOrderEmails(
       { ...order, status: "confirmed", download_token: downloadToken },

@@ -3,9 +3,10 @@ import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/admin/auth";
 import { adminForceConfirm, getOrderById } from "@/lib/orders/db";
-import { sendCustomerEmail } from "@/lib/mailer";
-import { DOWNLOADS } from "@/lib/data/downloads";
-import { getEnv } from "@/lib/env";
+import {
+  ensureConfirmedOrderEmails,
+  processEmailOutbox,
+} from "@/lib/orders/email-delivery";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(
@@ -70,27 +71,30 @@ export async function POST(
       );
     }
 
-    const env = await getEnv();
-    const siteUrl = env.SITE_URL ?? "";
-    const downloadUrl = `${siteUrl}/download/${downloadToken}`;
-    const hasFile = Boolean(DOWNLOADS[order.template_slug]);
+    // Manual confirmations use the same outbox as every other payment path so
+    // the owner is alerted, a failed send is retried, and the order can never
+    // be emailed again by the recovery pass.
+    const confirmedOrder = (await getOrderById(id)) ?? {
+      ...order,
+      status: "confirmed" as const,
+      download_token: downloadToken,
+    };
 
-    await sendCustomerEmail({
-      to: order.buyer_email,
-      subject: `Your payment was confirmed — download ${order.template_title}`,
-      html: `
-        <h2>Payment confirmed, ${order.buyer_name}!</h2>
-        <p>Your order for <strong>${order.template_title}</strong> has been manually verified.</p>
-        ${
-          hasFile
-            ? `<p><a href="${downloadUrl}">Click here to download your template</a></p>`
-            : `<p>Your access is unlocked — the download will appear shortly.</p>`
-        }
-        <p>— Nexora Core</p>
-      `,
-    });
+    await ensureConfirmedOrderEmails(
+      confirmedOrder,
+      {
+        paymentSource: "manual",
+        verificationDescription:
+          "NEXORA CORE recorded this order as confirmed manually by an authenticated administrator after an off-chain payment review.",
+      }
+    );
 
-    return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
+    const emailOutbox = await processEmailOutbox(10);
+
+    return NextResponse.json(
+      { ok: true, emailDelivery: emailOutbox },
+      { headers: { "Cache-Control": "no-store" } }
+    );
   } catch (error) {
     console.error("[admin/orders/confirm] Failed:", error);
     return NextResponse.json(

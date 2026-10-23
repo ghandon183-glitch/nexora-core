@@ -8,26 +8,48 @@ const USDT_TRC20_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 export interface MatchResult {
   matched: boolean;
   txHash?: string;
+  /** On-chain timestamp of the matching transfer, used to bound late payments. */
+  txTimestampMs?: number;
+}
+
+/**
+ * Optional upper bound (milliseconds since epoch) on the on-chain timestamp of
+ * a transfer accepted as evidence for this order. Late-payment reconciliation
+ * uses it so a later reuse of the same amount fingerprint cannot be credited
+ * to this order.
+ */
+export interface VerificationWindow {
+  notAfterMs?: number;
 }
 
 /**
  * Only accept transactions with a known timestamp that occurred at or after
  * the order was created. Failing closed here prevents replaying an old
  * transaction if an upstream API ever omits its timestamp.
+ *
+ * Every timestamp is normalised to milliseconds by the caller: TronGrid
+ * reports `block_timestamp` in ms, while mempool.space reports `block_time` in
+ * seconds. A mismatched unit would land outside this window and fail closed.
  */
-function isOnOrAfterOrder(
+function isWithinWindow(
   txTimestampMs: number | undefined,
-  order: Order
+  order: Order,
+  window: VerificationWindow
 ): boolean {
   if (txTimestampMs === undefined || Number.isNaN(txTimestampMs)) return false;
-  return txTimestampMs >= order.created_at;
+  if (txTimestampMs < order.created_at) return false;
+  if (window.notAfterMs !== undefined && txTimestampMs > window.notAfterMs) return false;
+  return true;
 }
 
 /**
  * Checks TronGrid for a confirmed incoming USDT (TRC20) transfer matching
  * this order's exact fingerprinted amount.
  */
-export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
+export async function checkUsdtPayment(
+  order: Order,
+  window: VerificationWindow = {}
+): Promise<MatchResult> {
   const wanted = toSmallestUnit(order.pay_amount, WALLETS.USDT.decimals);
 
   const url = `https://api.trongrid.io/v1/accounts/${order.wallet_address}/transactions/trc20?limit=50&only_to=true&contract_address=${USDT_TRC20_CONTRACT}`;
@@ -50,10 +72,14 @@ export async function checkUsdtPayment(order: Order): Promise<MatchResult> {
   for (const transfer of transfers) {
     if (transfer.token_info?.address !== USDT_TRC20_CONTRACT) continue;
     if (transfer.to !== order.wallet_address) continue;
-    if (!isOnOrAfterOrder(transfer.block_timestamp, order)) continue;
+    if (!isWithinWindow(transfer.block_timestamp, order, window)) continue;
 
     if (BigInt(transfer.value) === wanted) {
-      return { matched: true, txHash: transfer.transaction_id };
+      return {
+        matched: true,
+        txHash: transfer.transaction_id,
+        txTimestampMs: transfer.block_timestamp,
+      };
     }
   }
 
@@ -78,7 +104,10 @@ interface MempoolTx {
  * Checks mempool.space for a confirmed incoming BTC transaction matching
  * this order's exact fingerprinted amount (in satoshis).
  */
-export async function checkBtcPayment(order: Order): Promise<MatchResult> {
+export async function checkBtcPayment(
+  order: Order,
+  window: VerificationWindow = {}
+): Promise<MatchResult> {
   const wantedSats = toSmallestUnit(order.pay_amount, WALLETS.BTC.decimals);
 
   const url = `https://mempool.space/api/address/${order.wallet_address}/txs`;
@@ -98,13 +127,13 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
         ? tx.status.block_time * 1000
         : undefined;
 
-    if (!isOnOrAfterOrder(blockTimeMs, order)) continue;
+    if (!isWithinWindow(blockTimeMs, order, window)) continue;
 
     for (const output of tx.vout) {
       if (output.scriptpubkey_address !== order.wallet_address) continue;
 
       if (BigInt(output.value) === wantedSats) {
-        return { matched: true, txHash: tx.txid };
+        return { matched: true, txHash: tx.txid, txTimestampMs: blockTimeMs };
       }
     }
   }
@@ -112,7 +141,10 @@ export async function checkBtcPayment(order: Order): Promise<MatchResult> {
   return { matched: false };
 }
 
-export async function checkPayment(order: Order): Promise<MatchResult> {
-  if (order.currency === "USDT") return checkUsdtPayment(order);
-  return checkBtcPayment(order);
+export async function checkPayment(
+  order: Order,
+  window: VerificationWindow = {}
+): Promise<MatchResult> {
+  if (order.currency === "USDT") return checkUsdtPayment(order, window);
+  return checkBtcPayment(order, window);
 }

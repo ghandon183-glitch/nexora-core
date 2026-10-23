@@ -247,6 +247,39 @@ describe("Paymegate webhook", () => {
     assert.equal(readOutbox(db).length, 0);
   });
 
+  test("a D1 failure while queueing the emails fails the delivery and is healed by provider retry", async () => {
+    const order = await insertOrderRow(makeOrder());
+    const event = paidEvent(order);
+
+    // Confirmation is persisted before the outbox write; a database error on
+    // that write must surface as 500 so Paymegate re-delivers the event.
+    db.database.exec(
+      "CREATE TRIGGER fail_outbox BEFORE INSERT ON email_outbox BEGIN SELECT RAISE(ABORT, 'D1 write failure'); END;"
+    );
+
+    const failed = await POST(signedWebhookRequest(event));
+
+    assert.equal(failed.status, 500);
+    const afterFailure = readOrder(db, order.id);
+    assert.equal(afterFailure.status, "confirmed");
+    assert.ok(afterFailure.download_token, "the paid order must keep its entitlement");
+    assert.equal(readOutbox(db, order.id).length, 0);
+
+    db.database.exec("DROP TRIGGER fail_outbox");
+
+    const retry = await POST(signedWebhookRequest(event));
+    const retryBody = (await retry.json()) as { duplicate?: boolean };
+
+    assert.equal(retry.status, 200);
+    assert.equal(retryBody.duplicate, true);
+    assert.equal(readOutbox(db, order.id).length, 2);
+    assert.equal(testState.mailerCalls.length, 0);
+
+    // Replaying the event again still produces exactly one message per kind.
+    await POST(signedWebhookRequest(event));
+    assert.equal(readOutbox(db, order.id).length, 2);
+  });
+
   test("accepts a signature sent in the t=,v1= header format", async () => {
     const order = await insertOrderRow(makeOrder());
     const event: Order = order;
