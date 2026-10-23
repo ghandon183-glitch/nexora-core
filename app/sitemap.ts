@@ -5,6 +5,7 @@ import { getAllTemplates } from "@/lib/data/get-template";
 import { getEnv } from "@/lib/env";
 
 const FALLBACK_SITE_URL = "https://nexora-core.nxora.workers.dev";
+const INTERNAL_LINKS_UPDATED_AT = new Date("2026-10-23T00:00:00Z");
 
 async function getSiteUrl() {
   const env = await getEnv();
@@ -45,9 +46,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   for (const path of staticPaths) {
     for (const locale of routing.locales) {
+      // The guide index and guide articles are intentionally English-only.
+      if (path === "/guides" && locale !== "en") continue;
+
       entries.push({
         url: `${siteUrl}/${locale}${path}`,
-        lastModified: new Date("2026-09-29T00:00:00Z"),
+        lastModified:
+          path === "/guides"
+            ? INTERNAL_LINKS_UPDATED_AT
+            : new Date("2026-09-29T00:00:00Z"),
         changeFrequency:
           path === "" || path === "/templates" ? "weekly" : "monthly",
         priority:
@@ -59,7 +66,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 ? 0.8
                 : 0.6,
         alternates: {
-          languages: buildAlternates(path, siteUrl),
+          languages:
+            path === "/guides"
+              ? {
+                  en: `${siteUrl}/en/guides`,
+                  "x-default": `${siteUrl}/en/guides`,
+                }
+              : buildAlternates(path, siteUrl),
         },
       });
     }
@@ -75,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const path of guidePaths) {
     entries.push({
       url: `${siteUrl}/en${path}`,
-      lastModified: new Date("2026-09-29T00:00:00Z"),
+      lastModified: INTERNAL_LINKS_UPDATED_AT,
       changeFrequency: "monthly",
       priority: 0.75,
     });
@@ -87,7 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const locale of routing.locales) {
       entries.push({
         url: `${siteUrl}/${locale}/templates/${template.slug}`,
-        lastModified: new Date(template.lastUpdate || "2026-09-29T00:00:00Z"),
+        lastModified: new Date(Math.max(new Date(template.lastUpdate || "2026-09-29T00:00:00Z").getTime(), INTERNAL_LINKS_UPDATED_AT.getTime())),
         changeFrequency: "monthly",
         priority: 0.9,
         alternates: {
