@@ -204,7 +204,8 @@ jobs:
             return 1
           }
 
-          key_response="$(curl --connect-timeout 10 --max-time 30 -L -sS "$base/7fec80c6cbd74405bad9e8ca5bcec3dc.txt")"
+          fetch_200 "$base/7fec80c6cbd74405bad9e8ca5bcec3dc.txt" /tmp/nexora-indexnow-key.txt
+          key_response="$(cat /tmp/nexora-indexnow-key.txt)"
           test "$key_response" = "7fec80c6cbd74405bad9e8ca5bcec3dc"
           echo "200 /7fec80c6cbd74405bad9e8ca5bcec3dc.txt (IndexNow key verified)"
 
