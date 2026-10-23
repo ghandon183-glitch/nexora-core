@@ -12,7 +12,7 @@ test("every SEO guide links to three distinct visible template detail pages", ()
     for (const slug of guide.relatedTemplateSlugs) {
       const template = getTemplate(slug);
       assert.ok(template, `${guide.slug} references missing template ${slug}`);
-      assert.equal(template.hidden, false, `${guide.slug} links to hidden template ${slug}`);
+      assert.ok(!template.hidden, `${guide.slug} links to hidden template ${slug}`);
     }
   }
 });
