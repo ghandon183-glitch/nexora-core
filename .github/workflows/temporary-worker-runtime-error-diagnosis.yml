@@ -1,0 +1,41 @@
+name: Temporary Worker runtime error diagnosis
+
+on:
+  push:
+    branches:
+      - codex/production-smoke-retries-2026-10-23
+
+permissions:
+  contents: read
+
+jobs:
+  tail-runtime-errors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Capture Cloudflare Worker exception logs while requesting failing routes
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -u
+          timeout 30s npx wrangler tail nexora-core --format json --status error --sampling-rate 1 > /tmp/worker-tail.log 2>&1 &
+          tail_pid=$!
+          sleep 5
+          curl --connect-timeout 10 --max-time 20 -sS -o /dev/null "https://nexora-core.nxora.workers.dev/en/templates/vesper" || true
+          curl --connect-timeout 10 --max-time 20 -sS -o /dev/null "https://nexora-core.nxora.workers.dev/api/products.xml" || true
+          sleep 5
+          kill "$tail_pid" 2>/dev/null || true
+          wait "$tail_pid" 2>/dev/null || true
+          echo "=== Worker tail output (last 12000 bytes) ==="
+          tail -c 12000 /tmp/worker-tail.log || true
