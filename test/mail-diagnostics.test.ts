@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { diagnoseMailFailure } from "../lib/mail-diagnostics.ts";
+import { diagnoseMailFailure } from "../lib/mail-diagnostics";
 
 test("classifies missing Gmail credentials without exposing details", () => {
   assert.equal(diagnoseMailFailure("Gmail not configured").code, "gmail_credentials_missing");
