@@ -5,6 +5,7 @@ import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/admin/auth";
 import { getEnv } from "@/lib/env";
 import { sendCustomerEmail } from "@/lib/mailer";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { diagnoseMailFailure } from "@/lib/mail-diagnostics";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
@@ -69,11 +70,12 @@ export async function POST(request: Request) {
   });
 
   if (!result.sent) {
+    const diagnostic = diagnoseMailFailure(result.error);
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Gmail SMTP did not accept the test email. Check the Gmail app password and Worker configuration.",
+        error: diagnostic.message,
+        diagnostic: diagnostic.code,
       },
       { status: 502, headers: NO_STORE },
     );
