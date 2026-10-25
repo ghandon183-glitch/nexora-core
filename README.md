@@ -1,4 +1,6 @@
-This is a Next.js project deployed to Cloudflare Workers via OpenNext for Cloudflare, not Vercel.
+# Nexora Core
+
+Nexora Core is a Next.js project deployed to Cloudflare Workers via OpenNext for Cloudflare.
 
 ## Getting Started
 
@@ -8,12 +10,26 @@ Install dependencies and run the local development server with `npm install` and
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`, which runs `npm run cf:deploy`.
 
-### Production configuration
+## Production configuration
 
-In Cloudflare Workers & Pages → `nexora-core` → Settings → Variables, configure the required Worker secrets/variables, including `ADMIN_PASSWORD`, `CRON_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `NOTIFY_EMAIL`, and the payment-provider secrets used by this deployment. Configure `SITE_URL` to the public production URL. GitHub Actions also requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+Configure Worker secrets in Cloudflare Workers & Pages → `nexora-core` → Settings → Variables. Keep credentials as secrets and never commit them. GitHub Actions requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
-### Payments and email
+## Payments and email
 
 Automated crypto payment verification is documented in `docs/PAYMENT_VERIFICATION.md`. The scheduled job calls `/api/cron/check-payments` every five minutes, protected by `CRON_SECRET`.
 
-Owner notifications and customer-facing emails use the Resend HTTPS API. `RESEND_FROM_EMAIL` must be an address on a domain verified in Resend. Do not configure Gmail SMTP for Cloudflare Worker email delivery: raw SMTP connections are not a dependable Worker transport. Verify the domain before relying on customer purchase emails in production.
+### Customer emails without buying a domain
+
+Customer-facing email uses Gmail API over HTTPS because Cloudflare Workers cannot reliably send mail using raw SMTP. This path does not require a custom domain or paid email provider, but it does require Google OAuth credentials:
+
+- `GMAIL_USER`: the Gmail account Nexora sends from.
+- `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET`: OAuth 2.0 client credentials from Google Cloud Console.
+- `GMAIL_REFRESH_TOKEN`: a refresh token granted the Gmail API `gmail.send` scope.
+
+Enable the Gmail API for the Google Cloud project, configure OAuth consent, authorize the sending Gmail account, and store these values as Cloudflare Worker secrets. Never paste secrets into chat or commit them to Git. Google may require OAuth consent-screen configuration or reauthorization depending on the app's publishing/testing status. See the official [Gmail API sending guide](https://developers.google.com/workspace/gmail/api/guides/sending) and [Google OAuth documentation](https://developers.google.com/identity/protocols/oauth2).
+
+### Owner notifications
+
+Resend's onboarding test sender is only suitable for testing to the Resend account owner's own address. Sending from a branded address to arbitrary customers requires a verified domain, so do not treat Resend test-mode delivery as production customer email. Until a domain is affordable, keep customer email on the Gmail API path and verify owner notifications separately.
+
+Set `SITE_URL` to the current public production URL. Other payment-provider settings are listed in `.env.example`.
