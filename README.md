@@ -26,7 +26,7 @@ Customer-facing email uses Gmail API over HTTPS because Cloudflare Workers canno
 - `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET`: OAuth 2.0 client credentials from Google Cloud Console.
 - `GMAIL_REFRESH_TOKEN`: a refresh token granted the Gmail API `gmail.send` scope.
 
-Enable the Gmail API for the Google Cloud project, configure OAuth consent, authorize the sending Gmail account, and store these values as Cloudflare Worker secrets. Never paste secrets into chat or commit them to Git. Google may require OAuth consent-screen configuration or reauthorization depending on the app's publishing/testing status. See the official [Gmail API sending guide](https://developers.google.com/workspace/gmail/api/guides/sending) and [Google OAuth documentation](https://developers.google.com/identity/protocols/oauth2).
+Enable the Gmail API for the Google Cloud project, configure OAuth consent, authorize the sending Gmail account, and store these values as Cloudflare Worker secrets. Never paste secrets into chat or commit them to Git. Important: Google's OAuth documentation says refresh tokens issued while an external OAuth app is in Testing expire after 7 days for Gmail scopes. Do not treat Testing mode as a durable production setup. Review the publishing/verification requirements and set the app to In production when appropriate; Google may show an unverified-app warning or require verification for the sensitive gmail.send scope. See the official [Gmail API sending guide](https://developers.google.com/workspace/gmail/api/guides/sending) and [Google OAuth documentation](https://developers.google.com/identity/protocols/oauth2).
 
 ### Owner notifications
 
