@@ -8,6 +8,7 @@ export interface CloudflareEnv {
   ADMIN_PASSWORD?: string;
   CRON_SECRET?: string;
   RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL?: string;
   NOTIFY_EMAIL?: string;
   SITE_URL?: string;
   GOOGLE_SITE_VERIFICATION?: string;
@@ -26,6 +27,7 @@ const CF_ENV_KEYS = [
   "ADMIN_PASSWORD",
   "CRON_SECRET",
   "RESEND_API_KEY",
+  "RESEND_FROM_EMAIL",
   "NOTIFY_EMAIL",
   "SITE_URL",
   "GOOGLE_SITE_VERIFICATION",
