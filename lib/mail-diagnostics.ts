@@ -1,47 +1,52 @@
 export type MailFailureDiagnostic = {
   code:
-    | "resend_credentials_missing"
-    | "resend_sender_missing"
-    | "resend_sender_unverified"
-    | "resend_request_failed"
+    | "gmail_oauth_credentials_missing"
+    | "gmail_oauth_rejected"
+    | "gmail_api_rejected"
     | "smtp_connection_failed"
-    | "smtp_send_failed";
+    | "gmail_api_send_failed";
   message: string;
 };
 
 /**
  * Translate provider errors into actionable, non-secret diagnostics for the
- * authenticated admin test endpoint. Never return raw provider responses:
- * they can contain recipient addresses or operational details.
+ * authenticated admin test endpoint. Never return raw provider responses.
  */
 export function diagnoseMailFailure(error?: string): MailFailureDiagnostic {
   const value = (error ?? "").toLowerCase();
 
-  if (!value || value.includes("resend api key not configured")) {
+  if (
+    !value ||
+    value.includes("gmail api oauth credentials not configured")
+  ) {
     return {
-      code: "resend_credentials_missing",
+      code: "gmail_oauth_credentials_missing",
       message:
-        "RESEND_API_KEY is missing from the Cloudflare Worker. Add the API key from your Resend account as a Worker secret.",
-    };
-  }
-
-  if (value.includes("resend sender address not configured")) {
-    return {
-      code: "resend_sender_missing",
-      message:
-        "RESEND_FROM_EMAIL is missing. Set it to an address on a domain that is verified in Resend.",
+        "Gmail API OAuth settings are missing. Configure GMAIL_USER, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN as Cloudflare Worker secrets/variables.",
     };
   }
 
   if (
-    value.includes("domain is not verified") ||
-    value.includes("verify your domain") ||
-    value.includes("not authorized to send")
+    value.includes("invalid_grant") ||
+    value.includes("invalid_client") ||
+    value.includes("unauthorized_client") ||
+    value.includes("gmail oauth token request failed")
   ) {
     return {
-      code: "resend_sender_unverified",
+      code: "gmail_oauth_rejected",
       message:
-        "Resend rejected the sender. Verify the sender's domain in Resend, then set RESEND_FROM_EMAIL to an address on that verified domain.",
+        "Google rejected the Gmail OAuth credentials. Recheck the OAuth client ID/secret and refresh token, and confirm the OAuth consent setup is still valid.",
+    };
+  }
+
+  if (
+    value.includes("gmail api send failed") ||
+    value.includes("gmail api returned no message id")
+  ) {
+    return {
+      code: "gmail_api_rejected",
+      message:
+        "Gmail API did not accept the message. Check that the OAuth grant includes the Gmail send permission and that the sender account is active.",
     };
   }
 
@@ -56,13 +61,13 @@ export function diagnoseMailFailure(error?: string): MailFailureDiagnostic {
     return {
       code: "smtp_connection_failed",
       message:
-        "The current SMTP transport cannot establish a connection from the Cloudflare Worker. Customer email has been moved to the HTTPS Resend API; confirm the deployed version is current.",
+        "The previous SMTP transport could not connect from Cloudflare Workers. The new path uses Google's HTTPS API; confirm that the new deployment is active.",
     };
   }
 
   return {
-    code: "resend_request_failed",
+    code: "gmail_api_send_failed",
     message:
-      "Resend could not send the email. Check the Worker logs for the sanitized Resend error, and verify the API key, sender domain, and recipient.",
+      "Gmail API delivery failed. Check the Worker logs for the non-sensitive error category, then verify OAuth credentials and Gmail API access.",
   };
 }
