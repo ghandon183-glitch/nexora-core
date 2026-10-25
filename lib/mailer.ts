@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 import { getEnv } from "@/lib/env";
 
@@ -10,19 +10,16 @@ interface SendCustomerEmailParams {
 }
 
 /**
- * Sends an email directly through the site owner's Gmail account via SMTP.
+ * Sends customer-facing email through Resend's HTTPS API.
  *
- * Unlike the Resend integration (which can only send to the account owner's
- * own address until a custom domain is verified), this can send to any
- * recipient — so it's used specifically for customer-facing emails.
+ * Cloudflare Workers should not use a raw SMTP transport such as Nodemailer:
+ * outbound SMTP/TCP connections are not a reliable/supported Worker transport.
+ * Resend's HTTPS API is compatible with the Workers runtime.
  *
- * Returns { sent: false } instead of throwing when Gmail credentials aren't
- * configured, so checkout never breaks because of missing email setup.
- *
- * Credentials are read through the centralized getEnv() helper
- * (lib/env.ts), which prefers Cloudflare Worker vars/secrets (read via the
- * request's Cloudflare context) and falls back to process.env for local
- * development. Server-only.
+ * RESEND_FROM_EMAIL must be an address on a domain verified in Resend. Do not
+ * silently fall back to onboarding@resend.dev: that test sender cannot deliver
+ * to arbitrary customers and would make production email appear configured
+ * when it is not.
  */
 export async function sendCustomerEmail({
   to,
@@ -31,44 +28,53 @@ export async function sendCustomerEmail({
   messageId,
 }: SendCustomerEmailParams): Promise<{ sent: boolean; error?: string }> {
   const env = await getEnv();
+  const apiKey = env.RESEND_API_KEY?.trim();
+  const from = env.RESEND_FROM_EMAIL?.trim();
 
-  const gmailUser = env.GMAIL_USER;
-  const gmailAppPassword = env.GMAIL_APP_PASSWORD;
+  if (!apiKey) {
+    return { sent: false, error: "Resend API key not configured" };
+  }
 
-  if (!gmailUser || !gmailAppPassword) {
-    console.log(
-      "[mailer] Gmail not configured. Would have sent to:",
-      to,
-      subject
-    );
-
-    return { sent: false, error: "Gmail not configured" };
+  if (!from) {
+    return { sent: false, error: "Resend sender address not configured" };
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: gmailUser,
-        pass: gmailAppPassword,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `Nexora Core <${gmailUser}>`,
-      to,
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.emails.send({
+      from,
+      to: [to],
       subject,
       html,
-      ...(messageId ? { messageId } : {}),
+      ...(messageId
+        ? { headers: { "X-Nexora-Message-ID": messageId } }
+        : {}),
     });
+
+    if (error) {
+      console.error("[mailer] Resend API failed to send customer email:", {
+        name: error.name,
+        message: error.message,
+        statusCode: error.statusCode,
+      });
+      return {
+        sent: false,
+        error: `${error.name || "ResendError"}: ${error.message}`,
+      };
+    }
+
+    if (!data?.id) {
+      console.error("[mailer] Resend API returned no email id.");
+      return { sent: false, error: "Resend API returned no email id" };
+    }
 
     return { sent: true };
   } catch (error) {
-    console.error("[mailer] Failed to send customer email:", error);
-
-    return {
-      sent: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[mailer] Resend API request failed:", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message,
+    });
+    return { sent: false, error: message };
   }
 }
