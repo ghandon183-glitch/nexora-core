@@ -62,11 +62,11 @@ export async function POST(request: Request) {
     subject: "NEXORA CORE production email test",
     html:
       "<h1>NEXORA CORE production email test</h1>" +
-      "<p>This message was requested from the authenticated admin dashboard to verify the configured Gmail SMTP transport.</p>" +
+      "<p>This message was requested from the authenticated admin dashboard to verify the configured Gmail API HTTPS transport.</p>" +
       "<p><strong>No order was created and no payment was made.</strong></p>" +
       "<p>Test time: " + sentAt + "</p>" +
-      "<p>If you received this message, the production SMTP send path is working. Please also check Spam if it is not in the inbox.</p>",
-    messageId: `<nexora-email-test-${Date.now()}@nexora-core.nxora.workers.dev>`,
+      "<p>If you received this message, the production email path is working. Please also check Spam if it is not in the inbox.</p>",
+    messageId: `nexora-email-test-${Date.now()}@nexora-core.nxora.workers.dev`,
   });
 
   if (!result.sent) {
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     {
       ok: true,
       message:
-        "Gmail SMTP accepted the test email. Check the configured owner inbox and Spam folder. No order or payment was created.",
+        "Gmail API accepted the test email. Check the configured owner inbox and Spam folder. No order or payment was created.",
     },
     { headers: NO_STORE },
   );
