@@ -8,6 +8,7 @@ export interface CloudflareEnv {
   ADMIN_PASSWORD?: string;
   CRON_SECRET?: string;
   RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL?: string;
   NOTIFY_EMAIL?: string;
   SITE_URL?: string;
   GOOGLE_SITE_VERIFICATION?: string;
@@ -15,6 +16,9 @@ export interface CloudflareEnv {
   GA_MEASUREMENT_ID?: string;
   TRONGRID_API_KEY?: string;
   GMAIL_USER?: string;
+  GMAIL_CLIENT_ID?: string;
+  GMAIL_CLIENT_SECRET?: string;
+  GMAIL_REFRESH_TOKEN?: string;
   GMAIL_APP_PASSWORD?: string;
   PAYMEGATE_API_KEY?: string;
   PAYMEGATE_WEBHOOK_SECRET?: string;
@@ -26,6 +30,7 @@ const CF_ENV_KEYS = [
   "ADMIN_PASSWORD",
   "CRON_SECRET",
   "RESEND_API_KEY",
+  "RESEND_FROM_EMAIL",
   "NOTIFY_EMAIL",
   "SITE_URL",
   "GOOGLE_SITE_VERIFICATION",
@@ -33,6 +38,9 @@ const CF_ENV_KEYS = [
   "GA_MEASUREMENT_ID",
   "TRONGRID_API_KEY",
   "GMAIL_USER",
+  "GMAIL_CLIENT_ID",
+  "GMAIL_CLIENT_SECRET",
+  "GMAIL_REFRESH_TOKEN",
   "GMAIL_APP_PASSWORD",
   "PAYMEGATE_API_KEY",
   "PAYMEGATE_WEBHOOK_SECRET",

@@ -1,37 +1,58 @@
 export type MailFailureDiagnostic = {
-  code: "gmail_credentials_missing" | "gmail_auth_rejected" | "smtp_connection_failed" | "smtp_message_rejected" | "smtp_send_failed";
+  code:
+    | "gmail_oauth_credentials_missing"
+    | "gmail_oauth_rejected"
+    | "gmail_api_rejected"
+    | "smtp_connection_failed"
+    | "gmail_api_send_failed";
   message: string;
 };
 
 /**
  * Translate provider errors into actionable, non-secret diagnostics for the
- * authenticated admin test endpoint. Never return raw SMTP responses because
- * providers can include addresses or other operational details.
+ * authenticated admin test endpoint. Never return raw provider responses.
  */
 export function diagnoseMailFailure(error?: string): MailFailureDiagnostic {
   const value = (error ?? "").toLowerCase();
 
-  if (!value || value.includes("gmail not configured")) {
-    return {
-      code: "gmail_credentials_missing",
-      message: "Gmail SMTP credentials are missing from the Worker runtime. Verify GMAIL_USER and GMAIL_APP_PASSWORD.",
-    };
-  }
-
   if (
-    value.includes("eauth") ||
-    value.includes("invalid login") ||
-    value.includes("username and password not accepted") ||
-    value.includes("application-specific password required") ||
-    /\b(534|535)\b/.test(value)
+    !value ||
+    value.includes("gmail api oauth credentials not configured")
   ) {
     return {
-      code: "gmail_auth_rejected",
-      message: "Gmail rejected the login. Check that GMAIL_USER is the full Gmail address and GMAIL_APP_PASSWORD is a current 16-character Google App Password for that same account (not the normal account password).",
+      code: "gmail_oauth_credentials_missing",
+      message:
+        "Gmail API OAuth settings are missing. Configure GMAIL_USER, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN as Cloudflare Worker secrets/variables.",
     };
   }
 
   if (
+    value.includes("invalid_grant") ||
+    value.includes("invalid_client") ||
+    value.includes("unauthorized_client") ||
+    value.includes("gmail oauth token request failed")
+  ) {
+    return {
+      code: "gmail_oauth_rejected",
+      message:
+        "Google rejected the Gmail OAuth credentials. Recheck the OAuth client ID/secret and refresh token, and confirm the OAuth consent setup is still valid.",
+    };
+  }
+
+  if (
+    value.includes("gmail api send failed") ||
+    value.includes("gmail api returned no message id")
+  ) {
+    return {
+      code: "gmail_api_rejected",
+      message:
+        "Gmail API did not accept the message. Check that the OAuth grant includes the Gmail send permission and that the sender account is active.",
+    };
+  }
+
+  if (
+    value.includes("proxy request failed") ||
+    value.includes("cannot connect to the specified address") ||
     /\b(econn|enotfound|etimedout|esocket|ehostunreach|eai_again)\b/.test(value) ||
     value.includes("connection timeout") ||
     value.includes("certificate") ||
@@ -39,19 +60,14 @@ export function diagnoseMailFailure(error?: string): MailFailureDiagnostic {
   ) {
     return {
       code: "smtp_connection_failed",
-      message: "The Worker could not establish a secure SMTP connection to Gmail. Check the SMTP transport/runtime configuration and retry.",
-    };
-  }
-
-  if (/\b(550|552|553|554)\b/.test(value) || value.includes("message rejected") || value.includes("recipient address rejected")) {
-    return {
-      code: "smtp_message_rejected",
-      message: "Gmail or the recipient server rejected the message after login. Check the configured owner email address and Gmail's sending restrictions.",
+      message:
+        "The previous SMTP transport could not connect from Cloudflare Workers. The new path uses Google's HTTPS API; confirm that the new deployment is active.",
     };
   }
 
   return {
-    code: "smtp_send_failed",
-    message: "Gmail SMTP failed for an undetermined reason. Check the Worker logs for the mailer error and retry.",
+    code: "gmail_api_send_failed",
+    message:
+      "Gmail API delivery failed. Check the Worker logs for the non-sensitive error category, then verify OAuth credentials and Gmail API access.",
   };
 }

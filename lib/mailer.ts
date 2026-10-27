@@ -1,5 +1,3 @@
-import nodemailer from "nodemailer";
-
 import { getEnv } from "@/lib/env";
 
 interface SendCustomerEmailParams {
@@ -9,20 +7,29 @@ interface SendCustomerEmailParams {
   messageId?: string;
 }
 
+function base64(bytes: Uint8Array): string {
+  let binary = "";
+  // Keep chunks small to avoid argument limits in String.fromCharCode.
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+
+function base64Url(bytes: Uint8Array): string {
+  return base64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function encodeHeader(value: string): string {
+  return `=?UTF-8?B?${base64(new TextEncoder().encode(value))}=?=`;
+}
+
 /**
- * Sends an email directly through the site owner's Gmail account via SMTP.
+ * Sends customer-facing email using Gmail API HTTPS, not SMTP.
+ * This works from Cloudflare Workers without a custom domain or paid mail
+ * provider. It requires OAuth credentials for a Gmail account owned by Nexora.
  *
- * Unlike the Resend integration (which can only send to the account owner's
- * own address until a custom domain is verified), this can send to any
- * recipient — so it's used specifically for customer-facing emails.
- *
- * Returns { sent: false } instead of throwing when Gmail credentials aren't
- * configured, so checkout never breaks because of missing email setup.
- *
- * Credentials are read through the centralized getEnv() helper
- * (lib/env.ts), which prefers Cloudflare Worker vars/secrets (read via the
- * request's Cloudflare context) and falls back to process.env for local
- * development. Server-only.
+ * Keep OAuth credentials in Worker secrets; never log access/refresh tokens.
  */
 export async function sendCustomerEmail({
   to,
@@ -31,44 +38,92 @@ export async function sendCustomerEmail({
   messageId,
 }: SendCustomerEmailParams): Promise<{ sent: boolean; error?: string }> {
   const env = await getEnv();
+  const gmailUser = env.GMAIL_USER?.trim();
+  const clientId = env.GMAIL_CLIENT_ID?.trim();
+  const clientSecret = env.GMAIL_CLIENT_SECRET?.trim();
+  const refreshToken = env.GMAIL_REFRESH_TOKEN?.trim();
 
-  const gmailUser = env.GMAIL_USER;
-  const gmailAppPassword = env.GMAIL_APP_PASSWORD;
-
-  if (!gmailUser || !gmailAppPassword) {
-    console.log(
-      "[mailer] Gmail not configured. Would have sent to:",
-      to,
-      subject
-    );
-
-    return { sent: false, error: "Gmail not configured" };
+  if (!gmailUser || !clientId || !clientSecret || !refreshToken) {
+    return {
+      sent: false,
+      error: "Gmail API OAuth credentials not configured",
+    };
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: gmailUser,
-        pass: gmailAppPassword,
-      },
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+      }),
     });
 
-    await transporter.sendMail({
-      from: `Nexora Core <${gmailUser}>`,
-      to,
-      subject,
-      html,
-      ...(messageId ? { messageId } : {}),
-    });
+    if (!tokenResponse.ok) {
+      const tokenError = (await tokenResponse.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      // Provider error codes are safe to classify; do not log token responses.
+      return {
+        sent: false,
+        error: `Gmail OAuth token request failed: ${tokenError.error || tokenResponse.status}`,
+      };
+    }
+
+    const tokenData = (await tokenResponse.json()) as { access_token?: string };
+    if (!tokenData.access_token) {
+      return { sent: false, error: "Gmail OAuth response contained no access token" };
+    }
+
+    const safeMessageId = messageId?.replace(/[\r\n<>]/g, "").slice(0, 180);
+    const mime = [
+      `From: Nexora Core <${gmailUser}>`,
+      `To: ${to.replace(/[\r\n]/g, "")}`,
+      `Subject: ${encodeHeader(subject)}`,
+      "MIME-Version: 1.0",
+      "Content-Type: text/html; charset=UTF-8",
+      "Content-Transfer-Encoding: base64",
+      ...(safeMessageId ? [`X-Nexora-Message-ID: ${safeMessageId}`] : []),
+      "",
+      base64(new TextEncoder().encode(html)),
+    ].join("\r\n");
+
+    const raw = base64Url(new TextEncoder().encode(mime));
+    const sendResponse = await fetch(
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ raw }),
+      },
+    );
+
+    if (!sendResponse.ok) {
+      const apiError = (await sendResponse.json().catch(() => ({}))) as {
+        error?: { code?: number; status?: string };
+      };
+      return {
+        sent: false,
+        error: `Gmail API send failed: ${apiError.error?.status || apiError.error?.code || sendResponse.status}`,
+      };
+    }
+
+    const sentMessage = (await sendResponse.json()) as { id?: string };
+    if (!sentMessage.id) {
+      return { sent: false, error: "Gmail API returned no message id" };
+    }
 
     return { sent: true };
   } catch (error) {
-    console.error("[mailer] Failed to send customer email:", error);
-
-    return {
-      sent: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    const name = error instanceof Error ? error.name : "UnknownError";
+    // Do not log request headers, OAuth credentials, tokens, or message content.
+    console.error("[mailer] Gmail API HTTPS request failed:", { name });
+    return { sent: false, error: `Gmail API request failed: ${name}` };
   }
 }
