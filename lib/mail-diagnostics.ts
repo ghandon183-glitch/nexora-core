@@ -26,16 +26,35 @@ export function diagnoseMailFailure(error?: string): MailFailureDiagnostic {
     };
   }
 
-  if (
-    value.includes("invalid_grant") ||
-    value.includes("invalid_client") ||
-    value.includes("unauthorized_client") ||
-    value.includes("gmail oauth token request failed")
-  ) {
+  if (value.includes("invalid_client")) {
     return {
       code: "gmail_oauth_rejected",
       message:
-        "Google rejected the Gmail OAuth credentials. Recheck the OAuth client ID/secret and refresh token, and confirm the OAuth consent setup is still valid.",
+        "Google returned invalid_client during OAuth token exchange. Verify that GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET belong to the same OAuth client in the intended Google Cloud project, and that the client has not been deleted. No credential values were logged.",
+    };
+  }
+
+  if (value.includes("invalid_grant")) {
+    return {
+      code: "gmail_oauth_rejected",
+      message:
+        "Google returned invalid_grant during OAuth token exchange. The refresh token may be expired, revoked, or issued for a different OAuth client. Check the OAuth consent publishing status; Gmail-scope refresh tokens issued while an external app is in Testing expire after 7 days. No token values were logged.",
+    };
+  }
+
+  if (value.includes("unauthorized_client")) {
+    return {
+      code: "gmail_oauth_rejected",
+      message:
+        "Google returned unauthorized_client during OAuth token exchange. Check the OAuth client configuration and whether this client is permitted to use the refresh-token grant.",
+    };
+  }
+
+  if (value.includes("gmail oauth token request failed")) {
+    return {
+      code: "gmail_oauth_rejected",
+      message:
+        "Google's OAuth token endpoint rejected the refresh-token exchange. Check the sanitized oauthError and httpStatus fields in Cloudflare Worker logs; no OAuth credential or token values are recorded.",
     };
   }
 

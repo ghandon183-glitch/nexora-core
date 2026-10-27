@@ -21,8 +21,17 @@ function base64Url(bytes: Uint8Array): string {
 }
 
 function encodeHeader(value: string): string {
-  return `=?UTF-8?B?${base64(new TextEncoder().encode(value))}=?=`;
+  return `=?UTF-8?B?${base64(new TextEncoder().encode(value))}?=`;
 }
+
+const SAFE_OAUTH_ERRORS = new Set([
+  "invalid_client",
+  "invalid_grant",
+  "unauthorized_client",
+  "invalid_scope",
+  "invalid_request",
+  "unsupported_grant_type",
+]);
 
 /**
  * Sends customer-facing email using Gmail API HTTPS, not SMTP.
@@ -66,15 +75,29 @@ export async function sendCustomerEmail({
       const tokenError = (await tokenResponse.json().catch(() => ({}))) as {
         error?: string;
       };
-      // Provider error codes are safe to classify; do not log token responses.
+      // Only log Google's documented error enum and HTTP status. Never log
+      // error_description, request bodies, client credentials, or tokens.
+      const oauthError =
+        tokenError.error && SAFE_OAUTH_ERRORS.has(tokenError.error)
+          ? tokenError.error
+          : "unknown";
+      console.warn("[mailer] Gmail OAuth token exchange rejected", {
+        stage: "token_exchange",
+        httpStatus: tokenResponse.status,
+        oauthError,
+      });
       return {
         sent: false,
-        error: `Gmail OAuth token request failed: ${tokenError.error || tokenResponse.status}`,
+        error: `Gmail OAuth token request failed: ${oauthError}`,
       };
     }
 
     const tokenData = (await tokenResponse.json()) as { access_token?: string };
     if (!tokenData.access_token) {
+      console.warn("[mailer] Gmail OAuth response contained no access token", {
+        stage: "token_exchange",
+        httpStatus: tokenResponse.status,
+      });
       return { sent: false, error: "Gmail OAuth response contained no access token" };
     }
 
@@ -108,14 +131,24 @@ export async function sendCustomerEmail({
       const apiError = (await sendResponse.json().catch(() => ({}))) as {
         error?: { code?: number; status?: string };
       };
+      const apiStatus = apiError.error?.status || "unknown";
+      console.warn("[mailer] Gmail API send rejected", {
+        stage: "gmail_send",
+        httpStatus: sendResponse.status,
+        apiStatus,
+      });
       return {
         sent: false,
-        error: `Gmail API send failed: ${apiError.error?.status || apiError.error?.code || sendResponse.status}`,
+        error: `Gmail API send failed: ${apiStatus !== "unknown" ? apiStatus : apiError.error?.code || sendResponse.status}`,
       };
     }
 
     const sentMessage = (await sendResponse.json()) as { id?: string };
     if (!sentMessage.id) {
+      console.warn("[mailer] Gmail API returned no message id", {
+        stage: "gmail_send",
+        httpStatus: sendResponse.status,
+      });
       return { sent: false, error: "Gmail API returned no message id" };
     }
 

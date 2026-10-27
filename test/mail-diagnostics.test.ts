@@ -9,10 +9,31 @@ test("classifies missing Gmail API OAuth credentials", () => {
   assert.match(result.message, /GMAIL_REFRESH_TOKEN/);
 });
 
-test("classifies rejected OAuth credentials without exposing secrets", () => {
+test("classifies invalid_client without exposing credential values", () => {
+  const result = diagnoseMailFailure("Gmail OAuth token request failed: invalid_client");
+  assert.equal(result.code, "gmail_oauth_rejected");
+  assert.match(result.message, /invalid_client/);
+  assert.doesNotMatch(result.message, /secret=.+|refresh_token/i);
+});
+
+test("classifies invalid_grant and explains the possible consent-testing expiry", () => {
   const result = diagnoseMailFailure("Gmail OAuth token request failed: invalid_grant");
   assert.equal(result.code, "gmail_oauth_rejected");
-  assert.doesNotMatch(result.message, /invalid_grant|secret=.+|refresh_token/i);
+  assert.match(result.message, /Testing.*7 days/i);
+  assert.doesNotMatch(result.message, /secret=.+|refresh token value/i);
+});
+
+test("classifies unauthorized_client", () => {
+  const result = diagnoseMailFailure("Gmail OAuth token request failed: unauthorized_client");
+  assert.equal(result.code, "gmail_oauth_rejected");
+  assert.match(result.message, /unauthorized_client/);
+});
+
+test("classifies an unknown OAuth rejection without exposing raw provider details", () => {
+  const result = diagnoseMailFailure("Gmail OAuth token request failed: unknown");
+  assert.equal(result.code, "gmail_oauth_rejected");
+  assert.match(result.message, /sanitized oauthError/i);
+  assert.doesNotMatch(result.message, /sensitive provider response detail/);
 });
 
 test("classifies Gmail API send rejection", () => {
