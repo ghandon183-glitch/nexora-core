@@ -253,4 +253,57 @@ describe("Payment reconciliation cron", () => {
     assert.equal(reviewed.status, "review");
     assert.equal(reviewed.download_token, null);
   });
+
+  test("fulfils a paid order when the provider response omits the customer email", async () => {
+    const order = await insertOrderRow(
+      makeOrder({ status: "expired", expires_at: Date.now() - 60 * 60 * 1000 })
+    );
+
+    // The order is already bound by provider UUID, external id and amount, so an
+    // absent email is not evidence against the payment (same rule as the webhook).
+    globalThis.fetch = async () =>
+      jsonResponse(paymegateOrder(order.id, { customerEmail: null }));
+
+    const response = await runPaymentCheck(cronRequest());
+    const body = (await response.json()) as CronResponse;
+
+    assert.equal(body.confirmed, 1);
+    assert.deepEqual(body.paymegateErrors, []);
+
+    const confirmed = readOrder(db, order.id);
+    assert.equal(confirmed.status, "confirmed");
+    assert.ok(confirmed.download_token);
+    assert.equal(readOutbox(db, order.id).length, 2);
+  });
+
+  test("fulfils a paid order whose provider amount is formatted as 49.0", async () => {
+    const order = await insertOrderRow(
+      makeOrder({ status: "expired", expires_at: Date.now() - 60 * 60 * 1000 })
+    );
+
+    globalThis.fetch = async () =>
+      jsonResponse(paymegateOrder(order.id, { amount: "49.0", externalId: null }));
+
+    const response = await runPaymentCheck(cronRequest());
+    const body = (await response.json()) as CronResponse;
+
+    assert.equal(body.confirmed, 1);
+    assert.equal(readOrder(db, order.id).status, "confirmed");
+  });
+
+  test("still refuses a provider amount with sub-cent precision", async () => {
+    const order = await insertOrderRow(
+      makeOrder({ status: "expired", expires_at: Date.now() - 60 * 60 * 1000 })
+    );
+
+    globalThis.fetch = async () => jsonResponse(paymegateOrder(order.id, { amount: "49.004" }));
+
+    const response = await runPaymentCheck(cronRequest());
+    const body = (await response.json()) as CronResponse;
+
+    assert.equal(body.confirmed, 0);
+    assert.equal(body.paymegateErrors.length, 1);
+    assert.equal(readOrder(db, order.id).status, "expired");
+    assert.equal(readOutbox(db, order.id).length, 0);
+  });
 });

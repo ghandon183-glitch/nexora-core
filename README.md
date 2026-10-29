@@ -10,6 +10,13 @@ Install dependencies and run the local development server with `npm install` and
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`, which runs `npm run cf:deploy`.
 
+## Database migrations
+
+Apply every file in `migrations/` in filename order; see
+[`migrations/README.md`](migrations/README.md) for the order, the Wrangler
+command and the queries that verify what the production D1 database actually
+contains.
+
 ## Production configuration
 
 Configure Worker secrets in Cloudflare Workers & Pages → `nexora-core` → Settings → Variables. Keep credentials as secrets and never commit them. GitHub Actions requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
