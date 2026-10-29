@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 import { trackAnalyticsEvent } from "@/lib/analytics/track-event";
 
-
-
 export default function SiteAnalytics() {
+  // The app shell (this component) mounts once per locale and survives
+  // client-side navigation. Re-run the view when the route changes so
+  // client-side visits to another template still report view_item.
+  const pathname = usePathname();
+
   useEffect(() => {
     const view = document.querySelector<HTMLElement>("[data-analytics-view-item]");
     if (view) {
@@ -42,7 +46,7 @@ export default function SiteAnalytics() {
 
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, []);
+  }, [pathname]);
 
   return null;
 }
