@@ -306,4 +306,27 @@ describe("Payment reconciliation cron", () => {
     assert.equal(readOrder(db, order.id).status, "expired");
     assert.equal(readOutbox(db, order.id).length, 0);
   });
+
+  test("confirms nothing when the provider lookup itself fails", async () => {
+    const order = await insertOrderRow(
+      makeOrder({ status: "expired", expires_at: Date.now() - 60 * 60 * 1000 })
+    );
+
+    // A temporary provider outage must surface as an error and a retry on the
+    // next run, never as a confirmation of an unpaid order.
+    globalThis.fetch = async () => jsonResponse({ error: "provider down" }, 500);
+
+    const response = await runPaymentCheck(cronRequest());
+    const body = (await response.json()) as CronResponse;
+
+    assert.equal(body.ok, true);
+    assert.equal(body.confirmed, 0);
+    assert.equal(body.paymegateErrors.length, 1);
+
+    const unchanged = readOrder(db, order.id);
+    assert.equal(unchanged.status, "expired");
+    assert.equal(unchanged.download_token, null);
+    assert.equal(readOutbox(db, order.id).length, 0);
+    assert.equal(testState.mailerCalls.length, 0);
+  });
 });

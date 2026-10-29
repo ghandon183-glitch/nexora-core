@@ -8,10 +8,13 @@
 -- HTTP 500, blocking every other buyer of that template for as long as the
 -- first order stayed `pending` (up to 24 hours).
 --
--- Scoping the predicate keeps the crypto guarantee and lets independent
--- card orders coexist. The index is safe to recreate: it is derived data.
-DROP INDEX IF EXISTS idx_orders_pending_currency_pay_amount;
-
+-- Create the scoped index BEFORE dropping the old one: if an environment
+-- never applied 0003 and already holds duplicate pending crypto quotes, this
+-- statement fails while the existing schema is still intact, instead of
+-- leaving the table without any quote constraint. See migrations/README.md
+-- for the read-only preflight query.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_pending_crypto_pay_amount
   ON orders (currency, pay_amount)
   WHERE status = 'pending' AND payment_provider = 'crypto';
+
+DROP INDEX IF EXISTS idx_orders_pending_currency_pay_amount;

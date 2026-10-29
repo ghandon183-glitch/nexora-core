@@ -305,4 +305,28 @@ describe("Paymegate webhook", () => {
     assert.equal(response.status, 200);
     assert.equal(readOrder(db, order.id).status, "confirmed");
   });
+
+  test("accepts the same amount formatted with one decimal", async () => {
+    const order = await insertOrderRow(makeOrder());
+
+    const response = await POST(signedWebhookRequest(paidEvent(order, { amount: "49.0" })));
+
+    assert.equal(response.status, 200);
+    assert.equal(readOrder(db, order.id).status, "confirmed");
+    assert.equal(readOutbox(db, order.id).length, 2);
+  });
+
+  test("confirms a correlated paid event that omits the customer email", async () => {
+    const order = await insertOrderRow(makeOrder());
+
+    // Same rule as the polling fallback: absence is not a contradiction, while
+    // a present-but-different email is still rejected by the test above.
+    const response = await POST(
+      signedWebhookRequest(paidEvent(order, { customerEmail: undefined }))
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(readOrder(db, order.id).status, "confirmed");
+    assert.equal(readOutbox(db, order.id).length, 2);
+  });
 });
