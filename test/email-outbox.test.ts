@@ -163,10 +163,8 @@ describe("Email outbox", () => {
 
     assert.equal(claim, null);
   });
-});
 
-
-  test("permanently failing email reaches the retry cap and is excluded from future runs", async () => {
+test("permanently failing email reaches the retry cap and is excluded from future runs", async () => {
     const order = await confirmedOrder(db);
     testState.mailerFailuresRemaining = 20;
 
@@ -185,3 +183,5 @@ describe("Email outbox", () => {
     assert.deepEqual(afterCap, { claimed: 0, sent: 0, failed: 0 });
     assert.equal(testState.mailerCalls.length, 12);
   });
+
+});
