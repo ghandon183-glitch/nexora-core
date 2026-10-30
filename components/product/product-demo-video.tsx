@@ -1,4 +1,10 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+
 export default function ProductDemoVideo({ src, demoUrl }: { src?: string; demoUrl?: string }) {
+  const [demoLoaded, setDemoLoaded] = useState(false);
   if (!src) return null;
 
   // The shipped AETHER walkthrough was captured from a broken page.
@@ -23,14 +29,35 @@ export default function ProductDemoVideo({ src, demoUrl }: { src?: string; demoU
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl">
         {isAether && demoUrl ? (
           <>
-            <iframe
-              title="AETHER live interactive demo"
-              src={demoUrl}
-              className="aspect-video w-full bg-[#080808]"
-              loading="lazy"
-              allow="fullscreen"
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
+            {demoLoaded ? (
+              <iframe
+                title="AETHER live interactive demo"
+                src={demoUrl}
+                className="aspect-video w-full bg-[#080808]"
+                loading="lazy"
+                allow="fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            ) : (
+              <div className="relative aspect-video w-full overflow-hidden bg-[#080808]">
+                <Image
+                  src="/templates/aether.jpg"
+                  alt="AETHER interactive demo preview"
+                  fill
+                  sizes="(min-width: 1280px) 756px, 100vw"
+                  className="object-cover object-center"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 p-6">
+                  <button
+                    type="button"
+                    onClick={() => setDemoLoaded(true)}
+                    className="rounded-full border border-white/30 bg-black/70 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-300 hover:text-cyan-200"
+                  >
+                    Load interactive demo
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="border-t border-white/10 p-4 text-right">
               <a
                 href={demoUrl}
