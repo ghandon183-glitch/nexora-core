@@ -1,0 +1,31 @@
+name: Production passive security scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * 1"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/production-dast-baseline.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-passive-security-scan
+  cancel-in-progress: true
+
+jobs:
+  zap-baseline:
+    name: OWASP ZAP baseline (passive only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Scan public production site with passive checks
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
+        with:
+          target: "https://nexora-core.nxora.workers.dev/"
+          allow_issue_writing: false
+          fail_action: false
+          artifact_name: "nexora-zap-baseline"
