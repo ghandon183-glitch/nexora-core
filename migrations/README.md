@@ -12,6 +12,7 @@ prove it has been applied to the production database.
 | 5 | `0005_email_delivery.sql` | per-kind email delivery state on `orders` |
 | 6 | `0006_email_outbox.sql` | persistent `email_outbox` retry queue |
 | 7 | `0007_scope_pending_payment_quote_to_crypto.sql` | scopes the quote index to crypto orders |
+| 8 | `0008_email_outbox_dead_letter.sql` | records terminal email retries so permanent failures stop retrying forever |
 
 Apply them with Wrangler so the remote database tracks what ran:
 
@@ -78,3 +79,10 @@ npx wrangler d1 execute nexora-orders --remote \
 Without `0006` the confirmed-order email path cannot queue messages; with the
 unscoped `0003` index still in place, a second pending card checkout for the
 same template price fails.
+
+`0008` adds a nullable `dead_lettered_at` marker to `email_outbox`. After six
+failed send attempts, a row is marked terminal and excluded from automated
+retry/claim queries. The order and its download entitlement remain unchanged.
+An operator can investigate `last_error` and intentionally requeue a row after
+fixing the underlying cause; do not clear the marker without understanding why
+email delivery failed.
