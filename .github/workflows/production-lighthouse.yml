@@ -1,0 +1,43 @@
+name: Production launch audit (Lighthouse)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "53 5 * * 1"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/production-lighthouse.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-lighthouse-audit
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Public-page performance, accessibility and SEO
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Collect Lighthouse reports from public pages
+        run: |
+          npx --yes @lhci/cli@0.15.1 collect \
+            --url=https://nexora-core.nxora.workers.dev/en \
+            --url=https://nexora-core.nxora.workers.dev/en/templates \
+            --url=https://nexora-core.nxora.workers.dev/en/pricing \
+            --url=https://nexora-core.nxora.workers.dev/en/templates/aether \
+            --url=https://nexora-core.nxora.workers.dev/en/license \
+            --url=https://nexora-core.nxora.workers.dev/en/refunds \
+            --numberOfRuns=1 \
+            --settings.chromeFlags="--no-sandbox --headless=new"
+      - name: Save HTML and JSON reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-lighthouse-reports
+          path: .lighthouseci
+          if-no-files-found: warn
+          retention-days: 14
