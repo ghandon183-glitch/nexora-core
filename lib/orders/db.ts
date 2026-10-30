@@ -419,6 +419,7 @@ export interface EmailOutboxItem {
   last_error: string | null;
   created_at: number;
   updated_at: number;
+  dead_lettered_at: number | null;
 }
 
 export async function enqueueOrderEmail(
@@ -446,6 +447,7 @@ export async function enqueueOrderEmail(
          ELSE 'pending'
        END,
        next_attempt_at = email_outbox.next_attempt_at,
+       dead_lettered_at = NULL,
        locked_at = CASE WHEN email_outbox.status = 'sending' THEN email_outbox.locked_at ELSE NULL END,
        last_error = CASE WHEN email_outbox.status = 'sent' THEN NULL ELSE email_outbox.last_error END,
        updated_at = excluded.updated_at`;
@@ -476,8 +478,9 @@ export async function getDueEmailOutbox(limit = 10): Promise<EmailOutboxItem[]> 
 
   const result = await db.prepare(
     `SELECT * FROM email_outbox
-     WHERE (status = 'pending' AND next_attempt_at <= ?)
-        OR (status = 'sending' AND COALESCE(locked_at, 0) < ?)
+     WHERE dead_lettered_at IS NULL
+       AND ((status = 'pending' AND next_attempt_at <= ?)
+        OR (status = 'sending' AND COALESCE(locked_at, 0) < ?))
      ORDER BY next_attempt_at ASC, created_at ASC
      LIMIT ?`
   ).bind(now, now - 10 * 60 * 1000, safeLimit).all<EmailOutboxItem>();
@@ -496,6 +499,7 @@ export async function claimEmailOutbox(id: string): Promise<EmailOutboxItem | nu
          locked_at = ?,
          updated_at = ?
      WHERE id = ?
+       AND dead_lettered_at IS NULL
        AND (
          (status = 'pending' AND next_attempt_at <= ?)
          OR (status = 'sending' AND COALESCE(locked_at, 0) < ?)
@@ -544,8 +548,11 @@ export async function markEmailOutboxFailed(id: string, error: string): Promise<
   ).bind(id).first<{ attempts: number; order_id: string; kind: "owner" | "customer" }>();
 
   const attempts = Number(item?.attempts ?? 1);
+  const maxAttempts = 6;
+  const terminal = attempts >= maxAttempts;
+  const now = Date.now();
   const delayMs = Math.min(24 * 60 * 60 * 1000, 60 * 1000 * Math.pow(2, Math.min(attempts - 1, 10)));
-  const nextAttemptAt = Date.now() + delayMs;
+  const nextAttemptAt = terminal ? now : now + delayMs;
 
   const safeError = error.slice(0, 1000);
 
@@ -553,11 +560,12 @@ export async function markEmailOutboxFailed(id: string, error: string): Promise<
     `UPDATE email_outbox
      SET status = 'pending',
          locked_at = NULL,
+         dead_lettered_at = CASE WHEN ? THEN ? ELSE NULL END,
          next_attempt_at = ?,
          last_error = ?,
          updated_at = ?
      WHERE id = ?`
-  ).bind(nextAttemptAt, safeError, Date.now(), id).run();
+  ).bind(terminal ? 1 : 0, terminal ? now : null, nextAttemptAt, safeError, now, id).run();
 
   if (item) {
     const statusColumn = item.kind === "owner" ? "owner_email_status" : "customer_email_status";
