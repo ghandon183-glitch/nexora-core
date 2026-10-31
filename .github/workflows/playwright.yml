@@ -37,6 +37,9 @@ jobs:
           npm install --no-save --package-lock=false @playwright/test
           npx playwright install --with-deps chromium
       - name: Build application
+        env:
+          SITE_URL: http://127.0.0.1:3000
+          GA_MEASUREMENT_ID: G-TEST000000
         run: npm run build
       - name: Start production build
         run: |
