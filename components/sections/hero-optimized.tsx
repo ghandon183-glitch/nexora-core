@@ -37,9 +37,7 @@ export default function HeroOptimized() {
     let last = performance.now();
     let width = hero.clientWidth;
     let height = hero.clientHeight;
-    let phase: "scatter" | "line" | "circle" = "circle";
     const morph = S(1), rotation = S(), mouse = S();
-    const scatter = cards.map(() => ({ x: (Math.random() - .5) * 1500, y: (Math.random() - .5) * 1000, r: (Math.random() - .5) * 180 }));
     // Loop only runs while the hero is on-screen and the tab is visible; it never
     // spins forever in the background (fixes unbounded main-thread work / TBT).
     let visible = true;
@@ -107,23 +105,17 @@ export default function HeroOptimized() {
 
       cards.forEach((c, i) => {
         let tx = 0, ty = 0, tr = 0, ts = 1, op = 1;
-        if (phase === "scatter") {
-          const p = scatter[i]; tx = p.x; ty = p.y; tr = p.r; ts = .6; op = 0;
-        } else if (phase === "line") {
-          const spacing = 70; tx = i * spacing - (cards.length * spacing) / 2;
-        } else {
-          const ca = i / cards.length * Math.PI * 2;
-          const cx = Math.cos(ca) * circleR;
-          const cy = Math.sin(ca) * circleR;
-          const cr = ca * 180 / Math.PI + 90;
-          const aa = (start + i * step + bounded) * Math.PI / 180;
-          const ax = Math.cos(aa) * arcR + mouse.v;
-          const ay = Math.sin(aa) * arcR + centerY;
-          tx = cx + (ax - cx) * m;
-          ty = cy + (ay - cy) * m;
-          tr = cr + ((start + i * step + bounded + 90) - cr) * m;
-          ts = 1 + (mobile ? .4 : .8) * m;
-        }
+        const ca = i / cards.length * Math.PI * 2;
+        const cx = Math.cos(ca) * circleR;
+        const cy = Math.sin(ca) * circleR;
+        const cr = ca * 180 / Math.PI + 90;
+        const aa = (start + i * step + bounded) * Math.PI / 180;
+        const ax = Math.cos(aa) * arcR + mouse.v;
+        const ay = Math.sin(aa) * arcR + centerY;
+        tx = cx + (ax - cx) * m;
+        ty = cy + (ay - cy) * m;
+        tr = cr + ((start + i * step + bounded + 90) - cr) * m;
+        ts = 1 + (mobile ? .4 : .8) * m;
         if (reduced) {
           c.x.v = tx; c.y.v = ty; c.r.v = tr; c.sc.v = ts; c.o.v = op; c.ry.v = c.hover ? 180 : 0;
         } else {
@@ -134,7 +126,7 @@ export default function HeroOptimized() {
         c.inner.style.transform = `rotateY(${c.ry.v}deg)`;
       });
 
-      const introOp = phase === "circle" && m < .5 && !returnedToTop ? clamp(1 - m * 2, 0, 1) : 0;
+      const introOp = m < .5 && !returnedToTop ? clamp(1 - m * 2, 0, 1) : 0;
       if (intro) intro.style.opacity = String(introOp);
       if (title) { title.style.opacity = String(introOp); title.style.filter = `blur(${clamp(10 - introOp * 10, 0, 10)}px)`; }
       if (hint) hint.style.opacity = String(introOp * .5);
