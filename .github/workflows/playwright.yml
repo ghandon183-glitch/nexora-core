@@ -83,6 +83,7 @@ jobs:
             .lighthouseci/
           if-no-files-found: warn
           retention-days: 14
+          include-hidden-files: true
 
   production-smoke:
     if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
