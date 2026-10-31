@@ -1,0 +1,49 @@
+name: Nuclei safe web exposure scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuclei-safe-production-scan
+  cancel-in-progress: true
+
+jobs:
+  nuclei:
+    name: Rate-limited safe template scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+      - name: Install Nuclei on the ephemeral GitHub runner
+        run: go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+      - name: Update community templates
+        run: nuclei -update-templates
+      - name: Run selected non-intrusive templates against production
+        run: |
+          set +e
+          nuclei \
+            -target https://nexora-core.nxora.workers.dev \
+            -tags misconfig,exposure,ssl,dns \
+            -exclude-tags dos,fuzz,intrusive,bruteforce,headless \
+            -severity info,low,medium,high,critical \
+            -rate-limit 2 -concurrency 2 -timeout 5 -retries 1 \
+            -jsonl-export nuclei-results.json
+          scan_status=$?
+          echo "Nuclei exit code: $scan_status"
+          if [ "$scan_status" -gt 1 ]; then exit "$scan_status"; fi
+      - name: Upload Nuclei findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-nuclei-results
+          path: nuclei-results.json
+          if-no-files-found: warn
+          retention-days: 14
