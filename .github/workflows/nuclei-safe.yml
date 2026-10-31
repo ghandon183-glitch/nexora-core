@@ -1,8 +1,6 @@
 name: Nuclei safe TLS baseline
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "43 5 * * 1"
