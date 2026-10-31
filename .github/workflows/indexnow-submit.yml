@@ -46,10 +46,20 @@ jobs:
               if parsed.scheme != "https" or parsed.netloc != host:
                   raise SystemExit(f"Refusing off-host sitemap URL: {sitemap_url}")
               seen_sitemaps.add(sitemap_url)
-              with urllib.request.urlopen(sitemap_url, timeout=20) as response:
-                  if response.status != 200:
-                      raise SystemExit(f"Sitemap returned HTTP {response.status}: {sitemap_url}")
-                  root = ET.fromstring(response.read())
+              request = urllib.request.Request(
+                  sitemap_url,
+                  headers={
+                      "User-Agent": "Mozilla/5.0 (compatible; NexoraIndexingAudit/1.0; +https://nexora-core.nxora.workers.dev/)",
+                      "Accept": "application/xml,text/xml,*/*",
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      if response.status != 200:
+                          raise SystemExit(f"Sitemap returned HTTP {response.status}: {sitemap_url}")
+                      root = ET.fromstring(response.read())
+              except Exception as exc:
+                  raise SystemExit(f"Could not read production sitemap {sitemap_url}: {exc}") from exc
 
               for node in root.iter():
                   if node.tag.rsplit("}", 1)[-1] != "loc" or not node.text:
