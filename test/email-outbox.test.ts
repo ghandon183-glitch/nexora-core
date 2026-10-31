@@ -163,4 +163,25 @@ describe("Email outbox", () => {
 
     assert.equal(claim, null);
   });
+
+test("permanently failing email reaches the retry cap and is excluded from future runs", async () => {
+    const order = await confirmedOrder(db);
+    testState.mailerFailuresRemaining = 20;
+
+    for (let attempt = 1; attempt <= 6; attempt += 1) {
+      db.database.prepare("UPDATE email_outbox SET next_attempt_at = 0 WHERE order_id = ?").run(order.id);
+      const result = await processEmailOutbox(10);
+      assert.equal(result.failed, 2, `attempt ${attempt} should fail both messages`);
+    }
+
+    const terminalRows = readOutbox(db, order.id);
+    assert.equal(terminalRows.length, 2);
+    assert.ok(terminalRows.every((row) => row.attempts === 6));
+    assert.ok(terminalRows.every((row) => typeof row.dead_lettered_at === "number"));
+
+    const afterCap = await processEmailOutbox(10);
+    assert.deepEqual(afterCap, { claimed: 0, sent: 0, failed: 0 });
+    assert.equal(testState.mailerCalls.length, 12);
+  });
+
 });

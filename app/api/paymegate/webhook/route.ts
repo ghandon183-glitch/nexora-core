@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual, randomUUID } from "crypto";
 import { getOrderById, getOrderByPaymegateUuid, markPaymegateConfirmed } from "@/lib/orders/db";
+import { customerEmailMatches, sameUsdAmount } from "@/lib/orders/money";
 import { getEnv } from "@/lib/env";
 import { deliverConfirmedOrderEmails } from "@/lib/orders/email-delivery";
 
@@ -33,20 +34,6 @@ function verifySignature(rawBody: string, timestamp: string, signature: string, 
     const b = Buffer.from(expected);
     return a.length === b.length && timingSafeEqual(a, b);
   });
-}
-
-function sameMoney(amount: string, expected: number): boolean {
-  // USD checkout amounts have cent precision. Do not accept values such as
-  // "79.004" merely because floating-point rounding makes them display as 79.00.
-  if (typeof amount !== "string" || !/^(0|[1-9]\d*)(?:\.(\d{1,2}))?$/.test(amount)) {
-    return false;
-  }
-  const [whole, fraction = ""] = amount.split(".");
-  const actualCents = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
-  const expectedCents = Math.round(expected * 100);
-  return Number.isSafeInteger(actualCents) &&
-    Number.isSafeInteger(expectedCents) &&
-    actualCents === expectedCents;
 }
 
 export async function POST(request: Request) {
@@ -92,7 +79,7 @@ export async function POST(request: Request) {
     if (
       (event.externalId && event.externalId !== order.id) ||
       (order.paymegate_order_uuid && order.paymegate_order_uuid !== event.orderUUID) ||
-      !sameMoney(event.amount, order.base_price_usd) ||
+      !sameUsdAmount(event.amount, order.base_price_usd) ||
       event.currency !== "USD"
     ) {
       console.warn("[paymegate/webhook] Order mismatch:", {
@@ -103,7 +90,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Order mismatch" }, { status: 409 });
     }
 
-    if (event.customerEmail && event.customerEmail.toLowerCase() !== order.buyer_email.toLowerCase()) {
+    if (!customerEmailMatches(event.customerEmail, order.buyer_email)) {
       return NextResponse.json({ ok: false, error: "Customer mismatch" }, { status: 409 });
     }
 

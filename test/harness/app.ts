@@ -28,6 +28,7 @@ export interface OutboxRow {
   locked_at: number | null;
   sent_at: number | null;
   last_error: string | null;
+  dead_lettered_at: number | null;
 }
 
 /** Fresh migrated in-memory database plus a deterministic environment. */

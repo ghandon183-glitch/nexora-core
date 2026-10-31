@@ -10,11 +10,18 @@ npx wrangler d1 create nexora-orders
 
 خروجی این دستور یه `database_id` بهت می‌ده. اون رو کپی کن و جای `REPLACE_WITH_YOUR_D1_DATABASE_ID` تو فایل `wrangler.jsonc` بذار.
 
-## ۲. اجرای مایگریشن (ساخت جدول orders)
+## ۲. اجرای مایگریشن‌ها (همه فایل‌ها، به ترتیب)
+
+همه فایل‌های پوشه `migrations/` لازم‌اند (جدول `orders`، تأیید ایمیل،
+ستون‌های Paymegate، وضعیت ارسال ایمیل و جدول `email_outbox`).
 
 ```bash
-npx wrangler d1 execute nexora-orders --remote --file=./migrations/0001_orders.sql
+npx wrangler d1 migrations apply nexora-orders --remote
 ```
+
+ترتیب کامل و دستورهای بررسی وضعیت واقعی Production در
+[`migrations/README.md`](../migrations/README.md) آمده است. وجود فایل SQL در
+GitHub ثابت نمی‌کند که همان مایگریشن روی D1 اجرا شده است.
 
 ## ۳. اضافه‌کردن Secret ها به GitHub Actions
 

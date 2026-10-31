@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
@@ -16,6 +16,22 @@ export default function ProductGallery({
 }: ProductGalleryProps) {
   const t = useTranslations("ProductDetail");
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLightboxOpen(false);
+      if (event.key === "ArrowLeft") {
+        setActiveImage((current) => current === 0 ? images.length - 1 : current - 1);
+      }
+      if (event.key === "ArrowRight") {
+        setActiveImage((current) => current === images.length - 1 ? 0 : current + 1);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [lightboxOpen, images.length]);
 
   const previous = () => {
     setActiveImage((prev) =>
@@ -52,12 +68,17 @@ export default function ProductGallery({
           </div>
 
           <button
+            type="button"
+            aria-label={`Expand preview image ${activeImage + 1} of ${images.length}`}
+            onClick={() => setLightboxOpen(true)}
             className="absolute right-6 top-6 rounded-full bg-black/60 p-3 text-white backdrop-blur transition hover:bg-cyan-500"
           >
             <Expand size={20} />
           </button>
 
           <button
+            type="button"
+            aria-label="Previous preview image"
             onClick={previous}
             className="absolute left-5 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-3 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 hover:bg-cyan-500"
           >
@@ -65,6 +86,8 @@ export default function ProductGallery({
           </button>
 
           <button
+            type="button"
+            aria-label="Next preview image"
             onClick={next}
             className="absolute right-5 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-3 text-white opacity-0 backdrop-blur transition group-hover:opacity-100 hover:bg-cyan-500"
           >
@@ -75,6 +98,63 @@ export default function ProductGallery({
 
       </Card>
 
+      {lightboxOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Full-size template preview"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            aria-label="Close full-size preview"
+            onClick={() => setLightboxOpen(false)}
+            className="absolute right-5 top-5 z-10 rounded-full bg-white/10 px-4 py-2 text-2xl text-white hover:bg-white/20"
+          >
+            ×
+          </button>
+          {images.length > 1 && (
+            <button
+              type="button"
+              aria-label="Previous preview image"
+              onClick={(event) => {
+                event.stopPropagation();
+                previous();
+              }}
+              className="absolute left-4 z-10 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
+            >
+              <ChevronLeft size={28} />
+            </button>
+          )}
+          <div
+            className="relative h-[80vh] w-full max-w-6xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Image
+              src={images[activeImage]}
+              alt={t("galleryAltMain")}
+              fill
+              sizes="100vw"
+              className="object-contain"
+            />
+          </div>
+          {images.length > 1 && (
+            <button
+              type="button"
+              aria-label="Next preview image"
+              onClick={(event) => {
+                event.stopPropagation();
+                next();
+              }}
+              className="absolute right-4 z-10 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
+            >
+              <ChevronRight size={28} />
+            </button>
+          )}
+        </div>
+      )}
+
       {images.length > 1 && (
         <div className="grid grid-cols-4 gap-5">
 
@@ -82,6 +162,9 @@ export default function ProductGallery({
 
           <button
             key={index}
+            type="button"
+            aria-label={`Show preview image ${index + 1}`}
+            aria-pressed={activeImage === index}
             onClick={() => setActiveImage(index)}
             className={`group relative overflow-hidden rounded-2xl border transition duration-300 ${
               activeImage === index

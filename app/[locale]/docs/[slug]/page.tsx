@@ -27,7 +27,7 @@ export async function generateMetadata({
   const { locale, slug } = await params;
   const template = getTemplate(slug);
 
-  if (!template || !routing.locales.includes(locale as Locale)) {
+  if (!template || template.hidden || !routing.locales.includes(locale as Locale)) {
     return {
       title: "Documentation not found",
       robots: { index: false, follow: false },
@@ -60,7 +60,7 @@ export default async function TemplateDocsPage({
   const template = getTemplate(slug);
   const guide = getTemplateGuide(slug);
 
-  if (!template || !guide || !routing.locales.includes(locale as Locale)) {
+  if (!template || template.hidden || !guide || !routing.locales.includes(locale as Locale)) {
     notFound();
   }
 

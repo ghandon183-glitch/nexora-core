@@ -1,0 +1,58 @@
+name: Production D1 migration preflight (read-only)
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexora-d1-readonly-preflight
+  cancel-in-progress: true
+
+jobs:
+  inspect-production-schema:
+    name: Inspect remote D1 before deployment (no writes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: List migration state (read-only)
+        run: npx wrangler d1 migrations list nexora-orders --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Read production migration ledger and schema (read-only)
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          run_sql() {
+            local label="$1"
+            local sql="$2"
+            echo "::group::$label"
+            npx wrangler d1 execute nexora-orders --remote --command "$sql"
+            echo "::endgroup::"
+          }
+
+          run_sql "Applied migration ledger" "SELECT name FROM d1_migrations ORDER BY id"
+          run_sql "Order columns used by card and email flows" "SELECT name FROM pragma_table_info('orders') WHERE name IN ('payment_provider','paymegate_order_uuid','paymegate_transaction_uuid','paymegate_transaction_ref','paymegate_event_id','owner_email_status','customer_email_status','owner_email_claimed_at','customer_email_claimed_at','email_last_error') ORDER BY name"
+          run_sql "Email outbox schema and dead-letter marker" "SELECT name FROM pragma_table_info('email_outbox') ORDER BY cid"
+          run_sql "Relevant index state" "SELECT type, name, tbl_name FROM sqlite_master WHERE name IN ('idx_orders_pending_crypto_pay_amount','idx_orders_pending_currency_pay_amount','idx_orders_paymegate_order_uuid','idx_orders_paymegate_event_id','idx_email_outbox_due','idx_email_outbox_order') ORDER BY name"
+          run_sql "Potential duplicate active crypto quotes (must return zero rows)" "SELECT currency, pay_amount, COUNT(*) AS n FROM orders WHERE status = 'pending' AND payment_provider = 'crypto' GROUP BY currency, pay_amount HAVING COUNT(*) > 1"
+      - name: State explicit safety boundary
+        run: |
+          echo "This workflow is read-only. It does not apply migrations, update orders, or deploy a Worker."
+          echo "Review the output for migration 0008, email_outbox.dead_lettered_at, and duplicate active crypto quotes before merging."

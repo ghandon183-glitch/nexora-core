@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale, slug } = await params;
   const template = getTemplate(slug);
 
-  if (!template || !routing.locales.includes(locale as Locale)) {
+  if (!template || template.hidden || !routing.locales.includes(locale as Locale)) {
     return {
       title: "Template not found",
       robots: { index: false, follow: false },
@@ -78,7 +78,7 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
   const template = getTemplate(slug);
   const guide = getTemplateGuide(slug);
 
-  if (!template || !guide) notFound();
+  if (!template || template.hidden || !guide) notFound();
 
   const env = await getEnv();
   const siteUrl = env.SITE_URL || FALLBACK_SITE_URL;

@@ -12,6 +12,7 @@ import {
 } from "@/lib/orders/db";
 import { checkPayment } from "@/lib/orders/verify";
 import { getPaymegateOrderStatus } from "@/lib/orders/paymegate";
+import { customerEmailMatches, sameUsdAmount } from "@/lib/orders/money";
 import { getEnv } from "@/lib/env";
 import {
   deliverConfirmedOrderEmails,
@@ -174,12 +175,15 @@ export async function POST(request: Request) {
 
         if (status === "PAID" || status === "CONFIRMED" || status === "COMPLETED") {
           // The polling fallback must enforce the same reconciliation invariants
-          // as the signed webhook before it can fulfill a local order.
+          // as the signed webhook before it can fulfill a local order. The order
+          // is already bound to this provider order by its UUID, so a provider
+          // response that omits the customer email or formats the amount as
+          // "49.0" must not leave a genuinely paid order unfulfilled forever.
           if (
-            provider.externalId !== order.id ||
-            provider.amount !== order.base_price_usd.toFixed(2) ||
+            (provider.externalId !== null && provider.externalId !== order.id) ||
+            !sameUsdAmount(provider.amount, order.base_price_usd) ||
             provider.currency !== "USD" ||
-            provider.customerEmail !== order.buyer_email.toLowerCase()
+            !customerEmailMatches(provider.customerEmail, order.buyer_email)
           ) {
             throw new Error("Paymegate paid order failed local amount/currency/customer correlation");
           }
