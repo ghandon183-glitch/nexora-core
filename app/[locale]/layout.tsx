@@ -96,16 +96,28 @@ export default async function RootLayout({
         {env.GA_MEASUREMENT_ID ? (
           <>
             <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(env.GA_MEASUREMENT_ID)}`}
-            />
-            <script
               dangerouslySetInnerHTML={{
                 __html: `
                   window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
+                  function gtag(){window.dataLayer.push(arguments);}
                   gtag('js', new Date());
                   gtag('config', '${env.GA_MEASUREMENT_ID}', { anonymize_ip: true });
+                  (function () {
+                    var loaded = false;
+                    function loadAnalytics() {
+                      if (loaded) return;
+                      loaded = true;
+                      var script = document.createElement('script');
+                      script.async = true;
+                      script.src = 'https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(env.GA_MEASUREMENT_ID)}';
+                      document.head.appendChild(script);
+                    }
+                    window.addEventListener('pointerdown', loadAnalytics, { once: true, passive: true });
+                    window.addEventListener('keydown', loadAnalytics, { once: true });
+                    window.addEventListener('load', function () {
+                      window.setTimeout(loadAnalytics, 4000);
+                    }, { once: true });
+                  })();
                 `,
               }}
             />
