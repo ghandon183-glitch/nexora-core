@@ -31,7 +31,8 @@ export default function HeroOptimized() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let vScroll = reduced ? MAX_SCROLL : 0;
     let returnedToTop = window.scrollY <= 2;
-    let returnTopStart = performance.now();
+    // Wake the animation only when an interaction or phase transition needs it.
+    let wakeAnimation: () => void = () => {};
     let mouseTarget = 0;
     let last = performance.now();
     let width = hero.clientWidth;
@@ -47,7 +48,6 @@ export default function HeroOptimized() {
     const onScroll = () => {
       const y = window.scrollY;
       if (y <= 2) {
-        if (!returnedToTop) returnTopStart = performance.now();
         returnedToTop = true;
         vScroll = 600;
         rotation.v = 0;
@@ -56,10 +56,12 @@ export default function HeroOptimized() {
         returnedToTop = false;
         vScroll = clamp(y * 3.75, 0, MAX_SCROLL);
       }
+      wakeAnimation();
     };
     const onMouseMove = (e: MouseEvent) => {
       const r = hero.getBoundingClientRect();
       mouseTarget = ((e.clientX - r.left) / r.width) * 2 - 1;
+      wakeAnimation();
     };
     const resize = () => { width = hero.clientWidth; height = hero.clientHeight; };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -76,19 +78,20 @@ export default function HeroOptimized() {
     const content = hero.querySelector<HTMLElement>("[data-hero-content]");
 
     cards.forEach((c) => {
-      c.el.addEventListener("pointerenter", () => { c.hover = true; });
-      c.el.addEventListener("pointerleave", () => { c.hover = false; });
+      c.el.addEventListener("pointerenter", () => { c.hover = true; wakeAnimation(); });
+      c.el.addEventListener("pointerleave", () => { c.hover = false; wakeAnimation(); });
     });
 
     let raf = 0;
     const frame = (now: number) => {
+      raf = 0;
       const dt = clamp((now - last) / 1000, 0, 1 / 30);
       last = now;
       const W = width, H = height, mobile = W < 768, minDim = Math.min(W, H);
       const mt = clamp(vScroll / 600, 0, 1);
-      // Reduced-motion users get a static arrangement, not an ever-accumulating idle spin.
-      const idle = !reduced && returnedToTop && window.scrollY <= 2 ? ((now - returnTopStart) / 1000) * 14 : 0;
-      const rt = returnedToTop && window.scrollY <= 2 ? idle : clamp((vScroll - 600) / 2400, 0, 1) * 360;
+      // Keep the hero still at the top instead of continuously spinning in the idle state.
+      // Scroll and pointer interactions wake the animation when movement is meaningful.
+      const rt = returnedToTop && window.scrollY <= 2 ? 0 : clamp((vScroll - 600) / 2400, 0, 1) * 360;
       if (reduced) {
         morph.v = mt; rotation.v = rt; mouse.v = mouseTarget * 100;
       } else {
@@ -139,17 +142,29 @@ export default function HeroOptimized() {
       if (title) { title.style.opacity = String(introOp); title.style.filter = `blur(${clamp(10 - introOp * 10, 0, 10)}px)`; }
       if (hint) hint.style.opacity = String(introOp * .5);
       if (content) content.style.opacity = returnedToTop ? "1" : String(clamp((m - .8) / .2, 0, 1));
-      // Reduced-motion: paint this single static frame and stop — never reschedule.
+      // Stop scheduling frames once the entrance/interaction animation settles.
+      // This avoids an idle requestAnimationFrame loop consuming CPU on the homepage.
       if (reduced) return;
-      // Otherwise keep looping only while the hero is actually visible.
-      if (visible && tabVisible) raf = requestAnimationFrame(frame);
+      const moving = phase !== "circle"
+        || Math.abs(morph.v - mt) > 0.01
+        || Math.abs(rotation.v - rt) > 0.1
+        || Math.abs(mouse.v - mouseTarget * 100) > 0.5
+        || cards.some((c) =>
+          Math.abs(c.x.vel) > 0.05 || Math.abs(c.y.vel) > 0.05
+          || Math.abs(c.r.vel) > 0.05 || Math.abs(c.sc.vel) > 0.01
+          || Math.abs(c.o.vel) > 0.01
+          || Math.abs(c.ry.v - (c.hover ? 180 : 0)) > 0.5
+          || Math.abs(c.ry.vel) > 0.5
+        );
+      if (visible && tabVisible && moving) raf = requestAnimationFrame(frame);
     };
 
     const startLoop = () => {
-      if (raf) return;
+      if (raf || reduced || !visible || !tabVisible) return;
       last = performance.now();
       raf = requestAnimationFrame(frame);
     };
+    wakeAnimation = startLoop;
     const stopLoop = () => {
       if (!raf) return;
       cancelAnimationFrame(raf);
