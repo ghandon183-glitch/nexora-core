@@ -58,3 +58,37 @@ jobs:
             test-results/
           if-no-files-found: warn
           retention-days: 14
+
+  production-smoke:
+    if: github.event_name != 'pull_request'
+    name: Read-only production browser smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_BASE_URL: https://nexora-core.nxora.workers.dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright and Chromium on the GitHub runner
+        run: |
+          npm install --no-save --package-lock=false @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Check live production routes, checkout guard and protected download denial
+        run: npx playwright test
+      - name: Upload production Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-production-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14

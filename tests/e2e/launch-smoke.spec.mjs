@@ -39,3 +39,62 @@ test("product gallery controls have accessible names and expand the preview", as
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog", { name: /full-size template preview/i })).toHaveCount(0);
 });
+
+
+test("product purchase CTA points to the localized checkout", async ({ page }) => {
+  await page.goto("/en/templates/aether", { waitUntil: "domcontentloaded" });
+  const purchaseLink = page.locator('a[href="/en/checkout/aether"]');
+  await expect(purchaseLink).toBeVisible();
+});
+
+test("checkout requires authentication before payment can start", async ({ page }) => {
+  await page.goto("/en/checkout/aether", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/en\/sign-in/);
+  expect(page.url()).toContain("next=");
+});
+
+for (const route of ["/en/privacy", "/en/terms", "/en/license", "/en/refunds", "/en/faq", "/en/support"]) {
+  test(`legal/support page is publicly reachable: ${route}`, async ({ page }) => {
+    const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+    expect(response, `No document response for ${route}`).not.toBeNull();
+    expect(response.status(), `HTTP status for ${route}`).toBe(200);
+    await expect(page.locator("body")).not.toBeEmpty();
+  });
+}
+
+test("invalid download tokens are denied without caching", async ({ request }) => {
+  const response = await request.get("/api/download/not-a-uuid");
+  expect(response.status()).toBe(404);
+  expect(response.headers()["cache-control"]).toBe("no-store");
+});
+
+test("robots and sitemap are publicly available", async ({ request }) => {
+  const robots = await request.get("/robots.txt");
+  expect(robots.status()).toBe(200);
+  expect(await robots.text()).toContain("Sitemap:");
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.status()).toBe(200);
+  expect(await sitemap.text()).toContain("/en/templates/aether");
+});
+
+
+test("homepage sends the baseline CSP and required scripts do not violate it", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__cspViolations = [];
+    document.addEventListener("securitypolicyviolation", (event) => {
+      window.__cspViolations?.push(
+        `${event.violatedDirective}: ${event.blockedURI}`,
+      );
+    });
+  });
+  const response = await page.goto("/en", { waitUntil: "domcontentloaded" });
+  expect(response).not.toBeNull();
+  const csp = response.headers()["content-security-policy"];
+  expect(csp).toContain("object-src 'none'");
+  expect(csp).toContain("frame-ancestors 'none'");
+  await page.waitForTimeout(1500);
+  const violations = await page.evaluate(
+    () => window.__cspViolations ?? [],
+  );
+  expect(violations).toEqual([]);
+});
