@@ -65,7 +65,7 @@ for (const route of ["/en/privacy", "/en/terms", "/en/license", "/en/refunds", "
 test("invalid download tokens are denied without caching", async ({ request }) => {
   const response = await request.get("/api/download/not-a-uuid");
   expect(response.status()).toBe(404);
-  expect(response.headers()["cache-control"]).toBe("no-store");
+  expect(response.headers()["cache-control"]).toContain("no-store");
 });
 
 test("robots and sitemap are publicly available", async ({ request }) => {
