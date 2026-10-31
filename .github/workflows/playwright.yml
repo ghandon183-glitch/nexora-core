@@ -3,6 +3,10 @@ name: Playwright launch smoke tests
 on:
   pull_request:
     branches: [main]
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "37 5 * * 1"
@@ -33,6 +37,9 @@ jobs:
           npm install --no-save --package-lock=false @playwright/test
           npx playwright install --with-deps chromium
       - name: Build application
+        env:
+          SITE_URL: http://127.0.0.1:3000
+          GA_MEASUREMENT_ID: G-TEST000000
         run: npm run build
       - name: Start production build
         run: |
@@ -48,6 +55,26 @@ jobs:
           exit 1
       - name: Run browser smoke tests
         run: npx playwright test
+      - name: Collect local Lighthouse homepage report on pull requests
+        if: github.event_name == 'pull_request'
+        env:
+          npm_config_fetch_retries: 5
+          npm_config_fetch_retry_mintimeout: 20000
+          npm_config_fetch_retry_maxtimeout: 120000
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if npx --yes @lhci/cli@0.15.1 collect \
+              --url=http://127.0.0.1:3000/en \
+              --numberOfRuns=1 \
+              --settings.chromeFlags="--no-sandbox --headless=new"; then
+              exit 0
+            fi
+            echo "Local Lighthouse failed (attempt $attempt/3); retrying."
+            sleep $((attempt * 10))
+          done
+          echo "Local Lighthouse failed after three attempts." >&2
+          exit 1
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,11 +83,13 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            .lighthouseci/
           if-no-files-found: warn
           retention-days: 14
+          include-hidden-files: true
 
   production-smoke:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     name: Read-only production browser smoke tests
     runs-on: ubuntu-latest
     timeout-minutes: 15

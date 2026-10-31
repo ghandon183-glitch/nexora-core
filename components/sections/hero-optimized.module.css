@@ -1,0 +1,251 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #180f05;
+  color: #f6efe1;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(115% 90% at 50% 50%, transparent 45%, rgba(8, 4, 0, 0.68) 100%);
+}
+
+.glow {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 38% at 50% 45%, rgba(201, 154, 82, 0.17), transparent 70%),
+    radial-gradient(30% 26% at 82% 86%, rgba(140, 92, 36, 0.13), transparent 70%);
+}
+
+.ghost {
+  position: absolute;
+  left: -2vw;
+  bottom: -4vw;
+  z-index: 0;
+  font: 300 italic clamp(120px, 22vw, 340px) / 1 Georgia, serif;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(246, 239, 225, 0.05);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.card {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 1;
+  width: 60px;
+  height: 85px;
+  text-decoration: none;
+  perspective: 1000px;
+  pointer-events: none;
+  opacity: 0.68;
+  transform: translate(-50%, -50%) rotate(var(--rotation));
+}
+
+.cardInner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 12px;
+  backface-visibility: hidden;
+}
+
+.front {
+  background: #241708;
+  border: 1px solid rgba(246, 239, 225, 0.18);
+  box-shadow: 0 10px 15px -3px rgba(5, 3, 0, 0.5);
+}
+
+.front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 5, 0, 0.12);
+  pointer-events: none;
+}
+
+.back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  text-align: center;
+  color: #f6efe1;
+  background: #1e1408;
+  border: 1px solid rgba(217, 176, 108, 0.4);
+  transform: rotateY(180deg);
+}
+
+.back small {
+  font: 500 6px / 1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #d9b06c;
+  text-transform: uppercase;
+}
+
+.back b {
+  margin-top: 5px;
+  font: 600 9px / 1 Georgia, serif;
+}
+
+.back em {
+  margin-top: 5px;
+  font: 500 8.5px / 1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #d9b06c;
+  font-style: normal;
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: clamp(84px, 10%, 140px) 20px 24px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.eyebrow {
+  color: #d9b06c;
+  font: 500 11px / 1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.34em;
+}
+
+.content h1 {
+  margin: 16px 0 0;
+  color: #f6efe1;
+  font: 400 clamp(2rem, 4.5vw, 3.4rem) / 1.12 Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.content h1 em {
+  color: #d9b06c;
+  font-style: italic;
+}
+
+.content p {
+  max-width: 560px;
+  margin: 16px 0 0;
+  color: #b6a888;
+  font: 400 14.5px / 1.75 ui-sans-serif, system-ui, sans-serif;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 26px;
+  pointer-events: auto;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 15px 28px;
+  font: 600 14px / 1 ui-sans-serif, system-ui, sans-serif;
+  text-decoration: none;
+  transition: background 220ms ease, border-color 220ms ease, transform 220ms ease;
+}
+
+.primaryButton {
+  color: #1b1002;
+  background: #b98a45;
+}
+
+.primaryButton:hover {
+  background: #d9b06c;
+  transform: translateY(-2px);
+}
+
+.secondaryButton {
+  color: #f6efe1;
+  background: transparent;
+  border-color: rgba(246, 239, 225, 0.3);
+}
+
+.secondaryButton:hover {
+  background: rgba(246, 239, 225, 0.07);
+  border-color: rgba(246, 239, 225, 0.6);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px) {
+  .card {
+    width: 48px;
+    height: 68px;
+    opacity: 0.58;
+  }
+
+  .content {
+    padding-inline: 18px;
+  }
+
+  .content p {
+    font-size: 13px;
+  }
+
+  .actions {
+    width: min(360px, 100%);
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .secondaryButton {
+    transition: none;
+  }
+}
