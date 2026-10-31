@@ -80,9 +80,9 @@ test("robots and sitemap are publicly available", async ({ request }) => {
 
 test("homepage sends the baseline CSP and required scripts do not violate it", async ({ page }) => {
   await page.addInitScript(() => {
-    (window as Window & { __cspViolations?: string[] }).__cspViolations = [];
+    window.__cspViolations = [];
     document.addEventListener("securitypolicyviolation", (event) => {
-      (window as Window & { __cspViolations?: string[] }).__cspViolations?.push(
+      window.__cspViolations?.push(
         `${event.violatedDirective}: ${event.blockedURI}`,
       );
     });
@@ -94,7 +94,7 @@ test("homepage sends the baseline CSP and required scripts do not violate it", a
   expect(csp).toContain("frame-ancestors 'none'");
   await page.waitForTimeout(1500);
   const violations = await page.evaluate(
-    () => (window as Window & { __cspViolations?: string[] }).__cspViolations ?? [],
+    () => window.__cspViolations ?? [],
   );
   expect(violations).toEqual([]);
 });
