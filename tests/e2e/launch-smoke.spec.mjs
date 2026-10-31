@@ -76,3 +76,25 @@ test("robots and sitemap are publicly available", async ({ request }) => {
   expect(sitemap.status()).toBe(200);
   expect(await sitemap.text()).toContain("/en/templates/aether");
 });
+
+
+test("homepage sends the baseline CSP and required scripts do not violate it", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as Window & { __cspViolations?: string[] }).__cspViolations = [];
+    document.addEventListener("securitypolicyviolation", (event) => {
+      (window as Window & { __cspViolations?: string[] }).__cspViolations?.push(
+        `${event.violatedDirective}: ${event.blockedURI}`,
+      );
+    });
+  });
+  const response = await page.goto("/en", { waitUntil: "domcontentloaded" });
+  expect(response).not.toBeNull();
+  const csp = response.headers()["content-security-policy"];
+  expect(csp).toContain("object-src 'none'");
+  expect(csp).toContain("frame-ancestors 'none'");
+  await page.waitForTimeout(1500);
+  const violations = await page.evaluate(
+    () => (window as Window & { __cspViolations?: string[] }).__cspViolations ?? [],
+  );
+  expect(violations).toEqual([]);
+});
