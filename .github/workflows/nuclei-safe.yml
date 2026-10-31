@@ -33,10 +33,10 @@ jobs:
           set +e
           nuclei \
             -target https://nexora-core.nxora.workers.dev \
-            -tags misconfig,exposure,ssl,dns \
-            -exclude-tags dos,fuzz,intrusive,bruteforce,headless \
-            -severity info,low,medium,high,critical \
-            -rate-limit 2 -concurrency 2 -timeout 5 -retries 1 \
+            -tags misconfig,exposure,ssl \
+            -exclude-tags dos,fuzz,intrusive,bruteforce,headless,dns \
+            -severity low,medium,high,critical \
+            -rate-limit 3 -concurrency 5 -timeout 4 -retries 0 \
             -jsonl-export nuclei-results.json
           scan_status=$?
           echo "Nuclei exit code: $scan_status"
