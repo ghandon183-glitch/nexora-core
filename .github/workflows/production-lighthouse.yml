@@ -1,6 +1,10 @@
 name: Production launch audit (Lighthouse)
 
 on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "53 5 * * 1"
@@ -14,6 +18,7 @@ concurrency:
 
 jobs:
   lighthouse:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     name: Public-page performance, accessibility and SEO
     runs-on: ubuntu-latest
     timeout-minutes: 20
