@@ -71,7 +71,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <Link href="/sign-in" className="rounded-xl border border-[#d9b06c]/15 px-4 py-2 text-sm text-[#f6efe1] transition hover:border-[#d9b06c]/40 hover:bg-[#2b1b0d]">{t("login")}</Link>
-            <Link href="/sign-up" className="rounded-xl bg-[#c79a57] px-5 py-2 text-sm font-semibold text-[#1a0e03] shadow-[0_8px_24px_rgba(199,154,87,.16)] transition hover:bg-[#e0b76e] hover:scale-[1.03]">{t("getStarted")}</Link>
+            <Link href="/sign-up" style={{ color: "#1a0e03" }} className="rounded-xl bg-[#c79a57] px-5 py-2 text-sm font-semibold text-[#1a0e03] shadow-[0_8px_24px_rgba(199,154,87,.16)] transition hover:bg-[#e0b76e] hover:scale-[1.03]">{t("getStarted")}</Link>
           </div>
         )}
       </div>
