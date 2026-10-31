@@ -40,7 +40,7 @@ export default async function HeroOptimized() {
             </Link>
           </div>
         </div>
-        <div className={styles.stage} aria-label="Featured template previews">
+        <div className={styles.stage} aria-hidden="true">
           {items.map((template, index) => {
             const position = CARD_POSITIONS[index];
             const style = {
@@ -50,18 +50,12 @@ export default async function HeroOptimized() {
             } as CSSProperties;
 
             return (
-              <Link
-                key={template.slug}
-                href={`/templates/${template.slug}`}
-                className={styles.card}
-                style={style}
-                aria-label={`${template.title} — $${template.price}`}
-              >
+              <div key={template.slug} className={styles.card} style={style}>
                 <span className={styles.cardInner}>
                   <span className={`${styles.face} ${styles.front}`}>
                     <Image
                       src={template.image}
-                      alt={`${template.title} template preview`}
+                      alt=""
                       width={128}
                       height={184}
                       sizes="60px"
@@ -70,13 +64,13 @@ export default async function HeroOptimized() {
                     />
                     <span className={styles.shade} />
                   </span>
-                  <span className={`${styles.face} ${styles.back}`}>
+                  <span className={`${styles.face} ${styles.back}`} aria-hidden="true">
                     <small>{template.category}</small>
                     <b>{template.title}</b>
                     <em>${template.price}</em>
                   </span>
                 </span>
-              </Link>
+              </div>
             );
           })}
         </div>
