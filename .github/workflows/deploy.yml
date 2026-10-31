@@ -339,8 +339,9 @@ jobs:
           echo "AETHER dedicated Worker HTTP 200; image alt and asset checks passed"
 
           fetch_200 "$base/en" /tmp/nexora-home.html
-          grep -q 'template preview' /tmp/nexora-home.html
-          echo "Homepage template preview images have meaningful alt text"
+          grep -q 'NEXORA premium Next.js templates' /tmp/nexora-home.html
+          grep -q 'aria-hidden="true"' /tmp/nexora-home.html
+          echo "Homepage hero is present and its decorative gallery is hidden from assistive technology"
 
           fetch_200 "$base/demo/vesper/" /tmp/nexora-vesper-demo.html
           grep -q '<h1' /tmp/nexora-vesper-demo.html
