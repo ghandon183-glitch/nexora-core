@@ -43,3 +43,6 @@ jobs:
 
       - name: OpenNext Cloudflare Worker build
         run: npm run cf:build
+
+      - name: Validate payment reconciliation Cron Worker configuration
+        run: npx wrangler deploy --dry-run --config wrangler.payment-cron.jsonc
