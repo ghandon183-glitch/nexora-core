@@ -1,14 +1,11 @@
 name: Check pending payments
 
-# Triggers /api/cron/check-payments every five minutes. The endpoint is
-# protected by CRON_SECRET (x-cron-secret header).
-#
-# Required GitHub repository secrets:
+# Manual diagnostic fallback for payment reconciliation.
+# Automated five-minute reconciliation runs from the dedicated Cloudflare Cron Worker.
+# Required GitHub repository secrets for manual runs:
 #   CRON_SECRET — must match the Cloudflare Worker secret.
 #   SITE_URL    — deployed site origin, without a trailing slash.
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 jobs:
