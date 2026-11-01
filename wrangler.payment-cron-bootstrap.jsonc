@@ -3,7 +3,7 @@
   "name": "nexora-payment-cron",
   "main": "workers/payment-cron.ts",
   "compatibility_date": "2026-07-01",
-  "workers_dev": false,
+  "workers_dev": true,
   "observability": {
     "enabled": true,
     "logs": {
