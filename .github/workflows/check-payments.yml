@@ -1,11 +1,14 @@
 name: Check pending payments
 
-# Manual diagnostic fallback for payment reconciliation.
-# Automated five-minute reconciliation runs from the dedicated Cloudflare Cron Worker.
-# Required GitHub repository secrets for manual runs:
+# Cloudflare Cron Worker is the primary five-minute payment reconciler.
+# Keep a lower-frequency GitHub schedule as a fallback until the Cloudflare trigger
+# has been observed running reliably in production, plus manual diagnostics.
+# Required GitHub repository secrets:
 #   CRON_SECRET — must match the Cloudflare Worker secret.
 #   SITE_URL    — deployed site origin, without a trailing slash.
 on:
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_dispatch: {}
 
 jobs:
