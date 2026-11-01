@@ -29,8 +29,8 @@ import {
 const LATE_CRYPTO_GRACE_MS = 60 * 60 * 1000;
 
 /**
- * Polled every 5 minutes by GitHub Actions. The endpoint is protected by a
- * shared secret.
+ * Polled every 5 minutes by the dedicated Cloudflare Cron Worker. The endpoint
+ * is protected by a shared secret.
  *
  * Crypto orders use the blockchain verifier.
  * Paymegate orders are reconciled through the merchant API as a fallback to
