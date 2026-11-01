@@ -87,7 +87,9 @@ export default function CheckoutPage() {
   // address; the browser-only demo account must not be a purchase prerequisite.
   useEffect(() => {
     if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill checkout contact after the demo account hydrates from localStorage
     setBuyerNameInput((current) => current || user.name);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill checkout contact after the demo account hydrates from localStorage
     setEmailInput((current) => current || user.email);
   }, [user]);
 
@@ -103,7 +105,9 @@ export default function CheckoutPage() {
       const stored = window.sessionStorage.getItem(`nexora-checkout:${orderId}`);
       if (!stored) return;
       const contact = JSON.parse(stored) as { buyerName?: string; buyerEmail?: string };
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restore contact details after a same-tab provider redirect
       if (contact.buyerName) setBuyerNameInput(contact.buyerName);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restore contact details after a same-tab provider redirect
       if (contact.buyerEmail) setEmailInput(contact.buyerEmail);
     } catch {
       // Checkout status and server-side email delivery remain functional even
