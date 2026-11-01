@@ -66,6 +66,18 @@ function getLegacyDemoRedirect(pathname: string): string | null {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Next.js image optimization bypasses public/_headers and was the sole
+  // production route still missing HSTS in the passive ZAP report.
+  if (pathname === "/_next/image") {
+    const response = NextResponse.next();
+    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    response.headers.set("X-Frame-Options", "DENY");
+    response.headers.set("Cross-Origin-Resource-Policy", "same-site");
+    return response;
+  }
+
   const legacyRedirect = getLegacyDemoRedirect(pathname);
   if (legacyRedirect) {
     return NextResponse.redirect(new URL(legacyRedirect, request.url), 301);
@@ -89,5 +101,5 @@ export const config = {
   // are excluded by the dotted-path lookahead, EXCEPT `/downloads/*` which
   // we explicitly match so the deny rule above runs (requires
   // `assets.run_worker_first` in `wrangler.jsonc` to route them here).
-  matcher: ["/demo/aether/index.html", "/((?!api|_next|_vercel|.*\\..*).*)", "/downloads/:path*"],
+  matcher: ["/_next/image", "/demo/aether/index.html", "/((?!api|_next|_vercel|.*\\..*).*)", "/downloads/:path*"],
 };
