@@ -47,10 +47,11 @@ test("product purchase CTA points to the localized checkout", async ({ page }) =
   await expect(purchaseLink).toBeVisible();
 });
 
-test("checkout requires authentication before payment can start", async ({ page }) => {
+test("guest checkout is available and requires verified email before payment", async ({ page }) => {
   await page.goto("/en/checkout/aether", { waitUntil: "domcontentloaded" });
-  await expect(page).toHaveURL(/\/en\/sign-in/);
-  expect(page.url()).toContain("next=");
+  await expect(page).toHaveURL(/\/en\/checkout\/aether(?:\?.*)?$/);
+  await expect(page.locator("#checkout-buyer-name")).toBeVisible();
+  await expect(page.getByRole("button", { name: /send verification code/i })).toBeVisible();
 });
 
 for (const route of ["/en/privacy", "/en/terms", "/en/license", "/en/refunds", "/en/faq", "/en/support"]) {
