@@ -73,6 +73,7 @@ export default function CheckoutPage() {
   // so it has to be re-verified at checkout — the account email typed at
   // sign-up isn't trusted to be real or to belong to whoever's buying now.
   const [emailStep, setEmailStep] = useState<EmailStep>("entry");
+  const [buyerNameInput, setBuyerNameInput] = useState(user?.name ?? "");
   const [emailInput, setEmailInput] = useState(user?.email ?? "");
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [codeInput, setCodeInput] = useState("");
@@ -82,11 +83,33 @@ export default function CheckoutPage() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const purchaseTrackedRef = useRef(false);
 
+  // Checkout is available to guests. The verified buyer email is the delivery
+  // address; the browser-only demo account must not be a purchase prerequisite.
   useEffect(() => {
-    if (!loading && !user) {
-      router.push(`/sign-in?next=/checkout/${params.slug}`);
+    if (!user) return;
+    setBuyerNameInput((current) => current || user.name);
+    setEmailInput((current) => current || user.email);
+  }, [user]);
+
+  // PayMeGate returns to this page in the same tab. Restore the verified
+  // checkout contact from sessionStorage without exposing buyer data in the URL
+  // or in the public order-status endpoint.
+  useEffect(() => {
+    const provider = searchParams.get("payment");
+    const orderId = searchParams.get("order");
+    if (provider !== "paymegate" || !orderId) return;
+
+    try {
+      const stored = window.sessionStorage.getItem(`nexora-checkout:${orderId}`);
+      if (!stored) return;
+      const contact = JSON.parse(stored) as { buyerName?: string; buyerEmail?: string };
+      if (contact.buyerName) setBuyerNameInput(contact.buyerName);
+      if (contact.buyerEmail) setEmailInput(contact.buyerEmail);
+    } catch {
+      // Checkout status and server-side email delivery remain functional even
+      // if browser storage is unavailable or contains malformed data.
     }
-  }, [loading, user, router, params.slug]);
+  }, [searchParams]);
 
   // Poll order status every 8s while waiting for confirmation.
   useEffect(() => {
@@ -131,6 +154,14 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (order.paymentProvider === "paymegate") {
+      try {
+        window.sessionStorage.removeItem(`nexora-checkout:${order.id}`);
+      } catch {
+        // Ignore unavailable session storage.
+      }
+    }
+
     purchaseTrackedRef.current = true;
     trackAnalyticsEvent("purchase", {
       transaction_id: order.id,
@@ -173,7 +204,7 @@ export default function CheckoutPage() {
     };
   }, []);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#060B18]">
         <p className="text-slate-500">{t("loading")}</p>
@@ -276,17 +307,31 @@ export default function CheckoutPage() {
   }
 
   async function handlePaymegateCheckout() {
+    const buyerName = buyerNameInput.trim();
+    if (!buyerName) { setPaymegateError("Please enter your name."); return; }
     if (emailStep !== "verified" || !verificationId) { setVerifyError("Please verify your email first."); return; }
     setPaymegateCreating(true); setPaymegateError(null);
     try {
-      const res = await fetch("/api/paymegate/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ templateSlug: template!.slug, buyerName: user!.name, buyerEmail: emailInput.trim(), verificationId, locale: params.locale ?? "en" }) });
-      const data = (await res.json()) as { ok: boolean; error?: string; checkoutUrl?: string };
-      if (!data.ok || !data.checkoutUrl) { setPaymegateError(data.error || "Could not start card checkout. Please try again."); setPaymegateCreating(false); return; }
+      const res = await fetch("/api/paymegate/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ templateSlug: template!.slug, buyerName, buyerEmail: emailInput.trim(), verificationId, locale: params.locale ?? "en" }) });
+      const data = (await res.json()) as { ok: boolean; error?: string; checkoutUrl?: string; orderId?: string };
+      if (!data.ok || !data.checkoutUrl || !data.orderId) { setPaymegateError(data.error || "Could not start card checkout. Please try again."); setPaymegateCreating(false); return; }
+      try {
+        window.sessionStorage.setItem(`nexora-checkout:${data.orderId}`, JSON.stringify({ buyerName, buyerEmail: emailInput.trim() }));
+      } catch {
+        // The server still sends the receipt/download email if storage is blocked.
+      }
       window.location.href = data.checkoutUrl;
     } catch { setPaymegateError("Network error. Please try again."); setPaymegateCreating(false); }
   }
 
   async function handleCreateOrder() {
+    const buyerName = buyerNameInput.trim();
+    if (!buyerName) {
+      setErrorMessage("Please enter your name.");
+      setStatus("error");
+      return;
+    }
+
     if (emailStep !== "verified" || !verificationId) {
       setVerifyError("Please verify your email first.");
       return;
@@ -304,7 +349,7 @@ export default function CheckoutPage() {
           templateTitle: template!.title,
           basePriceUsd: template!.price,
           currency,
-          buyerName: user!.name,
+          buyerName,
           buyerEmail: emailInput.trim(),
           verificationId,
         }),
@@ -369,7 +414,21 @@ export default function CheckoutPage() {
               </div>
             ) : status === "idle" || status === "creating" || status === "error" ? (
               <div className="mt-6 space-y-6">
-                {emailStep !== "verified" ? (
+                <div className="space-y-2">
+              <label htmlFor="checkout-buyer-name" className="block text-sm text-slate-300">Full name</label>
+              <input
+                id="checkout-buyer-name"
+                type="text"
+                autoComplete="name"
+                maxLength={120}
+                value={buyerNameInput}
+                onChange={(event) => setBuyerNameInput(event.target.value)}
+                placeholder="Your name"
+                className="w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-cyan-400 focus:outline-none"
+              />
+            </div>
+
+            {emailStep !== "verified" ? (
                   <div className="space-y-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
