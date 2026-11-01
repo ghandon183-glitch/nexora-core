@@ -172,6 +172,25 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Deploy five-minute payment reconciliation Cron Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CRON_SECRET:-}" || { echo "CRON_SECRET GitHub secret is required" >&2; exit 1; }
+          test -n "${SITE_URL:-}" || { echo "SITE_URL GitHub secret is required" >&2; exit 1; }
+
+          # Bootstrap without changing existing triggers, then set secrets before
+          # enabling the new worker's first scheduled invocation.
+          npx wrangler deploy --config wrangler.payment-cron-bootstrap.jsonc
+          printf '%s' "$CRON_SECRET" | npx wrangler secret put CRON_SECRET --config wrangler.payment-cron-bootstrap.jsonc
+          printf '%s' "$SITE_URL" | npx wrangler secret put SITE_URL --config wrangler.payment-cron-bootstrap.jsonc
+          npx wrangler deploy --config wrangler.payment-cron.jsonc
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+
       - name: Check production Gmail OAuth secrets
         shell: bash
         run: |
