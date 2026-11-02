@@ -17,6 +17,10 @@ on:
       - "public/downloads/**"
       - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
+      - "lib/data/templates.ts"
+      - "lib/data/template-guides.ts"
+      - "components/product/purchase-card.tsx"
+      - "components/product/product-demo-video.tsx"
 
 concurrency:
   group: nexora-deep-template-quality-${{ github.ref }}
@@ -65,22 +69,6 @@ jobs:
                   archive.extractall(d)
           print('packages:', len(list(out.iterdir())))
           PY
-
-          mkdir -p .deep-audit/aether-lint-source
-          for file in \
-            components/motion/cursor.tsx \
-            components/motion/reveal.tsx \
-            components/site/footer.tsx \
-            components/site/hero.tsx \
-            components/site/projects.tsx \
-            components/site/studio.tsx \
-            components/webgl/hero-scene.tsx \
-            package.json package-lock.json pnpm-lock.yaml README.md LICENSE.md ASSET-LICENSES.md; do
-            if [ -f ".deep-audit/packages/aether/$file" ]; then
-              mkdir -p ".deep-audit/aether-lint-source/$(dirname "$file")"
-              cp ".deep-audit/packages/aether/$file" ".deep-audit/aether-lint-source/$file"
-            fi
-          done
 
           python3 - <<'PY'
           from pathlib import Path
@@ -254,7 +242,6 @@ jobs:
           path: |
             .deep-audit/REPORT.md
             .deep-audit/ARCHIVE_CONTENTS.md
-            .deep-audit/aether-lint-source/**
             .deep-audit/package-failures.txt
             .deep-audit/runtime-failures.txt
           retention-days: 30
