@@ -52,6 +52,9 @@ jobs:
                   if "next" not in manifest.get(section, {}):
                       raise SystemExit(f"{archive_name}: Next.js dependency not declared")
                   manifest[section]["next"] = "16.4.2"
+                  if archive_name == "aether.zip":
+                      manifest.setdefault("devDependencies", {})["eslint"] = "^9.39.5"
+                      manifest["devDependencies"]["eslint-config-next"] = "16.4.2"
                   manifests[0].write_text(json.dumps(manifest, indent=2) + "\n")
 
                   if archive_name == "aether.zip":
