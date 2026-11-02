@@ -88,14 +88,14 @@ jobs:
                   continue
               with zipfile.ZipFile(archive) as zf:
                   names = [n for n in zf.namelist() if not n.endswith("/")]
-                  readmes = [n for n in names if re.search(r"(^|/)readme(?:[^/]*)\\.(?:md|txt)$", n, re.I)]
-                  licenses = [n for n in names if re.search(r"(^|/)(?:license|licence)(?:[^/]*)\\.(?:md|txt|html)$", n, re.I)]
+                  readmes = [n for n in names if re.search(r"(^|/)readme(?:[^/]*)\.(?:md|txt)$", n, re.I)]
+                  licenses = [n for n in names if re.search(r"(^|/)(?:license|licence)(?:[^/]*)\.(?:md|txt|html)$", n, re.I)]
                   asset_manifests = [n for n in names if Path(n).name.lower() in ("asset-licenses.md", "third-party-licenses.md")]
                   package_paths = [n for n in names if Path(n).name.lower() == "package.json" and "node_modules/" not in n.lower()]
                   lockfiles = [n for n in names if Path(n).name.lower() in ("package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "bun.lock")]
                   env_examples = [n for n in names if Path(n).name.lower() in (".env.example", ".env.sample", ".env.template")]
                   docs = [n for n in names if re.search(r"(^|/)(docs?|documentation)(/|$)", n, re.I)]
-                  build_artifacts = [n for n in names if re.search(r"(^|/)(node_modules|\\.next|dist|build|out|\\.git)(/|$)", n, re.I)]
+                  build_artifacts = [n for n in names if re.search(r"(^|/)(node_modules|\.next|dist|build|out|\.git)(/|$)", n, re.I)]
                   packages = []
                   for p in package_paths[:10]:
                       try:
