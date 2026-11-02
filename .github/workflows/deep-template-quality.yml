@@ -65,6 +65,62 @@ jobs:
                   archive.extractall(d)
           print('packages:', len(list(out.iterdir())))
           PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, re, zipfile
+
+          root = Path("public/downloads")
+          out = Path(".deep-audit")
+          out.mkdir(parents=True, exist_ok=True)
+          lines = [
+              "# Shipped ZIP archive contents audit",
+              "",
+              "This report inspects the exact ZIP files checked out by this workflow run. A successful build does not prove third-party asset rights; that still needs human review.",
+              "",
+          ]
+          for archive in sorted(root.glob("*.zip")):
+              if archive.name.startswith("Nexora-All-Templates"):
+                  continue
+              with zipfile.ZipFile(archive) as zf:
+                  names = [n for n in zf.namelist() if not n.endswith("/")]
+                  readmes = [n for n in names if re.search(r"(^|/)readme(?:[^/]*)\.(?:md|txt)$", n, re.I)]
+                  licenses = [n for n in names if re.search(r"(^|/)(?:license|licence)(?:[^/]*)\.(?:md|txt|html)$", n, re.I)]
+                  asset_manifests = [n for n in names if Path(n).name.lower() in ("asset-licenses.md", "third-party-licenses.md")]
+                  package_paths = [n for n in names if Path(n).name.lower() == "package.json" and "node_modules/" not in n.lower()]
+                  lockfiles = [n for n in names if Path(n).name.lower() in ("package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "bun.lock")]
+                  env_examples = [n for n in names if Path(n).name.lower() in (".env.example", ".env.sample", ".env.template")]
+                  docs = [n for n in names if re.search(r"(^|/)(docs?|documentation)(/|$)", n, re.I)]
+                  build_artifacts = [n for n in names if re.search(r"(^|/)(node_modules|\.next|dist|build|out|\.git)(/|$)", n, re.I)]
+                  packages = []
+                  for p in package_paths[:10]:
+                      try:
+                          pkg = json.loads(zf.read(p).decode("utf-8"))
+                          packages.append((p, pkg))
+                      except Exception as e:
+                          packages.append((p, {"_parse_error": str(e)}))
+                  lines += [
+                      f"## {archive.name}",
+                      f"- SHA-256: {hashlib.sha256(archive.read_bytes()).hexdigest()}",
+                      f"- Size: {archive.stat().st_size:,} bytes",
+                      f"- Files: {len(names)}",
+                      f"- README: {'YES — ' + ', '.join(readmes[:5]) if readmes else 'NO'}",
+                      f"- License document: {'YES — ' + ', '.join(licenses[:5]) if licenses else 'NO'}",
+                      f"- Asset/third-party license manifest: {'YES — ' + ', '.join(asset_manifests[:5]) if asset_manifests else 'NO'}",
+                      f"- package.json: {'YES — ' + ', '.join(package_paths[:5]) if package_paths else 'NO (possibly a static package)'}",
+                      f"- Lockfile: {'YES — ' + ', '.join(lockfiles[:5]) if lockfiles else 'NO'}",
+                      f"- Environment example: {'YES — ' + ', '.join(env_examples[:5]) if env_examples else 'NO'}",
+                      f"- Documentation paths: {len(docs)}",
+                      f"- Bundled build/dependency artifacts: {len(build_artifacts)}",
+                  ]
+                  for p, pkg in packages:
+                      lines += [
+                          f"- Manifest {p}: name={pkg.get('name', 'UNKNOWN')}, version={pkg.get('version', 'UNSPECIFIED')}, next={pkg.get('dependencies', {}).get('next', pkg.get('devDependencies', {}).get('next', 'NOT DECLARED'))}, tailwind={pkg.get('dependencies', {}).get('tailwindcss', pkg.get('devDependencies', {}).get('tailwindcss', 'NOT DECLARED'))}",
+                          f"- Scripts: {json.dumps(pkg.get('scripts', {}), ensure_ascii=False)}",
+                      ]
+                  lines.append("")
+          (out / "ARCHIVE_CONTENTS.md").write_text("\n".join(lines), encoding="utf-8")
+          PY
       - name: Run package quality checks
         shell: bash
         run: |
@@ -181,6 +237,7 @@ jobs:
           name: nexora-deep-quality-audit-${{ github.run_id }}
           path: |
             .deep-audit/REPORT.md
+            .deep-audit/ARCHIVE_CONTENTS.md
             .deep-audit/package-failures.txt
             .deep-audit/runtime-failures.txt
           retention-days: 30
