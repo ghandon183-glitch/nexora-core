@@ -55,6 +55,13 @@ jobs:
                   if archive_name == "aether.zip":
                       manifest.setdefault("devDependencies", {})["eslint"] = "^9.39.5"
                       manifest["devDependencies"]["eslint-config-next"] = "16.4.2"
+                      eslint_config = (
+                          'import { defineConfig, globalIgnores } from "eslint/config";\\n'
+                          'import nextVitals from "eslint-config-next/core-web-vitals";\\n'
+                          'import nextTs from "eslint-config-next/typescript";\\n'
+                          'export default defineConfig([...nextVitals, ...nextTs, globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"])]);\\n'
+                      )
+                      (package_dir / "eslint.config.mjs").write_text(eslint_config)
                   manifests[0].write_text(json.dumps(manifest, indent=2) + "\n")
 
                   if archive_name == "aether.zip":
