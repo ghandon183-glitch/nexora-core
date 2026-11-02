@@ -126,9 +126,11 @@ def replace_source(root, relative, old, new):
     current = read_text(path)
     if not current:
         raise RuntimeError(f"Expected AETHER source file is missing or unreadable: {relative}")
-    if new in current:
+    if new and new in current:
         return
     if old not in current:
+        if not new:
+            return
         raise RuntimeError(f"Expected AETHER source snippet was not found in {relative}; refusing a silent partial patch.")
     path.write_text(current.replace(old, new, 1), encoding="utf-8")
 
