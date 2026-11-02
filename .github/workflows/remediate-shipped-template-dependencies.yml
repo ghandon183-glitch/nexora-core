@@ -108,7 +108,7 @@ jobs:
           PY
 
       - name: Create pull request with verified ZIP updates
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: automation/remediate-shipped-template-dependencies
