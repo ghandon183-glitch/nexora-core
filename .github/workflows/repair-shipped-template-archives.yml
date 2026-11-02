@@ -70,16 +70,16 @@ jobs:
                       cursor = package_dir / "components/motion/cursor.tsx"
                       if cursor.exists():
                           source = cursor.read_text()
-                          source = source.replace("    setEnabled(true)\\n", "    const enableFrame = requestAnimationFrame(() => setEnabled(true))\\n", 1)
-                          source = source.replace("      cancelAnimationFrame(raf)\\n", "      cancelAnimationFrame(raf)\\n      cancelAnimationFrame(enableFrame)\\n", 1)
+                          source = source.replace("    setEnabled(true)\n", "    const enableFrame = requestAnimationFrame(() => setEnabled(true))\n", 1)
+                          source = source.replace("      cancelAnimationFrame(raf)\n", "      cancelAnimationFrame(raf)\n      cancelAnimationFrame(enableFrame)\n", 1)
                           cursor.write_text(source)
 
                       reveal = package_dir / "components/motion/reveal.tsx"
                       if reveal.exists():
                           source = reveal.read_text()
                           source = source.replace(
-                              "const EASE = [0.16, 1, 0.3, 1] as const\\n",
-                              "const EASE = [0.16, 1, 0.3, 1] as const\\n\\nconst motionTags = {\\n  span: motion.span,\\n  h1: motion.h1,\\n  h2: motion.h2,\\n  h3: motion.h3,\\n  p: motion.p,\\n}\\n",
+                              "const EASE = [0.16, 1, 0.3, 1] as const\n",
+                              "const EASE = [0.16, 1, 0.3, 1] as const\n\nconst motionTags = {\n  span: motion.span,\n  h1: motion.h1,\n  h2: motion.h2,\n  h3: motion.h3,\n  p: motion.p,\n}\n",
                               1,
                           )
                           source = source.replace("const Comp = Tag as any", "const Comp = Tag")
@@ -91,31 +91,31 @@ jobs:
                           source = scene.read_text()
                           source = source.replace(
                               "function Core({ reducedMotion }: { reducedMotion: boolean }) {",
-                              "const sharedPointer = new THREE.Vector2(0, 0)\\nlet sharedScroll = 0\\n\\nfunction Core({ reducedMotion }: { reducedMotion: boolean }) {",
+                              "const sharedPointer = new THREE.Vector2(0, 0)\nlet sharedScroll = 0\n\nfunction Core({ reducedMotion }: { reducedMotion: boolean }) {",
                               1,
                           )
                           source = source.replace(
-                              "      )\\n      lastMove.current = performance.now()",
-                              "      )\\n      sharedPointer.copy(target.current)\\n      lastMove.current = performance.now()",
+                              "      )\n      lastMove.current = performance.now()",
+                              "      )\n      sharedPointer.copy(target.current)\n      lastMove.current = performance.now()",
                               1,
                           )
                           source = source.replace(
                               "      scroll = Math.min(window.scrollY / (window.innerHeight || 1), 1)",
-                              "      scroll = Math.min(window.scrollY / (window.innerHeight || 1), 1)\\n      sharedScroll = scroll",
+                              "      scroll = Math.min(window.scrollY / (window.innerHeight || 1), 1)\n      sharedScroll = scroll",
                               1,
                           )
-                          source = source.replace("    ;(Core as any)._pointer = () => pointer.current\\n", "")
-                          source = source.replace("    ;(Core as any)._scroll = () => scroll\\n", "")
+                          source = source.replace("    ;(Core as any)._pointer = () => pointer.current\n", "")
+                          source = source.replace("    ;(Core as any)._scroll = () => scroll\n", "")
                           source = source.replace(
                               "    pointer.current.lerp(target.current, 1 - Math.pow(0.0015, d))",
-                              "    pointer.current.lerp(target.current, 1 - Math.pow(0.0015, d))\\n    sharedPointer.copy(pointer.current)",
+                              "    pointer.current.lerp(target.current, 1 - Math.pow(0.0015, d))\n    sharedPointer.copy(pointer.current)",
                               1,
                           )
                           source = source.replace("    u.uScroll.value = (Core as any)._scroll ? (Core as any)._scroll() : 0", "    u.uScroll.value = sharedScroll")
                           source = source.replace("    const p = (Core as any)._pointer ? (Core as any)._pointer() : { x: 0, y: 0 }", "    const p = sharedPointer")
                           source = source.replace(
-                              "    const positions = new Float32Array(count * 3)\\n    const scales = new Float32Array(count)",
-                              "    const positions = new Float32Array(count * 3)\\n    const scales = new Float32Array(count)\\n    let seed = 0xA37E\\n    const random = () => {\\n      seed = (seed * 1664525 + 1013904223) >>> 0\\n      return seed / 4294967296\\n    }",
+                              "    const positions = new Float32Array(count * 3)\n    const scales = new Float32Array(count)",
+                              "    const positions = new Float32Array(count * 3)\n    const scales = new Float32Array(count)\n    let seed = 0xA37E\n    const random = () => {\n      seed = (seed * 1664525 + 1013904223) >>> 0\n      return seed / 4294967296\n    }",
                               1,
                           )
                           source = source.replace("Math.random()", "random()")
