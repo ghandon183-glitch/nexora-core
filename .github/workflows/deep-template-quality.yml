@@ -8,6 +8,10 @@ on:
       - "public/downloads/**"
       - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
+      - "lib/data/templates.ts"
+      - "lib/data/template-guides.ts"
+      - "components/product/purchase-card.tsx"
+      - "components/product/product-demo-video.tsx"
   pull_request:
     paths:
       - "public/downloads/**"
