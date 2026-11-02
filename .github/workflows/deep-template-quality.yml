@@ -124,6 +124,74 @@ jobs:
                       ]
                   lines.append("")
           (out / "ARCHIVE_CONTENTS.md").write_text("\n".join(lines), encoding="utf-8")
+          validation_errors = []
+          validation_lines = ["# Release package validation", "", "Checks the exact downloadable ZIPs in public/downloads.", ""]
+          required_docs = {"readme.md", ".env.example", "license.md", "updating.md"}
+          forbidden_env_names = {".env", ".env.local", ".env.production", ".env.development", ".env.test", ".env.staging"}
+          for archive in sorted(root.glob("*.zip")):
+              if archive.name.startswith("Nexora-All-Templates"):
+                  continue
+              with zipfile.ZipFile(archive) as zf:
+                  names = [n for n in zf.namelist() if not n.endswith("/")]
+                  basenames = {Path(n).name.lower() for n in names}
+                  missing = sorted(required_docs - basenames)
+                  for name in missing:
+                      validation_errors.append(f"{archive.name}: missing required {name}")
+                  for name in names:
+                      parts = {part.lower() for part in Path(name).parts}
+                      if "node_modules" in parts or ".next" in parts or ".git" in parts:
+                          validation_errors.append(f"{archive.name}: forbidden generated/dependency path {name}")
+                      if Path(name).name.lower() in forbidden_env_names:
+                          validation_errors.append(f"{archive.name}: secret environment file must not ship: {name}")
+                  manifests = [n for n in names if Path(n).name.lower() == "package.json"]
+                  for manifest_path in manifests:
+                      try:
+                          pkg = json.loads(zf.read(manifest_path).decode("utf-8"))
+                      except Exception as exc:
+                          validation_errors.append(f"{archive.name}: invalid package manifest {manifest_path}: {exc}")
+                          continue
+                      parent = Path(manifest_path).parent
+                      lock_path = str(parent / "package-lock.json") if str(parent) != "." else "package-lock.json"
+                      if lock_path not in names:
+                          validation_errors.append(f"{archive.name}: missing lockfile beside {manifest_path}")
+                      next_version = pkg.get("dependencies", {}).get("next", pkg.get("devDependencies", {}).get("next"))
+                      if next_version and next_version != "16.4.3":
+                          validation_errors.append(f"{archive.name}: Next.js must be 16.4.3, found {next_version}")
+                  if archive.name.lower() == "aether.zip":
+                      for manifest_path in manifests:
+                          try:
+                              pkg = json.loads(zf.read(manifest_path).decode("utf-8"))
+                          except Exception:
+                              continue
+                          deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+                          if "shadcn" in deps: validation_errors.append("aether.zip: vulnerable shadcn CLI still present")
+                          if "@vercel/analytics" in deps: validation_errors.append("aether.zip: Vercel analytics dependency still present")
+                      for suffix in ("app/layout.tsx", "components/webgl/hero-scene.tsx", "components/motion/reveal.tsx"):
+                          paths = [n for n in names if n.endswith(suffix)]
+                          if not paths:
+                              validation_errors.append(f"aether.zip: missing expected source file {suffix}")
+                              continue
+                          content = zf.read(paths[0]).decode("utf-8", errors="replace")
+                          if suffix == "app/layout.tsx" and ("@vercel/analytics" in content or "<Analytics" in content):
+                              validation_errors.append("aether.zip: Cloudflare-hosted package still imports Vercel Analytics")
+                          if suffix == "components/webgl/hero-scene.tsx" and ("as any" in content or "Math.random(" in content):
+                              validation_errors.append("aether.zip: WebGL scene still contains untyped any or impure random generation")
+                          if suffix == "components/motion/reveal.tsx" and "as any" in content:
+                              validation_errors.append("aether.zip: reveal component still contains explicit any")
+                      licenses = [n for n in names if Path(n).name.lower() == "license.md"]
+                      if licenses:
+                          license_text = zf.read(licenses[0]).decode("utf-8", errors="replace").lower()
+                          if "single end product commercial license" not in license_text or "one end product" not in license_text:
+                              validation_errors.append("aether.zip: package-level commercial license text is incomplete")
+              validation_lines.append(f"- {archive.name}: {archive.stat().st_size:,} bytes; SHA-256 {hashlib.sha256(archive.read_bytes()).hexdigest()}")
+          validation_lines += ["", f"Validation failures: {len(validation_errors)}", ""]
+          validation_lines += [f"- FAIL: {e}" for e in validation_errors] if validation_errors else ["- PASS: required docs, lockfiles, versions, source cleanup, and no-secret checks."]
+          (out / "RELEASE_PACKAGE_VALIDATION.md").write_text("\n".join(validation_lines), encoding="utf-8")
+          (out / "release-package-failures.txt").write_text(str(len(validation_errors)), encoding="utf-8")
+          if validation_errors:
+              print("\n".join(validation_errors))
+          else:
+              print("RELEASE PACKAGE VALIDATION: PASS")
           PY
       - name: Run package quality checks
         shell: bash
@@ -250,6 +318,8 @@ jobs:
           path: |
             .deep-audit/REPORT.md
             .deep-audit/ARCHIVE_CONTENTS.md
+            .deep-audit/RELEASE_PACKAGE_VALIDATION.md
+            .deep-audit/release-package-failures.txt
             .deep-audit/package-failures.txt
             .deep-audit/runtime-failures.txt
           retention-days: 30
@@ -262,11 +332,14 @@ jobs:
           set -u
           package_failures=0
           runtime_failures=0
+          distribution_failures=1
           if [ -f .deep-audit/package-failures.txt ]; then package_failures=$(cat .deep-audit/package-failures.txt); fi
           if [ -f .deep-audit/runtime-failures.txt ]; then runtime_failures=$(cat .deep-audit/runtime-failures.txt); fi
+          if [ -f .deep-audit/release-package-failures.txt ]; then distribution_failures=$(cat .deep-audit/release-package-failures.txt); fi
           echo "BLOCKING_PACKAGE_FAILURES=$package_failures"
           echo "RUNTIME_FAILURES=$runtime_failures"
-          if [ "$package_failures" -ne 0 ] || [ "$runtime_failures" -ne 0 ]; then
+          echo "DISTRIBUTION_PACKAGE_FAILURES=$distribution_failures"
+          if [ "$package_failures" -ne 0 ] || [ "$runtime_failures" -ne 0 ] || [ "$distribution_failures" -ne 0 ]; then
             echo "DEEP QUALITY GATE: FAIL"
             exit 1
           fi
