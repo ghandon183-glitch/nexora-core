@@ -123,7 +123,7 @@ jobs:
                           f"- Scripts: {json.dumps(pkg.get('scripts', {}), ensure_ascii=False)}",
                       ]
                   lines.append("")
-          (out / "ARCHIVE_CONTENTS.md").write_text("\\n".join(lines), encoding="utf-8")
+          (out / "ARCHIVE_CONTENTS.md").write_text("\n".join(lines), encoding="utf-8")
           PY
       - name: Run package quality checks
         shell: bash
