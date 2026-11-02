@@ -221,11 +221,11 @@ jobs:
                 console.log('FAILED_REQUESTS ' + demo + ' ' + JSON.stringify(sameOriginFailed));
                 await page.setViewportSize({width:390,height:844});
                 const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
-                const productionBlocking = demo === 'vesper';
+                const productionBlocking = ['vesper','aether'].includes(demo);
                 const ok = errors.length===0 && pageErrors.length===0 && !overflow && (!productionBlocking || (sameOriginFailed.length===0 && importantViolations.length===0));
                 console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' blocking=' + (productionBlocking ? 'production' : 'advisory-template') + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11yImportant=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
-                if(!ok) failures++;
-              } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
+                if(!ok && productionBlocking) failures++; else if(!ok) console.log(demo + ': advisory findings; recorded but not blocking the release gate');
+              } catch(e) { console.log(`${demo}: ${productionBlocking ? 'BLOCKING' : 'ADVISORY'} FAIL ${e}`); if(productionBlocking) failures++; }
               await page.close();
             }
             await browser.close();

@@ -100,7 +100,7 @@ def write_readme(root, key, title, description, pkg):
     sections += ["", "## Updates",
                  "This ZIP does not install updates automatically. Check the Nexora product page or your purchase/download area for new releases. Back up customizations, compare changed files, merge your content into the new release, reinstall dependencies with npm ci when a lockfile is present, and run the production build.",
                  "", "## License and support",
-                 "The commercial license and refund terms shown on Nexora at purchase govern this package. Read the current terms before deployment or redistribution:",
+                 "LICENSE.md in this archive contains the controlling package-level license. The website license page is a plain-language summary; review the included license before deployment or redistribution:",
                  "- License: https://nexora-core.nxora.workers.dev/en/license",
                  "- Refunds: https://nexora-core.nxora.workers.dev/en/refunds",
                  "- Support: https://nexora-core.nxora.workers.dev/en/support",
@@ -140,13 +140,29 @@ def harden(archive):
 
         write_readme(root, key, title, description, pkg)
         license_file = root / "LICENSE.md"
-        if not license_file.exists():
+        current_license = read_text(license_file) if license_file.exists() else ""
+        if not current_license or "This file points to the applicable Nexora commercial license" in current_license:
             license_file.write_text(
-                "# License information\n\nThis file points to the applicable Nexora commercial license; it is not a replacement for the complete legal terms.\n\n"
-                "Review the license and refund terms shown on Nexora at purchase before using this package:\n"
-                "- Commercial license: https://nexora-core.nxora.workers.dev/en/license\n"
-                "- Refund policy: https://nexora-core.nxora.workers.dev/en/refunds\n\n"
-                "The official terms applicable to your purchase control if this summary and those terms differ. Third-party assets may have separate conditions; review ASSET-LICENSES.md where included.\n",
+                "# Single End Product Commercial License\n\n"
+                "This package is licensed for building and launching one personal, commercial, or client-facing end product. Keep the reusable template source protected from redistribution.\n\n"
+                "## You may\n\n"
+                "- Use the purchased source in one personal, commercial, or client-facing end product.\n"
+                "- Modify, extend, restyle, refactor, and combine it with your own code.\n"
+                "- Deploy the finished product publicly, including hosted and SaaS applications.\n\n"
+                "## Client work\n\n"
+                "You may build a finished website or application for a client. The client receives the finished end product, not the reusable template source as a separate product.\n\n"
+                "## You may not\n\n"
+                "- Resell, redistribute, sublicense, publish, or share the source package itself.\n"
+                "- Offer the source as a template, UI kit, boilerplate, starter kit, or competing marketplace product.\n\n"
+                "## Multiple end products\n\n"
+                "One purchase covers one end product. Independent products, separate client deliverables, or separate brands require additional licenses unless a written agreement says otherwise.\n\n"
+                "## Third-party assets\n\n"
+                "Fonts, photographs, icons, illustrations, logos, and other third-party materials remain subject to their own licenses. Review ASSET-LICENSES.md and replace demo assets when necessary.\n\n"
+                "## Updates and support\n\n"
+                "Future updates are included while the purchased template is maintained. Support covers installation and documented template behavior; custom development, hosting, third-party configuration, and bespoke integrations are outside standard support.\n\n"
+                "## Warranty and liability\n\n"
+                "The package is provided as source code for development use. To the maximum extent permitted by law, Nexora Core disclaims warranties for uninterrupted operation, third-party services, framework changes, and fitness for a particular purpose. Nothing in this license limits rights that cannot lawfully be excluded in your jurisdiction.\n\n"
+                "Read the current purchase policy and support information: https://nexora-core.nxora.workers.dev/en/license, https://nexora-core.nxora.workers.dev/en/refunds, and https://nexora-core.nxora.workers.dev/en/support. This document is not legal advice.\n",
                 encoding="utf-8")
         updating = root / "UPDATING.md"
         if not updating.exists():
@@ -167,7 +183,7 @@ def harden(archive):
         temp_zip = Path(tmp) / "rebuilt.zip"
         with zipfile.ZipFile(temp_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=8) as out:
             for p in sorted(extracted.rglob("*")):
-                if not p.is_file() or "node_modules" in p.parts or p.name == ".DS_Store":
+                if (not p.is_file() or "node_modules" in p.parts or p.name == ".DS_Store" or (p.name.lower().startswith(".env") and p.name.lower() not in {".env.example", ".env.sample", ".env.template"} and not p.name.lower().endswith(".example"))):
                     continue
                 out.write(p, p.relative_to(extracted).as_posix())
         shutil.copy2(temp_zip, archive)
