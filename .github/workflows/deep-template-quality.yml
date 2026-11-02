@@ -69,6 +69,18 @@ jobs:
                   archive.extractall(d)
           print('packages:', len(list(out.iterdir())))
           PY
+      - name: Capture AETHER lint source context for release fixes
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          for file in components/motion/cursor.tsx components/motion/reveal.tsx components/webgl/hero-scene.tsx app/layout.tsx; do
+            path=".deep-audit/packages/aether/$file"
+            if [ -f "$path" ]; then
+              echo "===== AETHER SOURCE: $file ====="
+              nl -ba "$path" | sed -n '1,320p'
+            fi
+          done
 
           python3 - <<'PY'
           from pathlib import Path
@@ -170,13 +182,13 @@ jobs:
               if (cd "$dir" && npm run lint); then
                 echo '- lint: PASS' >> .deep-audit/REPORT.md
               else
-                echo '- lint: ADVISORY FAIL (non-blocking; see job log)' >> .deep-audit/REPORT.md
+                echo "$name: lint FAIL"; echo '- lint: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
-            else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if (cd "$dir" && npm audit --audit-level=high --omit=dev); then
-              echo "$name: npm audit PASS"; echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md
+            else echo '- lint: NOT CONFIGURED' >> .deep-audit/REPORT.md; fi
+            if (cd "$dir" && npm audit); then
+              echo "$name: full npm audit PASS"; echo '- npm audit all dependencies: PASS' >> .deep-audit/REPORT.md
             else
-              echo "$name: npm audit FAIL"; echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
+              echo "$name: full npm audit FAIL"; echo '- npm audit all dependencies: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
             fi
             echo >> .deep-audit/REPORT.md
           done
