@@ -66,7 +66,7 @@ def find_env_names(root):
 
 def write_readme(root, key, title, description, pkg):
     p = root / "README.md"
-    if p.exists() and read_text(p).strip():
+    if p.exists() and read_text(p).strip() and "This template is a starting point" not in read_text(p):
         return
     next_ver = ((pkg or {}).get("dependencies", {}).get("next") or (pkg or {}).get("devDependencies", {}).get("next"))
     scripts = (pkg or {}).get("scripts", {})
@@ -74,6 +74,16 @@ def write_readme(root, key, title, description, pkg):
                 "- Template source and assets contained in this archive.",
                 "- ASSET-LICENSES.md, when present, lists known third-party asset attributions and license notes.", "",
                 "## Requirements"]
+    if pkg:
+        sections += ["", "## Package details", f"- Package: {pkg.get('name', key)}", f"- Package manifest version: {pkg.get('version', 'not specified')}"]
+        if next_ver: sections += [f"- Next.js: {next_ver}"]
+        tailwind = pkg.get("dependencies", {}).get("tailwindcss", pkg.get("devDependencies", {}).get("tailwindcss"))
+        if tailwind: sections += [f"- Tailwind CSS: {tailwind}"]
+        top_entries = []
+        for item in sorted(root.iterdir(), key=lambda x: x.name.lower()):
+            if item.name in {"node_modules", ".next", ".git", ".env", ".env.local", ".env.production", ".env.development"}: continue
+            top_entries.append(item.name + ("/" if item.is_dir() else ""))
+        if top_entries: sections += ["", "## Project structure"] + [f"- {name}" for name in top_entries[:35]]
     if pkg:
         sections += ["- Node.js 22 LTS is recommended.", "- npm (included with Node.js)."]
         if next_ver:
@@ -89,6 +99,8 @@ def write_readme(root, key, title, description, pkg):
             sections += ["", "## Production verification", "Run: npm run build"]
             if "start" in scripts:
                 sections += ["To test the production build locally, run: npm run start."]
+        if scripts:
+            sections += ["", "## Available npm scripts"] + [f"- {name}: {command}" for name, command in sorted(scripts.items())]
         sections += ["", "## Customization",
                      "- Replace demo copy, placeholder content, links, and imagery with assets and claims you have permission to use.",
                      "- Connect forms, authentication, databases, analytics, checkout, or CMS integrations yourself; do not assume a backend service is included unless it is present in this package.",
