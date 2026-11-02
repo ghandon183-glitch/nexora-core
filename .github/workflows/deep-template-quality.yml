@@ -69,18 +69,6 @@ jobs:
                   archive.extractall(d)
           print('packages:', len(list(out.iterdir())))
           PY
-      - name: Capture AETHER lint source context for release fixes
-        if: always()
-        shell: bash
-        run: |
-          set +e
-          for file in components/motion/cursor.tsx components/motion/reveal.tsx components/webgl/hero-scene.tsx app/layout.tsx; do
-            path=".deep-audit/packages/aether/$file"
-            if [ -f "$path" ]; then
-              echo "===== AETHER SOURCE: $file ====="
-              nl -ba "$path" | sed -n '1,320p'
-            fi
-          done
 
           python3 - <<'PY'
           from pathlib import Path

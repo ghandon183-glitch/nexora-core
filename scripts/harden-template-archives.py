@@ -105,6 +105,7 @@ def write_readme(root, key, title, description, pkg):
                      "- Replace demo copy, placeholder content, links, and imagery with assets and claims you have permission to use.",
                      "- Connect forms, authentication, databases, analytics, checkout, or CMS integrations yourself; do not assume a backend service is included unless it is present in this package.",
                      "- Review SEO metadata, accessibility, reduced-motion behavior, and small-screen layouts before launch."]
+        if key == "aether": sections += ["- The included UI components are in the source; the optional shadcn generator CLI is not bundled."]
     else:
         sections += ["- A modern web browser.", "- Python 3 (optional, for a local preview).", "",
                      "## Quick start", "1. Extract this ZIP.", "2. Open index.html in a browser, or run a local server:",
@@ -119,6 +120,74 @@ def write_readme(root, key, title, description, pkg):
                  "", "This template is a starting point, not a hosted backend or a guarantee that third-party integrations are configured. Review LICENSE.md and ASSET-LICENSES.md if present.", ""]
     p.write_text("\n".join(sections), encoding="utf-8")
 
+
+def replace_source(root, relative, old, new):
+    path = root / relative
+    current = read_text(path)
+    if not current:
+        raise RuntimeError(f"Expected AETHER source file is missing or unreadable: {relative}")
+    if new in current:
+        return
+    if old not in current:
+        raise RuntimeError(f"Expected AETHER source snippet was not found in {relative}; refusing a silent partial patch.")
+    path.write_text(current.replace(old, new, 1), encoding="utf-8")
+
+def patch_aether_source(root):
+    replace_source(root, "components/motion/cursor.tsx",
+        "    setEnabled(true)\n    document.documentElement.classList.add('has-cursor')",
+        "    const enableFrame = window.requestAnimationFrame(() => setEnabled(true))\n    document.documentElement.classList.add('has-cursor')")
+    replace_source(root, "components/motion/cursor.tsx",
+        "      cancelAnimationFrame(raf)\n      window.removeEventListener('pointermove', onMove)",
+        "      cancelAnimationFrame(raf)\n      cancelAnimationFrame(enableFrame)\n      window.removeEventListener('pointermove', onMove)")
+    replace_source(root, "components/motion/reveal.tsx",
+        "import type { ReactNode } from 'react'",
+        "import { createElement, type ReactNode } from 'react'")
+    replace_source(root, "components/motion/reveal.tsx",
+        "    const Comp = Tag as any\n    return <Comp className={className}>{text}</Comp>",
+        "    return createElement(Tag, { className }, text)")
+    replace_source(root, "components/motion/reveal.tsx",
+        "  const MotionTag = motion[Tag] as any",
+        "  const MotionTag = {\n    span: motion.span,\n    h1: motion.h1,\n    h2: motion.h2,\n    h3: motion.h3,\n    p: motion.p,\n  }[Tag]")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "import { useEffect, useMemo, useRef, useState } from 'react'",
+        "import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "function Core({ reducedMotion }: { reducedMotion: boolean }) {",
+        "function randomUnit(seed: number) {\n  const value = Math.sin(seed * 12.9898) * 43758.5453\n  return value - Math.floor(value)\n}\n\nfunction Core({ reducedMotion, pointerRef, scrollRef }: {\n  reducedMotion: boolean\n  pointerRef: MutableRefObject<THREE.Vector2>\n  scrollRef: MutableRefObject<number>\n}) {")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "  const pointer = useRef(new THREE.Vector2(0, 0))",
+        "  const pointer = pointerRef")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "    let scroll = 0\n    const onScroll = () => {\n      scroll = Math.min(window.scrollY / (window.innerHeight || 1), 1)\n    }",
+        "    const onScroll = () => {\n      scrollRef.current = Math.min(window.scrollY / (window.innerHeight || 1), 1)\n    }\n    onScroll()")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "    ;(Core as any)._pointer = () => pointer.current\n    ;(Core as any)._scroll = () => scroll\n",
+        "")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "    u.uScroll.value = (Core as any)._scroll ? (Core as any)._scroll() : 0",
+        "    u.uScroll.value = scrollRef.current")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "function Atmosphere({ reducedMotion }: { reducedMotion: boolean }) {",
+        "function Atmosphere({ reducedMotion, pointerRef }: {\n  reducedMotion: boolean\n  pointerRef: MutableRefObject<THREE.Vector2>\n}) {")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "    const p = (Core as any)._pointer ? (Core as any)._pointer() : { x: 0, y: 0 }",
+        "    const p = pointerRef.current")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "      const r = 2.2 + Math.random() * 3.4\n      const theta = Math.random() * Math.PI * 2\n      const phi = Math.acos(2 * Math.random() - 1)",
+        "      const r = 2.2 + randomUnit(i * 4 + 1) * 3.4\n      const theta = randomUnit(i * 4 + 2) * Math.PI * 2\n      const phi = Math.acos(2 * randomUnit(i * 4 + 3) - 1)")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "      scales[i] = Math.random()",
+        "      scales[i] = randomUnit(i * 4 + 4)")
+    replace_source(root, "components/webgl/hero-scene.tsx",
+        "function Scene({ reducedMotion }: { reducedMotion: boolean }) {\n  return (\n    <>\n      <Core reducedMotion={reducedMotion} />\n      <Atmosphere reducedMotion={reducedMotion} />\n    </>\n  )\n}",
+        "function Scene({ reducedMotion }: { reducedMotion: boolean }) {\n  const pointerRef = useRef(new THREE.Vector2(0, 0))\n  const scrollRef = useRef(0)\n  return (\n    <>\n      <Core reducedMotion={reducedMotion} pointerRef={pointerRef} scrollRef={scrollRef} />\n      <Atmosphere reducedMotion={reducedMotion} pointerRef={pointerRef} />\n    </>\n  )\n}")
+    replace_source(root, "app/layout.tsx",
+        "import { Analytics } from '@vercel/analytics/next'\n",
+        "")
+    replace_source(root, "app/layout.tsx",
+        "        {process.env.NODE_ENV === 'production' && <Analytics />}\n",
+        "")
+
 def harden(archive):
     key = archive.stem
     title, description = PRODUCTS.get(key, (key.replace("-", " ").title(), "A Nexora template package."))
@@ -128,16 +197,25 @@ def harden(archive):
         with zipfile.ZipFile(archive) as zf:
             safe_extract(zf, extracted)
         root = choose_root(extracted)
+        if key == "aether":
+            patch_aether_source(root)
         package_file = root / "package.json"
         pkg = None
         if package_file.exists():
             pkg = json.loads(read_text(package_file))
             deps = pkg.setdefault("dependencies", {})
             dev = pkg.setdefault("devDependencies", {})
+            if key == "aether":
+                for section in (deps, dev):
+                    section.pop("@vercel/analytics", None)
+                    section.pop("shadcn", None)
             if "next" in deps: deps["next"] = STABLE_NEXT
             elif "next" in dev: dev["next"] = STABLE_NEXT
             if "eslint-config-next" in dev: dev["eslint-config-next"] = STABLE_NEXT
             elif "eslint-config-next" in deps: deps["eslint-config-next"] = STABLE_NEXT
+            if "next" in deps or "next" in dev:
+                overrides = pkg.setdefault("overrides", {})
+                overrides["minimatch"] = "^11.0.1"
             package_file.write_text(json.dumps(pkg, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
         env_names = find_env_names(root)
