@@ -209,12 +209,12 @@ def patch_aether_source(root):
 
 A11Y_TEXT_REPLACEMENTS = {
     "kiln-estates": [
-        (r"--clay\\s*:\\s*#b5562d\\s*;", "--clay:#8f4021;"),
+        (r"--clay\s*:\s*#b5562d\s*;", "--clay:#8f4021;"),
         ("text-forest/60", "text-forest/85"),
         ("text-forest/50", "text-forest/80"),
     ],
     "modern-saas": [
-        (r"--moss-bright\\s*:\\s*#5c8768\\s*;", "--moss-bright:#3f6b4f;"),
+        (r"--moss-bright\s*:\s*#5c8768\s*;", "--moss-bright:#3f6b4f;"),
         ("text-moss-bright", "text-moss"),
         ("text-text-muted/30", "text-text-muted/75"),
     ],
@@ -222,32 +222,32 @@ A11Y_TEXT_REPLACEMENTS = {
         ("text-slate-500", "text-slate-400"),
     ],
     "premium-blog": [
-        (r"--color-accent\\s*:\\s*#c2410c\\s*;", "--color-accent:#9a3412;"),
+        (r"--color-accent\s*:\s*#c2410c\s*;", "--color-accent:#9a3412;"),
         ("text-ink-mute", "text-ink-soft"),
     ],
     "premium-restaurant": [
         ("text-ink-mute", "text-ink-soft"),
     ],
     "solace-studio": [
-        (r"--color-clay\\s*:\\s*#c4623c\\s*;", "--color-clay:#8f4021;"),
+        (r"--color-clay\s*:\s*#c4623c\s*;", "--color-clay:#8f4021;"),
         ("text-cream/45", "text-cream/80"),
         ("text-cream/40", "text-cream/80"),
     ],
     "admin-dashboard": [
-        (r"--teal-bright\\s*:\\s*#17767d\\s*;", "--teal-bright:#4cc9d0;"),
-        (r"--danger\\s*:\\s*#e0563f\\s*;", "--danger:#ff8b78;"),
+        (r"--teal-bright\s*:\s*#17767d\s*;", "--teal-bright:#4cc9d0;"),
+        (r"--danger\s*:\s*#e0563f\s*;", "--danger:#ff8b78;"),
     ],
     "aurelia-store": [
-        (r"--coral\\s*:\\s*#e17a57\\s*;", "--coral:#9f4328;"),
-        (r"--coral-deep\\s*:\\s*#c85f3d\\s*;", "--coral-deep:#87391f;"),
+        (r"--coral\s*:\s*#e17a57\s*;", "--coral:#9f4328;"),
+        (r"--coral-deep\s*:\s*#c85f3d\s*;", "--coral-deep:#87391f;"),
     ],
     "creative-agency": [
-        (r"--violet\\s*:\\s*#8b5cf6\\s*;", "--violet:#6d28d9;"),
-        (r"--violet-bright\\s*:\\s*#a683ff\\s*;", "--violet-bright:#6d28d9;"),
+        (r"--violet\s*:\s*#8b5cf6\s*;", "--violet:#6d28d9;"),
+        (r"--violet-bright\s*:\s*#a683ff\s*;", "--violet-bright:#6d28d9;"),
         ("text-text-muted/50", "text-text-muted"),
     ],
     "premium-portfolio": [
-        (r"--color-ink-mute\\s*:\\s*#6b6b75\\s*;", "--color-ink-mute:#9a9aa3;"),
+        (r"--color-ink-mute\s*:\s*#6b6b75\s*;", "--color-ink-mute:#9a9aa3;"),
     ],
     "vesper": [],
 }
@@ -282,45 +282,45 @@ def patch_accessibility_text(root, key):
             if path.suffix.lower() == ".css":
                 if slug == "modern-saas":
                     if "[data-theme=dark]{--moss-bright:" not in updated:
-                        updated = re.sub(r"(\\[data-theme=dark\\]\\{)", r"\\1--moss-bright:#7cae87;", updated)
+                        updated = re.sub(r"(\[data-theme=dark\]\{)", r"\1--moss-bright:#7cae87;", updated)
                     if "[data-theme=light]{--moss-bright:" not in updated:
-                        updated = re.sub(r"(\\[data-theme=light\\]\\{)", r"\\1--moss-bright:#31563b;", updated)
+                        updated = re.sub(r"(\[data-theme=light\]\{)", r"\1--moss-bright:#31563b;", updated)
                 if slug == "admin-dashboard":
                     if "[data-theme=dark]{--teal-bright:" not in updated:
-                        updated = re.sub(r"(\\[data-theme=dark\\]\\{)", r"\\1--teal-bright:#4cc9d0;--danger:#ff8b78;", updated)
+                        updated = re.sub(r"(\[data-theme=dark\]\{)", r"\1--teal-bright:#4cc9d0;--danger:#ff8b78;", updated)
                     if "[data-theme=light]{--teal-bright:" not in updated:
-                        updated = re.sub(r"(\\[data-theme=light\\]\\{)", r"\\1--teal-bright:#0f5257;--danger:#b91c1c;", updated)
+                        updated = re.sub(r"(\[data-theme=light\]\{)", r"\1--teal-bright:#0f5257;--danger:#b91c1c;", updated)
                 if slug == "creative-agency" and "[data-theme=dark] .text-violet{color:#a683ff}" not in updated:
-                    updated += "\\n[data-theme=dark] .text-violet{color:#a683ff}"
+                    updated += "\n[data-theme=dark] .text-violet{color:#a683ff}"
             if updated != original:
                 path.write_text(updated, encoding="utf-8")
                 touched += 1
             continue
         if slug == "kiln-estates":
-            updated = re.sub(r"<h4(\\b[^>]*)>Explore</h4>", r"<h3\\1>Explore</h3>", updated)
+            updated = re.sub(r"<h4(\b[^>]*)>Explore</h4>", r"<h3\1>Explore</h3>", updated)
         if slug == "nexi-ai":
-            updated = re.sub(r"<h4(\\b[^>]*)>Product</h4>", r"<h3\\1>Product</h3>", updated)
+            updated = re.sub(r"<h4(\b[^>]*)>Product</h4>", r"<h3\1>Product</h3>", updated)
         if slug == "premium-blog":
             def label_article(match):
                 opening = match.group(0)
-                if re.search(r"\\baria-label\\s*=", opening, re.I):
+                if re.search(r"\baria-label\s*=", opening, re.I):
                     return opening
-                href = re.search(r"""href=(["'])(/articles/[^"']+)\\1""", opening, re.I)
+                href = re.search(r"""href=(["'])(/articles/[^"']+)\1""", opening, re.I)
                 if not href:
                     return opening
                 title = href.group(2).rstrip("/").split("/")[-1].replace("-", " ").title()
                 return opening[:-1] + ' aria-label="Read article: ' + title + '">'
-            updated = re.sub(r"""<(?:a|Link)\\b[^>]*href=(["'])/articles/[^"']+\\1[^>]*>""", label_article, updated, flags=re.I)
+            updated = re.sub(r"""<(?:a|Link)\b[^>]*href=(["'])/articles/[^"']+\1[^>]*>""", label_article, updated, flags=re.I)
             updated = re.sub(
-                r"""(<(?:Link|a)\\b(?=[^>]*class(?:Name)?=["'][^"']*overflow-hidden rounded-lg)[^>]*)(>)""",
-                lambda m: m.group(1) + (' aria-label="Open article"' if not re.search(r"\\baria-label\\s*=", m.group(1), re.I) else "") + m.group(2),
+                r"""(<(?:Link|a)\b(?=[^>]*class(?:Name)?=["'][^"']*overflow-hidden rounded-lg)[^>]*)(>)""",
+                lambda m: m.group(1) + (' aria-label="Open article"' if not re.search(r"\baria-label\s*=", m.group(1), re.I) else "") + m.group(2),
                 updated,
                 flags=re.I,
             )
         if slug == "premium-restaurant":
             updated = re.sub(
-                r"""(<(?:a|Link)\\b[^>]*href=(["'])/reserve\\2[^>]*)(>)""",
-                lambda m: m.group(1) + (' aria-label="Make a reservation"' if not re.search(r"\\baria-label\\s*=", m.group(1), re.I) else "") + m.group(3),
+                r"""(<(?:a|Link)\b[^>]*href=(["'])/reserve\2[^>]*)(>)""",
+                lambda m: m.group(1) + (' aria-label="Make a reservation"' if not re.search(r"\baria-label\s*=", m.group(1), re.I) else "") + m.group(3),
                 updated,
                 flags=re.I,
             )
@@ -331,7 +331,7 @@ def patch_accessibility_text(root, key):
                 attrs, inner = match.group(1), match.group(2)
                 return "<div" + attrs + ">" + inner + "</div>"
             updated = re.sub(
-                r"""<aside(\\b[^>]*class(?:Name)?=["'][^"']*rounded-2xl[^"']*bg-white/\\[0\\.025\\][^"']*p-3[^"']*["'][^>]*)>(.*?)</aside>""",
+                r"""<aside(\b[^>]*class(?:Name)?=["'][^"']*rounded-2xl[^"']*bg-white/\[0\.025\][^"']*p-3[^"']*["'][^>]*)>(.*?)</aside>""",
                 demote_complementary,
                 updated,
                 flags=re.I | re.S,
@@ -341,10 +341,10 @@ def patch_accessibility_text(root, key):
         if slug == "kiln-estates":
             def wrap_main(match):
                 header, middle, footer = match.group(1), match.group(2), match.group(3)
-                if re.search(r"<main\\b", middle, re.I):
+                if re.search(r"<main\b", middle, re.I):
                     return match.group(0)
                 return header + '<main id="main-content">' + middle + "</main>" + footer
-            updated = re.sub(r"(</header>)(.*?)(<footer\\b)", wrap_main, updated, flags=re.I | re.S)
+            updated = re.sub(r"(</header>)(.*?)(<footer\b)", wrap_main, updated, flags=re.I | re.S)
         if updated != original:
             try:
                 path.write_text(updated, encoding="utf-8")
