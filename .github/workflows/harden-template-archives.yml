@@ -3,8 +3,7 @@ name: Harden shipped template ZIPs
 on:
   workflow_dispatch:
   push:
-    branches:
-      - fix/aether-product-page-packaging
+    branches: ["**"]
     paths:
       - "scripts/harden-template-archives.py"
       - ".github/workflows/harden-template-archives.yml"
