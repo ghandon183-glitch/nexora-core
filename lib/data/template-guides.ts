@@ -114,13 +114,13 @@ export const templateGuides: Record<string, TemplateGuide> = {
     slug: "aether",
     positioning: "An immersive creative-studio presentation for brands that want a cinematic first impression and a strong visual project showcase.",
     idealFor: ["Creative agencies", "Production studios", "Digital studios", "Art-led brands"],
-    included: ["Interactive WebGL hero", "3D experience", "Project showcase", "Motion system", "Responsive editorial layout"],
-    requirements: ["Node.js compatible with Next.js 16", "A modern browser", "Your own project media"],
+    included: ["Downloadable AETHER source-code ZIP", "Next.js 16 app source and reusable UI components", "Interactive WebGL hero and 3D presentation", "Project showcase and responsive editorial layouts", "Local visual assets used by the template", "Tailwind CSS styling and project configuration", "Installation and customization guidance in the package documentation"],
+    requirements: ["Node.js version supported by Next.js 16", "npm (or a compatible Node.js package manager)", "A modern browser for the WebGL hero", "Your own licensed project media for production use"],
     installTime: "About 5–10 minutes.",
-    setup: ["Install dependencies.", "Replace studio identity and project content.", "Review interactive scene settings.", "Connect contact and analytics."],
-    customization: ["Replace demo imagery and copy.", "Tune animation timing.", "Adapt project cards.", "Provide a non-WebGL fallback where needed."],
+    setup: ["Extract the downloaded ZIP into a new project folder.", "Read the included README and install dependencies using the package manager documented there.", "Start the development server using the documented script.", "Replace studio identity, project content, and demo assets.", "Review interactive scene settings, then connect contact and analytics."],
+    customization: ["Replace demo imagery and copy with assets you are licensed to use.", "Tune animation timing and WebGL settings.", "Adapt project cards and capabilities to your studio.", "Keep reduced-motion support and provide a non-WebGL fallback where needed."],
     deployment: ["Build and run a production preview.", "Test on mobile and lower-powered devices.", "Deploy.", "Check outbound links."],
-    faq: [{question:"Will it work on mobile?",answer:"The listing describes a responsive layout; test the WebGL experience on target devices and provide a graceful fallback where needed."},{question:"Can I use it for an agency?",answer:"Yes. Replace the showcase content with your agency work."}]
+    faq: [{question:"Which framework and styling does AETHER use?",answer:"The listing specifies Next.js 16 and Tailwind CSS. Review the package manifest and README in the downloaded ZIP for the exact installed versions and scripts."},{question:"Does the package include a production contact backend?",answer:"The template provides a contact-oriented presentation; connect your own contact service and analytics before launch."},{question:"Will it work on mobile?",answer:"The layout is responsive; test the WebGL experience on target devices and provide a graceful fallback where needed."},{question:"Can I use it for an agency or client?",answer:"Yes, for one finished end product under the single-end-product commercial license. The source ZIP may not be redistributed or resold."}]
   },
   "premium-blog": {
     slug: "premium-blog",
