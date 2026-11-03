@@ -30,8 +30,6 @@ jobs:
         with:
           node-version: 22
       - name: Harden the exact shipped ZIPs
-        env:
-          NEXORA_PACKAGE_TARGET: aether.zip
         run: python3 scripts/harden-template-archives.py
       - name: Verify every archive is valid and has release docs
         run: |
