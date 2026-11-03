@@ -190,6 +190,22 @@ def patch_aether_source(root):
         "        {process.env.NODE_ENV === 'production' && <Analytics />}\n",
         "")
 
+    # The shadcn CLI is intentionally removed from the shipped dependencies.
+    # Remove its stale CSS entrypoint, which is not a published runtime stylesheet,
+    # while preserving Tailwind and the template's own CSS.
+    css_file = root / "app" / "globals.css"
+    css_text = read_text(css_file)
+    if css_text:
+        cleaned_css = re.sub(
+            r"""(?m)^\s*@import\s+['"]shadcn/tailwind\.css['"]\s*;[ \t]*(?:\r?\n|$)""",
+            "",
+            css_text,
+        )
+        if cleaned_css != css_text:
+            css_file.write_text(cleaned_css, encoding="utf-8")
+        if re.search(r"shadcn/tailwind\.css", read_text(css_file), re.I):
+            raise RuntimeError("AETHER still imports removed shadcn/tailwind.css; refusing to ship a broken ZIP.")
+
 def harden(archive):
     key = archive.stem
     title, description = PRODUCTS.get(key, (key.replace("-", " ").title(), "A Nexora template package."))
@@ -233,7 +249,15 @@ def harden(archive):
         write_readme(root, key, title, description, pkg)
         license_file = root / "LICENSE.md"
         current_license = read_text(license_file) if license_file.exists() else ""
-        if not current_license or "This file points to the applicable Nexora commercial license" in current_license:
+        license_lower = current_license.lower()
+        license_is_complete = (
+            "single end product commercial license" in license_lower
+            and "one end product" in license_lower
+            and "may not" in license_lower
+            and "redistribute" in license_lower
+            and "third-party" in license_lower
+        )
+        if not license_is_complete:
             license_file.write_text(
                 "# Single End Product Commercial License\n\n"
                 "This package is licensed for building and launching one personal, commercial, or client-facing end product. Keep the reusable template source protected from redistribution.\n\n"
