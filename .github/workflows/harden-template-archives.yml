@@ -1,0 +1,74 @@
+name: Harden shipped template ZIPs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/aether-product-page-packaging
+    paths:
+      - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nexora-harden-template-zips-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harden:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Harden the exact shipped ZIPs
+        env:
+          NEXORA_PACKAGE_TARGET: aether.zip
+        run: python3 scripts/harden-template-archives.py
+      - name: Verify every archive is valid and has release docs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile, json
+          failed=[]
+          for archive in sorted(Path("public/downloads").glob("*.zip")):
+              if archive.name.startswith("Nexora-All-Templates"): continue
+              try:
+                  with zipfile.ZipFile(archive) as z:
+                      bad=z.testzip()
+                      names=[n for n in z.namelist() if not n.endswith("/")]
+                      required=("README.md",".env.example","LICENSE.md","UPDATING.md")
+                      missing=[name for name in required if not any(Path(n).name.lower()==name.lower() for n in names)]
+                      manifests=[n for n in names if Path(n).name=="package.json" and "node_modules/" not in n]
+                      for m in manifests:
+                          pkg=json.loads(z.read(m))
+                          nextv=pkg.get("dependencies",{}).get("next",pkg.get("devDependencies",{}).get("next"))
+                          if nextv and nextv != "16.4.3": failed.append(f"{archive.name}: Next.js version is {nextv}, expected 16.4.3")
+                          if nextv and not any(Path(n).name=="package-lock.json" for n in names): failed.append(f"{archive.name}: Next.js package missing package-lock.json")
+                      if bad: failed.append(f"{archive.name}: corrupt ZIP member {bad}")
+                      if missing: failed.append(f"{archive.name}: missing {', '.join(missing)}")
+              except Exception as e: failed.append(f"{archive.name}: {e}")
+          print("\n".join(failed) if failed else "All shipped ZIPs are valid and contain README, .env.example, LICENSE.md, and UPDATING.md.")
+          if failed: raise SystemExit(1)
+          PY
+      - name: Commit updated ZIPs back to this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/downloads/*.zip
+          if git diff --cached --quiet; then
+            echo "No archive changes to commit."
+            exit 0
+          fi
+          git commit -m "chore(packages): add release docs and refresh stable Next.js"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
