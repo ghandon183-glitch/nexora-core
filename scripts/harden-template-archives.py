@@ -252,6 +252,16 @@ A11Y_TEXT_REPLACEMENTS = {
 }
 
 
+
+def replace_all_source(root, relative, old, new):
+    path = root / relative
+    current = read_text(path)
+    if new in current and old not in current:
+        return
+    if old not in current:
+        raise RuntimeError(f"Expected source snippet was not found in {relative}; refusing a silent partial patch.")
+    path.write_text(current.replace(old, new), encoding="utf-8")
+
 def patch_nexi_ai_source(root):
     # Nexi AI is a front-end landing-page template, not a hosted AI product.
     replace_source(root, "components/hero.tsx",
@@ -271,7 +281,7 @@ def patch_nexi_ai_source(root):
         "A polished starting point for an AI support product website. Customize the copy,\n            connect your real services, and publish only capabilities you have verified.")
     replace_source(root, "components/agent-chat-card.tsx", "Nexi Assistant", "Example assistant")
     replace_source(root, "components/agent-chat-card.tsx", "Online — replies instantly", "Illustrative sample")
-    replace_source(root, "components/agent-chat-card.tsx", "● Live", "DEMO")
+    replace_source(root, "components/agent-chat-card.tsx", "Live", "DEMO")
     replace_source(root, "components/agent-chat-card.tsx",
         "Hi! Can I get a refund on order #4821? It arrived damaged.",
         "I need help with an order that arrived damaged.")
@@ -329,7 +339,7 @@ def patch_nexi_ai_source(root):
     replace_source(root, "components/pricing.tsx",
         '<div className="mt-16 grid gap-6 lg:grid-cols-3">',
         '<p className="mt-5 text-center text-sm text-slate-300">Sample plans and prices — replace these with your actual offer and terms before publishing.</p>\n        <div className="mt-10 grid gap-6 lg:grid-cols-3">')
-    replace_source(root, "components/pricing.tsx", 'href="#"', 'href="#contact"')
+    replace_all_source(root, "components/pricing.tsx", 'href="#"', 'href="#contact"')
     replace_source(root, "components/cta.tsx",
         '<section className="relative overflow-hidden py-24 lg:py-32">',
         '<section id="contact" className="relative overflow-hidden py-24 lg:py-32">')
@@ -341,11 +351,11 @@ def patch_nexi_ai_source(root):
     replace_source(root, "components/nav.tsx",
         'href="#" className="text-sm font-medium text-slate-300 hover:text-white"',
         'href="#contact" className="text-sm font-medium text-slate-300 hover:text-white"')
-    replace_source(root, "components/footer.tsx",
+    replace_all_source(root, "components/footer.tsx",
         '<h4 className="text-sm font-semibold text-white">',
         '<h3 className="text-sm font-semibold text-white">')
-    replace_source(root, "components/footer.tsx", "</h4>", "</h3>")
-    replace_source(root, "components/footer.tsx", 'href="#"', 'href="#contact"')
+    replace_all_source(root, "components/footer.tsx", "</h4>", "</h3>")
+    replace_all_source(root, "components/footer.tsx", 'href="#"', 'href="#contact"')
 
     testimonials = root / "components" / "testimonials.tsx"
     if testimonials.exists():
