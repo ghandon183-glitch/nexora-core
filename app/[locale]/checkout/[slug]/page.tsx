@@ -222,7 +222,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!template) {
+  if (!template || template.hidden) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#060B18]">
         <p className="text-slate-500">{t("templateNotFound")}</p>
