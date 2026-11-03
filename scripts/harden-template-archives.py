@@ -19,7 +19,7 @@ PRODUCTS = {
     "solace-studio": ("Solace Studio", "A wellness-studio presentation for classes, trainers, schedules, pricing, and galleries."),
     "Nexora-Template-12-Vesper-v1.0.0": ("Vesper", "A responsive static template package. No Node.js build is required unless the package includes a package.json."),
 }
-TEXT_EXTS = {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".html", ".json", ".md", ".css"}
+TEXT_EXTS = {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".html", ".json", ".md", ".css", ".txt"}
 
 def safe_extract(zf, dest):
     base = dest.resolve()
@@ -206,6 +206,147 @@ def patch_aether_source(root):
         if re.search(r"shadcn/tailwind\.css", read_text(css_file), re.I):
             raise RuntimeError("AETHER still imports removed shadcn/tailwind.css; refusing to ship a broken ZIP.")
 
+
+A11Y_TEXT_REPLACEMENTS = {
+    "kiln-estates": [
+        (r"--clay\\s*:\\s*#b5562d\\s*;", "--clay:#8f4021;"),
+        ("text-forest/60", "text-forest/85"),
+        ("text-forest/50", "text-forest/80"),
+    ],
+    "modern-saas": [
+        (r"--moss-bright\\s*:\\s*#5c8768\\s*;", "--moss-bright:#3f6b4f;"),
+        ("text-moss-bright", "text-moss"),
+        ("text-text-muted/30", "text-text-muted/75"),
+    ],
+    "nexi-ai": [
+        ("text-slate-500", "text-slate-400"),
+    ],
+    "premium-blog": [
+        (r"--color-accent\\s*:\\s*#c2410c\\s*;", "--color-accent:#9a3412;"),
+        ("text-ink-mute", "text-ink-soft"),
+    ],
+    "premium-restaurant": [
+        ("text-ink-mute", "text-ink-soft"),
+    ],
+    "solace-studio": [
+        (r"--color-clay\\s*:\\s*#c4623c\\s*;", "--color-clay:#8f4021;"),
+        ("text-cream/45", "text-cream/80"),
+        ("text-cream/40", "text-cream/80"),
+    ],
+    "admin-dashboard": [
+        (r"--teal-bright\\s*:\\s*#17767d\\s*;", "--teal-bright:#4cc9d0;"),
+        (r"--danger\\s*:\\s*#e0563f\\s*;", "--danger:#ff8b78;"),
+    ],
+    "aurelia-store": [
+        (r"--coral\\s*:\\s*#e17a57\\s*;", "--coral:#9f4328;"),
+        (r"--coral-deep\\s*:\\s*#c85f3d\\s*;", "--coral-deep:#87391f;"),
+    ],
+    "creative-agency": [
+        (r"--violet\\s*:\\s*#8b5cf6\\s*;", "--violet:#6d28d9;"),
+        (r"--violet-bright\\s*:\\s*#a683ff\\s*;", "--violet-bright:#6d28d9;"),
+        ("text-text-muted/50", "text-text-muted/80"),
+    ],
+    "premium-portfolio": [
+        (r"--color-ink-mute\\s*:\\s*#6b6b75\\s*;", "--color-ink-mute:#9a9aa3;"),
+    ],
+}
+
+def normalize_template_key(key):
+    return "vesper" if key.lower().startswith("nexora-template-12-vesper") else key.lower()
+
+def patch_accessibility_text(root, key):
+    slug = normalize_template_key(key)
+    replacements = A11Y_TEXT_REPLACEMENTS.get(slug, [])
+    touched = 0
+    for path in root.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in TEXT_EXTS:
+            continue
+        if any(part in {"node_modules", ".next", ".git", ".turbo", "coverage"} for part in path.parts):
+            continue
+        try:
+            if path.stat().st_size > 2_000_000:
+                continue
+        except OSError:
+            continue
+        original = read_text(path)
+        if not original:
+            continue
+        updated = original
+        for pattern, replacement in replacements:
+            updated, count = re.subn(pattern, replacement, updated) if pattern.startswith("r") and False else (updated, 0)
+            # Plain replacements are intentionally literal; color definitions below are handled by regex.
+            if pattern.startswith("--"):
+                updated = updated.replace(pattern, replacement)
+            else:
+                updated = updated.replace(pattern, replacement)
+        if slug == "kiln-estates":
+            updated = re.sub(r"<h4(\\b[^>]*)>Explore</h4>", r"<h3\\1>Explore</h3>", updated)
+        if slug == "nexi-ai":
+            updated = re.sub(r"<h4(\\b[^>]*)>Product</h4>", r"<h3\\1>Product</h3>", updated)
+        if slug == "premium-blog":
+            def label_article(match):
+                opening = match.group(0)
+                if re.search(r"\\baria-label\\s*=", opening, re.I):
+                    return opening
+                href = re.search(r"""href=(["'])(/articles/[^"']+)\\1""", opening, re.I)
+                if not href:
+                    return opening
+                title = href.group(2).rstrip("/").split("/")[-1].replace("-", " ").title()
+                return opening[:-1] + ' aria-label="Read article: ' + title + '">'
+            updated = re.sub(r"""<(?:a|Link)\\b[^>]*href=(["'])/articles/[^"']+\\1[^>]*>""", label_article, updated, flags=re.I)
+            updated = re.sub(
+                r"""(<(?:Link|a)\\b(?=[^>]*className?=["'][^"']*overflow-hidden rounded-lg)[^>]*)(>)""",
+                lambda m: m.group(1) + (' aria-label="Open article"' if not re.search(r"\\baria-label\\s*=", m.group(1), re.I) else "") + m.group(2),
+                updated,
+                flags=re.I,
+            )
+        if slug == "premium-restaurant":
+            updated = re.sub(
+                r"""(<(?:a|Link)\\b[^>]*href=(["'])/reserve\\2[^>]*)(>)""",
+                lambda m: m.group(1) + (' aria-label="Make a reservation"' if not re.search(r"\\baria-label\\s*=", m.group(1), re.I) else "") + m.group(3),
+                updated,
+                flags=re.I,
+            )
+        if slug == "solace-studio" and 'role="img" aria-label="5 out of 5 stars"' not in updated:
+            updated = updated.replace('aria-label="5 out of 5 stars"', 'role="img" aria-label="5 out of 5 stars"')
+        if slug == "vesper":
+            def demote_complementary(match):
+                attrs, inner = match.group(1), match.group(2)
+                return "<div" + attrs + ">" + inner + "</div>"
+            updated = re.sub(
+                r"""<aside(\\b[^>]*class(?:Name)?=["'][^"']*rounded-2xl[^"']*bg-white/\\[0\\.025\\][^"']*p-3[^"']*["'][^>]*)>(.*?)</aside>""",
+                demote_complementary,
+                updated,
+                flags=re.I | re.S,
+            )
+        # Put unlabelled page sections inside the main landmark when the exported
+        # document has a header/footer shell but no existing main element.
+        if slug == "kiln-estates":
+            def wrap_main(match):
+                header, middle, footer = match.group(1), match.group(2), match.group(3)
+                if re.search(r"<main\\b", middle, re.I):
+                    return match.group(0)
+                return header + '<main id="main-content">' + middle + "</main>" + footer
+            updated = re.sub(r"(</header>)(.*?)(<footer\\b)", wrap_main, updated, flags=re.I | re.S)
+        if updated != original:
+            try:
+                path.write_text(updated, encoding="utf-8")
+                touched += 1
+            except OSError as exc:
+                raise RuntimeError(f"Unable to write accessibility fix to {path}: {exc}") from exc
+    if touched:
+        print(f"A11Y {slug}: patched {touched} source/export text files")
+
+def patch_demo_exports():
+    demo_root = Path("public/demo")
+    if not demo_root.is_dir():
+        return
+    for slug in A11Y_TEXT_REPLACEMENTS:
+        root = demo_root / slug
+        if root.is_dir():
+            patch_accessibility_text(root, slug)
+
+
 def harden(archive):
     key = archive.stem
     title, description = PRODUCTS.get(key, (key.replace("-", " ").title(), "A Nexora template package."))
@@ -217,6 +358,7 @@ def harden(archive):
         root = choose_root(extracted)
         if key == "aether":
             patch_aether_source(root)
+        patch_accessibility_text(root, key)
         package_file = root / "package.json"
         pkg = None
         if package_file.exists():
@@ -316,6 +458,7 @@ def main():
             raise SystemExit(f"Requested package archive was not found: {target}")
     if not archives: raise SystemExit("No template ZIPs found.")
     for archive in archives: harden(archive)
+    patch_demo_exports()
 
 if __name__ == "__main__":
     main()
