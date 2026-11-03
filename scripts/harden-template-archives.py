@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Harden the exact ZIPs sold by Nexora without bundling node_modules or secrets."""
-import json, re, shutil, subprocess, tempfile, zipfile
+import json, os, re, shutil, subprocess, tempfile, zipfile
 from pathlib import Path
 
 ROOT = Path("public/downloads")
@@ -309,6 +309,11 @@ def main():
     if not ROOT.is_dir():
         raise SystemExit(f"Missing downloads directory: {ROOT}")
     archives = [p for p in sorted(ROOT.glob("*.zip")) if not p.name.startswith("Nexora-All-Templates")]
+    target = os.environ.get("NEXORA_PACKAGE_TARGET", "").strip()
+    if target:
+        archives = [p for p in archives if p.name.lower() == target.lower()]
+        if not archives:
+            raise SystemExit(f"Requested package archive was not found: {target}")
     if not archives: raise SystemExit("No template ZIPs found.")
     for archive in archives: harden(archive)
 
