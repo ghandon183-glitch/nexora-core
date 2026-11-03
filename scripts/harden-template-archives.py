@@ -244,7 +244,7 @@ A11Y_TEXT_REPLACEMENTS = {
     "creative-agency": [
         (r"--violet\\s*:\\s*#8b5cf6\\s*;", "--violet:#6d28d9;"),
         (r"--violet-bright\\s*:\\s*#a683ff\\s*;", "--violet-bright:#6d28d9;"),
-        ("text-text-muted/50", "text-text-muted/80"),
+        ("text-text-muted/50", "text-text-muted"),
     ],
     "premium-portfolio": [
         (r"--color-ink-mute\\s*:\\s*#6b6b75\\s*;", "--color-ink-mute:#9a9aa3;"),
@@ -279,6 +279,19 @@ def patch_accessibility_text(root, key):
             else:
                 updated = updated.replace(pattern, replacement)
         if path.suffix.lower() not in {".tsx", ".jsx", ".html", ".txt"}:
+            if path.suffix.lower() == ".css":
+                if slug == "modern-saas":
+                    if "[data-theme=dark]{--moss-bright:" not in updated:
+                        updated = re.sub(r"(\\[data-theme=dark\\]\\{)", r"\\1--moss-bright:#7cae87;", updated)
+                    if "[data-theme=light]{--moss-bright:" not in updated:
+                        updated = re.sub(r"(\\[data-theme=light\\]\\{)", r"\\1--moss-bright:#31563b;", updated)
+                if slug == "admin-dashboard":
+                    if "[data-theme=dark]{--teal-bright:" not in updated:
+                        updated = re.sub(r"(\\[data-theme=dark\\]\\{)", r"\\1--teal-bright:#4cc9d0;--danger:#ff8b78;", updated)
+                    if "[data-theme=light]{--teal-bright:" not in updated:
+                        updated = re.sub(r"(\\[data-theme=light\\]\\{)", r"\\1--teal-bright:#0f5257;--danger:#b91c1c;", updated)
+                if slug == "creative-agency" and "[data-theme=dark] .text-violet{color:#a683ff}" not in updated:
+                    updated += "\\n[data-theme=dark] .text-violet{color:#a683ff}"
             if updated != original:
                 path.write_text(updated, encoding="utf-8")
                 touched += 1
