@@ -6,7 +6,10 @@ on:
   push:
     paths:
       - "public/downloads/**"
-      - "public/demo/vesper/**"
+      - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+      - ".github/workflows/audit-template-packages.yml"
+      - "public/demo/**"
       - ".github/workflows/deep-template-quality.yml"
       - "lib/data/templates.ts"
       - "lib/data/template-guides.ts"
@@ -15,7 +18,10 @@ on:
   pull_request:
     paths:
       - "public/downloads/**"
-      - "public/demo/vesper/**"
+      - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+      - ".github/workflows/audit-template-packages.yml"
+      - "public/demo/**"
       - ".github/workflows/deep-template-quality.yml"
       - "lib/data/templates.ts"
       - "lib/data/template-guides.ts"
@@ -208,17 +214,19 @@ jobs:
               if (!fs.existsSync(file)) { console.log(`${demo}: NOT FOUND`); continue; }
               const page = await browser.newPage({viewport:{width:1440,height:900}});
               const errors=[]; const pageErrors=[]; const failed=[];
-              page.on('console',m=>{if(m.type()==='error') errors.push(m.text())});
-              page.on('pageerror',e=>pageErrors.push(String(e)));
-              page.on('requestfailed',r=>failed.push(r.url()));
+              page.on('console',m=>{if(m.type()==='error') errors.push({text:m.text(),location:m.location()})});
+              page.on('pageerror',e=>pageErrors.push({message:e.message,stack:e.stack || null}));
+              page.on('requestfailed',r=>failed.push({url:r.url(),failure:r.failure()?.errorText || 'unknown'}));
               try {
-                await page.goto(`http://127.0.0.1:4174/demo/${demo}/index.html`,{waitUntil:'networkidle',timeout:30000});
+                await page.goto(`http://127.0.0.1:4174/demo/${demo}/`,{waitUntil:'networkidle',timeout:30000});
                 await page.addScriptTag({content:axe.source});
                 const a11y = await page.evaluate(async()=>await axe.run(document));
                 const importantViolations = a11y.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
-                const sameOriginFailed = failed.filter(url => url.startsWith(base));
-                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,html:v.nodes.slice(0,8).map(n=>n.html)}))));
+                const sameOriginFailed = failed.filter(request => request.url.startsWith(base));
+                console.log('CONSOLE_ERRORS ' + demo + ' ' + JSON.stringify(errors));
+                console.log('PAGE_ERRORS ' + demo + ' ' + JSON.stringify(pageErrors));
                 console.log('FAILED_REQUESTS ' + demo + ' ' + JSON.stringify(sameOriginFailed));
+                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,details:v.nodes.slice(0,8).map(n=>({target:n.target,html:n.html,failureSummary:n.failureSummary}))}))));
                 await page.setViewportSize({width:390,height:844});
                 const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
                 const productionBlocking = demo === 'vesper';
