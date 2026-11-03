@@ -249,6 +249,7 @@ A11Y_TEXT_REPLACEMENTS = {
     "premium-portfolio": [
         (r"--color-ink-mute\\s*:\\s*#6b6b75\\s*;", "--color-ink-mute:#9a9aa3;"),
     ],
+    "vesper": [],
 }
 
 def normalize_template_key(key):
