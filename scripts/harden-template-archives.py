@@ -214,9 +214,8 @@ A11Y_TEXT_REPLACEMENTS = {
         ("text-forest/50", "text-forest/80"),
     ],
     "modern-saas": [
-        (r"--moss-bright\s*:\s*#5c8768\s*;", "--moss-bright:#3f6b4f;"),
-        ("text-moss-bright", "text-moss"),
-        ("text-text-muted/30", "text-text-muted/75"),
+        (r"--moss-bright\s*:\s*#5c8768\s*;", "--moss-bright:#7cae87;"),
+        ("text-text-muted/30", "text-text-muted"),
     ],
     "nexi-ai": [
         ("text-slate-500", "text-slate-400"),
@@ -243,7 +242,6 @@ A11Y_TEXT_REPLACEMENTS = {
     ],
     "creative-agency": [
         (r"--violet\s*:\s*#8b5cf6\s*;", "--violet:#6d28d9;"),
-        (r"--violet-bright\s*:\s*#a683ff\s*;", "--violet-bright:#6d28d9;"),
         ("text-text-muted/50", "text-text-muted"),
     ],
     "premium-portfolio": [
