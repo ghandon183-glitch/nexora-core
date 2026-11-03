@@ -273,10 +273,8 @@ def patch_accessibility_text(root, key):
             continue
         updated = original
         for pattern, replacement in replacements:
-            updated, count = re.subn(pattern, replacement, updated) if pattern.startswith("r") and False else (updated, 0)
-            # Plain replacements are intentionally literal; color definitions below are handled by regex.
-            if pattern.startswith("--"):
-                updated = updated.replace(pattern, replacement)
+            if "\\" in pattern:
+                updated = re.sub(pattern, replacement, updated, flags=re.I)
             else:
                 updated = updated.replace(pattern, replacement)
         if slug == "kiln-estates":
