@@ -40,7 +40,6 @@ test("PayMeGate confirmation to D1, retryable emails, authorized download, and d
     makeOrder({
       template_slug: "vesper",
       template_title: "Vesper",
-      currency: "USD",
       payment_provider: "paymegate",
     }),
   );
