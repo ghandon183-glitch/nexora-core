@@ -68,4 +68,8 @@ jobs:
             exit 0
           fi
           git commit -m "chore(packages): add release docs and refresh stable Next.js"
+          # The branch may receive workflow or test commits while ZIP checks run.
+          # Rebase the archive-only commit onto the latest branch before pushing.
+          git fetch origin "${GITHUB_REF_NAME}"
+          git rebase "origin/${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
