@@ -218,7 +218,8 @@ A11Y_TEXT_REPLACEMENTS = {
         ("text-text-muted/30", "text-text-muted"),
     ],
     "nexi-ai": [
-        ("text-slate-500", "text-slate-400"),
+        ("text-slate-500", "text-slate-300"),
+        ("text-slate-400", "text-slate-300"),
     ],
     "premium-blog": [
         (r"--color-accent\s*:\s*#c2410c\s*;", "--color-accent:#9a3412;"),
@@ -249,6 +250,234 @@ A11Y_TEXT_REPLACEMENTS = {
     ],
     "vesper": [],
 }
+
+
+def patch_nexi_ai_source(root):
+    # Nexi AI is a front-end landing-page template, not a hosted AI product.
+    replace_source(root, "components/hero.tsx",
+        """const STATS = [
+  { value: "2.4M+", label: "Conversations handled" },
+  { value: "99.9%", label: "Uptime SLA" },
+  { value: "<200ms", label: "Avg response time" },
+];""",
+        """const STATS = [
+  { value: "Your data", label: "Connect approved knowledge sources" },
+  { value: "Your rules", label: "Configure verified safeguards" },
+  { value: "Your team", label: "Keep escalation under your control" },
+];""")
+    replace_source(root, "components/hero.tsx", "Live AI Agent Platform", "AI support landing page template")
+    replace_source(root, "components/hero.tsx",
+        "Ship a production-ready AI support agent in a weekend — trained on your docs,\n            wired to your tools, and live on your site by tonight. No ML team required.",
+        "A polished starting point for an AI support product website. Customize the copy,\n            connect your real services, and publish only capabilities you have verified.")
+    replace_source(root, "components/agent-chat-card.tsx", "Nexi Assistant", "Example assistant")
+    replace_source(root, "components/agent-chat-card.tsx", "Online — replies instantly", "Illustrative sample")
+    replace_source(root, "components/agent-chat-card.tsx", "● Live", "DEMO")
+    replace_source(root, "components/agent-chat-card.tsx",
+        "Hi! Can I get a refund on order #4821? It arrived damaged.",
+        "I need help with an order that arrived damaged.")
+    replace_source(root, "components/agent-chat-card.tsx",
+        "So sorry about that! I've checked order #4821 — I can issue a full refund\n            right now, or send a free replacement. Which works better?",
+        "This example shows how a support agent might explain next steps. A real product\n            must verify the order and follow its configured refund policy.")
+    replace_source(root, "components/agent-chat-card.tsx", "Resolved in 12s", "Example workflow")
+    replace_source(root, "components/agent-chat-card.tsx", "No human handoff needed", "Illustrative content only")
+    replace_source(root, "components/agent-chat-card.tsx", "Type a message...", "Demo input — not connected")
+    replace_source(root, "components/features.tsx", "Trained on your docs", "Knowledge sources")
+    replace_source(root, "components/features.tsx",
+        "Point it at your help center, PDFs, or a Notion workspace. It learns your product in minutes, not weeks.",
+        "Describe the sources your implementation can actually ingest and the setup steps required.")
+    replace_source(root, "components/features.tsx", "20+ integrations", "Your integrations")
+    replace_source(root, "components/features.tsx",
+        "Slack, Zendesk, Stripe, and your own API — connect in a few clicks.",
+        "List only integrations your product really supports and that you have tested.")
+    replace_source(root, "components/features.tsx", "Sub-200ms replies", "Measured response times")
+    replace_source(root, "components/features.tsx",
+        "Edge-deployed inference keeps conversations feeling instant.",
+        "Add response-time benchmarks only after measuring them in your own deployment.")
+    replace_source(root, "components/features.tsx", "Guardrails built in", "Configurable controls")
+    replace_source(root, "components/features.tsx",
+        "Set boundaries on tone, topics, and actions the agent can take — with a human handoff for anything outside them.",
+        "Explain the controls, permissions, and human-escalation paths your implementation really provides.")
+    replace_source(root, "components/features.tsx", "Live analytics", "Operational analytics")
+    replace_source(root, "components/features.tsx",
+        "Resolution rate, sentiment, and drop-off, updated in real time.",
+        "Show only metrics your deployed product actually measures and can substantiate.")
+    replace_source(root, "components/features.tsx", "40+ languages", "Language support")
+    replace_source(root, "components/features.tsx",
+        "Detects and replies in the customer's language automatically.",
+        "List supported languages only after validating answer quality in each language.")
+    replace_source(root, "components/features.tsx",
+        "Not a chatbot that reads from a script — an agent that checks real data before it answers.",
+        "Use this section to describe verified product capabilities, integrations, and safeguards.")
+    replace_source(root, "components/how-it-works.tsx", "Live in an afternoon, not a quarter", "A clear path from setup to launch")
+    replace_source(root, "components/how-it-works.tsx",
+        "Link your docs, help center, and APIs. Nexi indexes everything automatically.",
+        "Connect the knowledge sources supported by your implementation and verify the sync.")
+    replace_source(root, "components/how-it-works.tsx",
+        "Define what the agent can do, say, and escalate — in plain language, no code.",
+        "Configure the instructions, permissions, and escalation rules your product supports.")
+    replace_source(root, "components/how-it-works.tsx",
+        "Drop a single snippet into your site. The agent is live and learning immediately.",
+        "Integrate the approved widget or API and test it in a staging environment before launch.")
+    replace_source(root, "components/how-it-works.tsx", "Watch it resolve tickets", "Monitor and improve")
+    replace_source(root, "components/how-it-works.tsx",
+        "Track every conversation, reasoning step, and outcome from the live dashboard.",
+        "Use your real analytics and support workflows to measure quality after deployment.")
+    replace_source(root, "components/logo-strip.tsx",
+        'const STACK = ["Next.js", "OpenAI", "Anthropic", "Slack", "Zendesk", "Stripe"];',
+        'const STACK = ["Help center", "CRM", "Support inbox", "Analytics", "Billing", "Your API"];')
+    replace_source(root, "components/logo-strip.tsx", "Connects with", "Example categories")
+    replace_source(root, "components/pricing.tsx",
+        '<div className="mt-16 grid gap-6 lg:grid-cols-3">',
+        '<p className="mt-5 text-center text-sm text-slate-300">Sample plans and prices — replace these with your actual offer and terms before publishing.</p>\n        <div className="mt-10 grid gap-6 lg:grid-cols-3">')
+    replace_source(root, "components/pricing.tsx", 'href="#"', 'href="#contact"')
+    replace_source(root, "components/cta.tsx",
+        '<section className="relative overflow-hidden py-24 lg:py-32">',
+        '<section id="contact" className="relative overflow-hidden py-24 lg:py-32">')
+    replace_source(root, "components/cta.tsx", "Your first agent is free to build.", "Ready to make this template yours?")
+    replace_source(root, "components/cta.tsx",
+        "Connect a data source and have it answering real questions in the next ten minutes.",
+        "Connect your real signup, contact, or demo destination here before publishing.")
+    replace_source(root, "components/cta.tsx", "Start Building Free", "Explore sample pricing")
+    replace_source(root, "components/nav.tsx",
+        'href="#" className="text-sm font-medium text-slate-300 hover:text-white"',
+        'href="#contact" className="text-sm font-medium text-slate-300 hover:text-white"')
+    replace_source(root, "components/footer.tsx",
+        '<h4 className="text-sm font-semibold text-white">',
+        '<h3 className="text-sm font-semibold text-white">')
+    replace_source(root, "components/footer.tsx", "</h4>", "</h3>")
+    replace_source(root, "components/footer.tsx", 'href="#"', 'href="#contact"')
+
+    testimonials = root / "components" / "testimonials.tsx"
+    if testimonials.exists():
+        testimonials.write_text("""const ITEMS = [
+  {
+    title: "Verified outcomes",
+    body: "Publish measurable results only when you can substantiate them.",
+    note: "Add an approved metric and its source",
+  },
+  {
+    title: "Real customer voices",
+    body: "Use customer quotes only with permission and accurate attribution.",
+    note: "Add the customer's approved name and role",
+  },
+  {
+    title: "Transparent workflows",
+    body: "Show how your product handles data, safeguards, and human escalation.",
+    note: "Link to your real product documentation",
+  },
+];
+
+export default function Testimonials() {
+  return (
+    <section className="relative py-28 lg:py-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 px-4 py-2 text-sm font-semibold text-fuchsia-300">
+            Evidence customers can verify
+          </span>
+          <h2 className="mt-6 font-display text-4xl font-extrabold text-white sm:text-5xl">
+            Build trust with proof, not placeholder claims
+          </h2>
+        </div>
+        <div className="mt-16 grid gap-5 lg:grid-cols-3">
+          {ITEMS.map((item) => (
+            <article key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.02] p-7">
+              <p className="text-[15px] leading-relaxed text-slate-300">{item.body}</p>
+              <div className="mt-5 border-t border-white/5 pt-5">
+                <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                <p className="text-xs text-slate-300">{item.note}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+""", encoding="utf-8")
+
+    faq = root / "components" / "faq.tsx"
+    if faq.exists():
+        faq.write_text('''"use client";
+
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
+const FAQS = [
+  {
+    q: "Does this ZIP include a working AI agent backend?",
+    a: "No. This package contains a front-end landing-page template and sample UI. Connect your own AI service, data sources, authentication, and support workflows.",
+  },
+  {
+    q: "Can I publish the included metrics and testimonials?",
+    a: "They are illustrative placeholders. Replace them with verified performance data and customer quotes you have permission to publish.",
+  },
+  {
+    q: "Are the listed integrations and capabilities included?",
+    a: "The page is a marketing template; it does not connect the services shown. Update the copy to match your real integrations and tested capabilities.",
+  },
+  {
+    q: "Can I customize pricing and calls to action?",
+    a: "Yes. Edit the sample plans and replace every placeholder link with your own signup, booking, or contact destination before publishing.",
+  },
+  {
+    q: "What does one purchase cover?",
+    a: "One purchase covers one end product under LICENSE.md. Review the included license before using the template for client work or multiple products.",
+  },
+];
+
+export default function FAQ() {
+  const [open, setOpen] = useState<number | null>(0);
+
+  return (
+    <section id="faq" className="relative py-28 lg:py-36">
+      <div className="mx-auto max-w-3xl px-6 lg:px-10">
+        <div className="text-center">
+          <h2 className="font-display text-4xl font-extrabold text-white sm:text-5xl">
+            Questions, answered
+          </h2>
+        </div>
+        <div className="mt-12 flex flex-col gap-3">
+          {FAQS.map((item, i) => {
+            const isOpen = open === i;
+            return (
+              <div key={item.q} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+                <button
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                >
+                  <span className="font-display text-base font-semibold text-white">{item.q}</span>
+                  <ChevronDown size={18} className={isOpen ? "shrink-0 text-slate-300 transition-transform rotate-180" : "shrink-0 text-slate-300 transition-transform"} />
+                </button>
+                {isOpen && <p className="px-6 pb-5 text-sm leading-relaxed text-slate-300">{item.a}</p>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+''', encoding="utf-8")
+
+    readme = root / "README.md"
+    current = read_text(readme)
+    current = current.replace(
+        "A production-ready landing page template for AI agent, chatbot, and automation products.",
+        "A customizable front-end landing page template for AI agent, chatbot, and automation products. It does not include a hosted AI agent or backend service.")
+    current = current.replace(
+        "Commercial license included with purchase — use in unlimited personal or client\nprojects. Redistribution or resale of the template itself is not permitted.",
+        "Commercial license included with purchase — one end product per purchase. Client work is allowed within the included single-end-product license. Redistribution or resale of the template source is not permitted.")
+    if "## Before publishing" not in current:
+        current += """
+
+## Before publishing
+
+This ZIP is a front-end template, not a hosted AI agent, model, backend, or integration service. Replace all sample metrics, testimonials, customer names, pricing, integration labels, and links with accurate information for your own product. Publish performance claims and customer proof only when you can substantiate them and have permission to use them. Connect and test your own backend, authentication, data sources, and support workflows.
+"""
+    readme.write_text(current, encoding="utf-8")
+
 
 def normalize_template_key(key):
     return "vesper" if key.lower().startswith("nexora-template-12-vesper") else key.lower()
@@ -373,6 +602,8 @@ def harden(archive):
         root = choose_root(extracted)
         if key == "aether":
             patch_aether_source(root)
+        if key == "nexi-ai":
+            patch_nexi_ai_source(root)
         patch_accessibility_text(root, key)
         package_file = root / "package.json"
         pkg = None
