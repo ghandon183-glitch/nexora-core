@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useRouter, Link } from "@/i18n/navigation";
 import { trackAnalyticsEvent } from "@/lib/analytics/track-event";
+import { shouldTrackPurchase } from "@/lib/analytics/purchase-dedupe";
 
 import { getTemplate } from "@/lib/data/get-template";
 import { useAuth } from "@/lib/context/auth-context";
@@ -164,6 +165,11 @@ export default function CheckoutPage() {
       } catch {
         // Ignore unavailable session storage.
       }
+    }
+
+    if (!shouldTrackPurchase(order.id)) {
+      purchaseTrackedRef.current = true;
+      return;
     }
 
     purchaseTrackedRef.current = true;
