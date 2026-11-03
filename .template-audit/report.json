@@ -1,9 +1,9 @@
 [
   {
     "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
-    "bytes": 102216,
-    "sha256": "7c84bea7689e1120ea3a31ed21385287e0f1f5450907ee5a8e50b06bbe2b635b",
-    "files": 45,
+    "bytes": 135473,
+    "sha256": "932d6f6179e7283d873e8cef918a4d06350b552f975bd005d53e215d90a2f159",
+    "files": 47,
     "readmes": [
       "README.md"
     ],
@@ -21,17 +21,18 @@
     ],
     "asset_count": 5,
     "asset_samples": [
-      "src/assets/images/vesper_video_frame_1790162217348.webp",
-      "src/assets/images/vesper_fashion_previs_1790162254947.webp",
       "src/assets/images/vesper_audio_visual_1790162242624.webp",
+      "src/assets/images/vesper_fashion_previs_1790162254947.webp",
+      "src/assets/images/vesper_hero_cinematic_1790162202012.webp",
       "src/assets/images/vesper_showcase_portrait_1790162229168.webp",
-      "src/assets/images/vesper_hero_cinematic_1790162202012.webp"
+      "src/assets/images/vesper_video_frame_1790162217348.webp"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
       "http://www.w3.org/2000/",
       "https://font",
+      "https://nexora-core.nxora.worker",
       "keyword:fonts.googleapis",
       "keyword:fonts.gstatic"
     ],
@@ -76,14 +77,15 @@
   },
   {
     "package": "admin-dashboard.zip",
-    "bytes": 29730,
-    "sha256": "ee671c708cb310184f9cb182da4123b91d5d04271216ef26cce8ad005df43940",
-    "files": 36,
+    "bytes": 85219,
+    "sha256": "effc3fd9cf35e0d6459ceca2084c37fda9f0acd836c5e11b73b128762f54c7f9",
+    "files": 40,
     "readmes": [
       "admin-dashboard-template/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "admin-dashboard-template/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -91,18 +93,21 @@
     "package_json": [
       "admin-dashboard-template/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "admin-dashboard-template/.env.example"
+    ],
     "asset_count": 5,
     "asset_samples": [
-      "admin-dashboard-template/public/next.svg",
-      "admin-dashboard-template/public/window.svg",
       "admin-dashboard-template/public/file.svg",
       "admin-dashboard-template/public/globe.svg",
-      "admin-dashboard-template/public/vercel.svg"
+      "admin-dashboard-template/public/next.svg",
+      "admin-dashboard-template/public/vercel.svg",
+      "admin-dashboard-template/public/window.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj",
       "https://rechart"
     ],
@@ -119,7 +124,7 @@
         },
         "dependencies": {
           "lucide-react": "^1.23.0",
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "recharts": "^3.9.2"
@@ -130,18 +135,21 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "aether.zip",
-    "bytes": 10476133,
-    "sha256": "6e62fcd652422c07bb5f8fdc420f24f0108539edc0db84c8e25f21250f4d5e87",
-    "files": 50,
+    "bytes": 10444372,
+    "sha256": "b9f6bc2689f42d734401962b09ff31518e05fad4830ff7bf75ff9dae2b0360a1",
+    "files": 52,
     "readmes": [
       "README.md"
     ],
@@ -154,7 +162,9 @@
     "package_json": [
       "package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      ".env.example"
+    ],
     "asset_count": 18,
     "asset_samples": [
       "public/apple-icon.png",
@@ -184,6 +194,7 @@
       "https://dribbble.com",
       "https://in",
       "https://linkedin.com",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -201,12 +212,11 @@
           "@base-ui/react": "^1.5.0",
           "@react-three/drei": "^10.7.8",
           "@react-three/fiber": "^9.7.0",
-          "@vercel/analytics": "1.6.1",
           "class-variance-authority": "^0.7.1",
           "clsx": "^2.1.1",
           "framer-motion": "^13.1.0",
           "lucide-react": "^1.16.0",
-          "next": "16.4.2",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.3.1",
@@ -221,27 +231,30 @@
           "@types/three": "^0.185.4",
           "postcss": "^8.5",
           "tailwindcss": "^4.3.3",
-          "typescript": "5.7.3",
-          "shadcn": "^4.8.0"
+          "typescript": "5.7.3"
         },
         "pnpm": {
           "overrides": {
             "hono": "4.12.25"
           }
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "aurelia-store.zip",
-    "bytes": 1675253,
-    "sha256": "471f0fa1eec5e13e81216180cc2701aa57251e3f219d4d1e2f7e63ccc82089f0",
-    "files": 39,
+    "bytes": 1727447,
+    "sha256": "fc54db18737d5f771cbd66dca30491f5c15bdfaa405958b76be12945fb19a578",
+    "files": 43,
     "readmes": [
       "aurelia-store/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "aurelia-store/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -249,23 +262,26 @@
     "package_json": [
       "aurelia-store/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "aurelia-store/.env.example"
+    ],
     "asset_count": 10,
     "asset_samples": [
-      "aurelia-store/public/images/rings-pair.jpg",
-      "aurelia-store/public/images/chain-macro.jpg",
-      "aurelia-store/public/images/vase-dried-flowers.jpg",
-      "aurelia-store/public/images/necklace-worn.jpg",
-      "aurelia-store/public/images/ring-cluster.jpg",
-      "aurelia-store/public/images/ring-bee.jpg",
       "aurelia-store/public/images/candles-lit.jpg",
       "aurelia-store/public/images/ceramic-vases-colorful.jpg",
+      "aurelia-store/public/images/chain-macro.jpg",
+      "aurelia-store/public/images/necklace-heart.jpg",
+      "aurelia-store/public/images/necklace-worn.jpg",
+      "aurelia-store/public/images/ring-bee.jpg",
+      "aurelia-store/public/images/ring-cluster.jpg",
       "aurelia-store/public/images/ring-engraved.jpg",
-      "aurelia-store/public/images/necklace-heart.jpg"
+      "aurelia-store/public/images/rings-pair.jpg",
+      "aurelia-store/public/images/vase-dried-flowers.jpg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -286,7 +302,7 @@
           "framer-motion": "^12.42.0",
           "gsap": "^3.13.0",
           "lucide-react": "^1.21.0",
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.6.0"
@@ -297,23 +313,27 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "creative-agency.zip",
-    "bytes": 32797,
-    "sha256": "287e79ff26c1cdf0481e6ffe73a88d03198651a84ec77f23cb53660b0be7d392",
-    "files": 39,
+    "bytes": 83845,
+    "sha256": "3758f08bb6a62b3175388473055034fb8d2cbd307df51c9c3c64bc23ac42423a",
+    "files": 43,
     "readmes": [
       "creative-agency-template/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "creative-agency-template/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -321,19 +341,22 @@
     "package_json": [
       "creative-agency-template/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "creative-agency-template/.env.example"
+    ],
     "asset_count": 5,
     "asset_samples": [
-      "creative-agency-template/public/next.svg",
-      "creative-agency-template/public/window.svg",
       "creative-agency-template/public/file.svg",
       "creative-agency-template/public/globe.svg",
-      "creative-agency-template/public/vercel.svg"
+      "creative-agency-template/public/next.svg",
+      "creative-agency-template/public/vercel.svg",
+      "creative-agency-template/public/window.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
       "http://www.w3.org/2000/",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -348,7 +371,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -358,18 +381,21 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "kiln-estates.zip",
-    "bytes": 1917678,
-    "sha256": "69429fa3bc467359159dace37830083af196ee393db0a53b77f2120d3626cdde",
-    "files": 36,
+    "bytes": 1918283,
+    "sha256": "c9150284d181c6bfb646958d0a9fb466045daf159b54559a299da84fbc8cac5d",
+    "files": 38,
     "readmes": [
       "README.md"
     ],
@@ -382,7 +408,9 @@
     "package_json": [
       "package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      ".env.example"
+    ],
     "asset_count": 9,
     "asset_samples": [
       "public/file.svg",
@@ -398,6 +426,7 @@
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj",
       "https://un",
       "keyword:unsplash"
@@ -414,7 +443,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.4.2",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -424,23 +453,27 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "modern-saas.zip",
-    "bytes": 33456,
-    "sha256": "39135cc055c233a4dc04963331938ef8d1e192038496817fcd0d823600b3a761",
-    "files": 40,
+    "bytes": 84469,
+    "sha256": "192f6e2e27678f31812dfc1a3422a4da5ecda7e4714782e9284ebe53f9cda3c1",
+    "files": 44,
     "readmes": [
       "modern-saas-template/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "modern-saas-template/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -448,18 +481,21 @@
     "package_json": [
       "modern-saas-template/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "modern-saas-template/.env.example"
+    ],
     "asset_count": 5,
     "asset_samples": [
-      "modern-saas-template/public/next.svg",
-      "modern-saas-template/public/window.svg",
       "modern-saas-template/public/file.svg",
       "modern-saas-template/public/globe.svg",
-      "modern-saas-template/public/vercel.svg"
+      "modern-saas-template/public/next.svg",
+      "modern-saas-template/public/vercel.svg",
+      "modern-saas-template/public/window.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -474,7 +510,7 @@
           "lint": "eslint"
         },
         "dependencies": {
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -484,18 +520,21 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 80332,
-    "sha256": "5824f4f5312e512cdeed2594eff905158b0d67fa06019c3076d6a1be7538cab2",
-    "files": 30,
+    "bytes": 80944,
+    "sha256": "6d0ba601c861739381e9fa8876002722618d420610b33ffc7ca68ffc03d01e54",
+    "files": 32,
     "readmes": [
       "README.md"
     ],
@@ -508,12 +547,15 @@
     "package_json": [
       "package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      ".env.example"
+    ],
     "asset_count": 0,
     "asset_samples": [],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -530,7 +572,7 @@
         "dependencies": {
           "framer-motion": "^12.42.2",
           "lucide-react": "^1.24.0",
-          "next": "16.4.2",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4"
         },
@@ -540,23 +582,27 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "premium-blog.zip",
-    "bytes": 27892,
-    "sha256": "41d0ada0fecbe362a7a7530f4d9e5c65f376f9fc36c677bf3501c04017327d65",
-    "files": 32,
+    "bytes": 79937,
+    "sha256": "0d3df6a87c1a83589cbcfa2716f7f61688c81b1684f1612dbc44a1615d6ba269",
+    "files": 36,
     "readmes": [
       "premium-blog/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "premium-blog/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -564,12 +610,15 @@
     "package_json": [
       "premium-blog/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "premium-blog/.env.example"
+    ],
     "asset_count": 0,
     "asset_samples": [],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -589,7 +638,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.0",
           "lucide-react": "^1.21.0",
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.6.0"
@@ -600,23 +649,27 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "premium-portfolio.zip",
-    "bytes": 605640,
-    "sha256": "35168566a1584412e280a6654ea1a115850e2d4bb99263984e5856bee51b190d",
-    "files": 43,
+    "bytes": 664545,
+    "sha256": "c64af2c69457281a73acfc82fca13d9516080d4aab1501c301eea0cd75261371",
+    "files": 47,
     "readmes": [
       "premium-portfolio/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "premium-portfolio/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -624,25 +677,28 @@
     "package_json": [
       "premium-portfolio/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "premium-portfolio/.env.example"
+    ],
     "asset_count": 11,
     "asset_samples": [
-      "premium-portfolio/public/images/gallery-2.jpg",
-      "premium-portfolio/public/images/hero.jpg",
-      "premium-portfolio/public/images/project-4.jpg",
-      "premium-portfolio/public/images/hero-depth.png",
+      "premium-portfolio/public/images/about.jpg",
       "premium-portfolio/public/images/gallery-1.jpg",
+      "premium-portfolio/public/images/gallery-2.jpg",
+      "premium-portfolio/public/images/gallery-3.jpg",
+      "premium-portfolio/public/images/gallery-4.jpg",
+      "premium-portfolio/public/images/hero-depth.png",
+      "premium-portfolio/public/images/hero.jpg",
       "premium-portfolio/public/images/project-1.jpg",
       "premium-portfolio/public/images/project-2.jpg",
-      "premium-portfolio/public/images/about.jpg",
       "premium-portfolio/public/images/project-3.jpg",
-      "premium-portfolio/public/images/gallery-4.jpg",
-      "premium-portfolio/public/images/gallery-3.jpg"
+      "premium-portfolio/public/images/project-4.jpg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
       "https://example.com/",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -664,7 +720,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.0",
           "lucide-react": "^1.21.0",
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "^19.2.4",
           "tailwind-merge": "^3.6.0",
@@ -677,23 +733,27 @@
           "@types/react-dom": "^19",
           "@types/three": "^0.180.0",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "premium-restaurant.zip",
-    "bytes": 23466,
-    "sha256": "478f8d038f3a26b23849c99e3f10f79dd91fc0bd34eba648c4dba1016b55d34c",
-    "files": 31,
+    "bytes": 75585,
+    "sha256": "0cc29c39a9c79f74f047e312587704c8a678c9dd26f9f8f8f1b3edea3903b144",
+    "files": 35,
     "readmes": [
       "premium-restaurant/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "premium-restaurant/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -701,12 +761,15 @@
     "package_json": [
       "premium-restaurant/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "premium-restaurant/.env.example"
+    ],
     "asset_count": 0,
     "asset_samples": [],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -726,7 +789,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.0",
           "lucide-react": "^1.21.0",
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "19.2.4",
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.6.0"
@@ -737,23 +800,27 @@
           "@types/react": "^19",
           "@types/react-dom": "^19",
           "eslint": "^9",
-          "eslint-config-next": "16.3.6",
+          "eslint-config-next": "16.4.3",
           "tailwindcss": "^4",
           "typescript": "^5"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
   },
   {
     "package": "solace-studio.zip",
-    "bytes": 13767147,
-    "sha256": "5fb57c8a9546f5b028f2c353f3f231becb7bc0d8b879730efdcecc126767eccb",
-    "files": 51,
+    "bytes": 13807387,
+    "sha256": "f9d713162e872438680648e3e60f1e9c205e872865eae4cbb9d27042f13ad469",
+    "files": 55,
     "readmes": [
       "solace-studio/README.md"
     ],
     "licenses": [
-      "LICENSE.md"
+      "LICENSE.md",
+      "solace-studio/LICENSE.md"
     ],
     "asset_manifests": [
       "ASSET-LICENSES.md"
@@ -761,32 +828,35 @@
     "package_json": [
       "solace-studio/package.json"
     ],
-    "env_examples": [],
+    "env_examples": [
+      "solace-studio/.env.example"
+    ],
     "asset_count": 18,
     "asset_samples": [
-      "solace-studio/public/placeholder-logo.png",
-      "solace-studio/public/icon-light-32x32.png",
       "solace-studio/public/apple-icon.png",
       "solace-studio/public/icon-dark-32x32.png",
-      "solace-studio/public/placeholder-user.jpg",
-      "solace-studio/public/placeholder.jpg",
+      "solace-studio/public/icon-light-32x32.png",
       "solace-studio/public/icon.svg",
-      "solace-studio/public/placeholder.svg",
-      "solace-studio/public/placeholder-logo.svg",
       "solace-studio/public/images/gallery-1.png",
-      "solace-studio/public/images/trainer-1.png",
       "solace-studio/public/images/gallery-2.png",
-      "solace-studio/public/images/trainer-2.png",
-      "solace-studio/public/images/trainer-3.png",
-      "solace-studio/public/images/hero-studio.png",
       "solace-studio/public/images/gallery-3.png",
       "solace-studio/public/images/gallery-4.png",
-      "solace-studio/public/images/gallery-5.png"
+      "solace-studio/public/images/gallery-5.png",
+      "solace-studio/public/images/hero-studio.png",
+      "solace-studio/public/images/trainer-1.png",
+      "solace-studio/public/images/trainer-2.png",
+      "solace-studio/public/images/trainer-3.png",
+      "solace-studio/public/placeholder-logo.png",
+      "solace-studio/public/placeholder-logo.svg",
+      "solace-studio/public/placeholder-user.jpg",
+      "solace-studio/public/placeholder.jpg",
+      "solace-studio/public/placeholder.svg"
     ],
     "bundled_build_artifacts": [],
     "external_asset_references": [
       "http://localho",
       "http://www.w3.org/2000/",
+      "https://nexora-core.nxora.worker",
       "https://nextj"
     ],
     "packages": [
@@ -809,7 +879,7 @@
           "clsx": "^2.1.1",
           "framer-motion": "^12.42.2",
           "lucide-react": "^1.16.0",
-          "next": "16.3.6",
+          "next": "16.4.3",
           "react": "^19",
           "react-dom": "^19",
           "shadcn": "^4.8.0",
@@ -824,6 +894,9 @@
           "postcss": "^8.5",
           "tailwindcss": "^4.3.3",
           "typescript": "5.7.3"
+        },
+        "overrides": {
+          "minimatch": "^11.0.1"
         }
       }
     ]
