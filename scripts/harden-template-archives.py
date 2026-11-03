@@ -278,6 +278,11 @@ def patch_accessibility_text(root, key):
                 updated = re.sub(pattern, replacement, updated, flags=re.I)
             else:
                 updated = updated.replace(pattern, replacement)
+        if path.suffix.lower() not in {".tsx", ".jsx", ".html", ".txt"}:
+            if updated != original:
+                path.write_text(updated, encoding="utf-8")
+                touched += 1
+            continue
         if slug == "kiln-estates":
             updated = re.sub(r"<h4(\\b[^>]*)>Explore</h4>", r"<h3\\1>Explore</h3>", updated)
         if slug == "nexi-ai":
@@ -294,7 +299,7 @@ def patch_accessibility_text(root, key):
                 return opening[:-1] + ' aria-label="Read article: ' + title + '">'
             updated = re.sub(r"""<(?:a|Link)\\b[^>]*href=(["'])/articles/[^"']+\\1[^>]*>""", label_article, updated, flags=re.I)
             updated = re.sub(
-                r"""(<(?:Link|a)\\b(?=[^>]*className?=["'][^"']*overflow-hidden rounded-lg)[^>]*)(>)""",
+                r"""(<(?:Link|a)\\b(?=[^>]*class(?:Name)?=["'][^"']*overflow-hidden rounded-lg)[^>]*)(>)""",
                 lambda m: m.group(1) + (' aria-label="Open article"' if not re.search(r"\\baria-label\\s*=", m.group(1), re.I) else "") + m.group(2),
                 updated,
                 flags=re.I,
