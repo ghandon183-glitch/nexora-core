@@ -286,7 +286,7 @@ def patch_nexi_ai_source(root):
         "Hi! Can I get a refund on order #4821? It arrived damaged.",
         "I need help with an order that arrived damaged.")
     replace_source(root, "components/agent-chat-card.tsx",
-        "So sorry about that! I've checked order #4821 — I can issue a full refund\n            right now, or send a free replacement. Which works better?",
+        "So sorry about that! I&apos;ve checked order #4821 — I can issue a full refund\n            right now, or send a free replacement. Which works better?",
         "This example shows how a support agent might explain next steps. A real product\n            must verify the order and follow its configured refund policy.")
     replace_source(root, "components/agent-chat-card.tsx", "Resolved in 12s", "Example workflow")
     replace_source(root, "components/agent-chat-card.tsx", "No human handoff needed", "Illustrative content only")
