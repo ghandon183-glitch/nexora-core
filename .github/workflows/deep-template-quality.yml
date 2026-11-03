@@ -7,6 +7,8 @@ on:
     paths:
       - "public/downloads/**"
       - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+      - ".github/workflows/audit-template-packages.yml"
       - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
       - "lib/data/templates.ts"
@@ -17,6 +19,8 @@ on:
     paths:
       - "public/downloads/**"
       - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+      - ".github/workflows/audit-template-packages.yml"
       - "public/demo/vesper/**"
       - ".github/workflows/deep-template-quality.yml"
       - "lib/data/templates.ts"
