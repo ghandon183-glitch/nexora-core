@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { getAllTemplates } from "@/lib/data/templates";
+import { getAllTemplates } from "@/lib/data/get-template";
 
 test("llms.txt links every public template and does not advertise hidden bundle checkout", () => {
   const content = readFileSync("public/llms.txt", "utf8");
