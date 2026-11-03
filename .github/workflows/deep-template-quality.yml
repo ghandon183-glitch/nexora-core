@@ -12,6 +12,7 @@ on:
       - "lib/data/template-guides.ts"
       - "components/product/purchase-card.tsx"
       - "components/product/product-demo-video.tsx"
+      - "scripts/harden-template-archives.py"
   pull_request:
     paths:
       - "public/downloads/**"
@@ -21,6 +22,7 @@ on:
       - "lib/data/template-guides.ts"
       - "components/product/purchase-card.tsx"
       - "components/product/product-demo-video.tsx"
+      - "scripts/harden-template-archives.py"
 
 concurrency:
   group: nexora-deep-template-quality-${{ github.ref }}
