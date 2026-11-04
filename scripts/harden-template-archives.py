@@ -503,12 +503,17 @@ def patch_nexi_ai_font(root):
             font_files.append((path, source))
 
     if not font_files:
+        local_layouts = [p for p in root.rglob("layout.tsx") if "@fontsource-variable/sora" in read_text(p)]
+        local_css = [p for p in root.rglob("globals.css") if '--font-sora:"Sora Variable"' in read_text(p)]
+        if local_layouts and local_css:
+            print("NEXI_LOCAL_FONT: already bundled")
+            return
         suspects = []
         for path in root.rglob("*.tsx"):
             source = read_text(path)
             if re.search(r"\bSora\b|\bfont\b", source, re.I):
                 suspects.append(str(path.relative_to(root)))
-        raise RuntimeError("Nexi AI remote Google font import was not found. Candidate TSX files: " + ", ".join(suspects[:20]))
+        raise RuntimeError("Nexi AI remote Google font import was not found and local font is not configured. Candidate TSX files: " + ", ".join(suspects[:20]))
 
     patched = 0
     font_identifier = None
