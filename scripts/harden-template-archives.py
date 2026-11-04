@@ -623,11 +623,11 @@ def add_id_to_section_containing(content, needle, target_id):
 
 def patch_template_link_destinations(content, slug):
     if slug == "aurelia-store":
-        if not re.search(r"<header\b[^>]*\bid=['"]top['"]", content, flags=re.I):
+        if not re.search(r"""<header\b[^>]*\bid=["']top["']""", content, flags=re.I):
             content = re.sub(r"<header\b", '<header id="top"', content, count=1, flags=re.I)
         content = add_id_to_section_containing(content, "New pieces, restocks, and studio notes", "contact")
     elif slug == "modern-saas":
-        if not re.search(r"<footer\b[^>]*\bid=['"]contact['"]", content, flags=re.I):
+        if not re.search(r"""<footer\b[^>]*\bid=["']contact["']""", content, flags=re.I):
             content = re.sub(r"<footer\b", '<footer id="contact"', content, count=1, flags=re.I)
     elif slug == "nexi-ai":
         content = add_id_to_section_containing(content, "Your first agent is free to build.", "contact")
@@ -644,6 +644,7 @@ def patch_nexi_ai_published_copy(content):
         ("Avg response time", "Keep escalation under your control"),
         ("Ship a production-ready AI support agent in a weekend — trained on your docs, wired to your tools, and live on your site by tonight. No ML team required.",
          "A polished starting point for an AI support product website. Customize the copy, connect your real services, and publish only capabilities you have verified."),
+        ("Nexi Assistant", "Example assistant"),
         ("Online — replies instantly", "Illustrative sample"),
         ("● Live", "DEMO"),
         ("Hi! Can I get a refund on order #4821? It arrived damaged.", "I need help with an order that arrived damaged."),
@@ -682,11 +683,11 @@ def patch_nexi_ai_published_copy(content):
         ("Watch it resolve tickets", "Monitor and improve"),
         ("Track every conversation, reasoning step, and outcome from the live dashboard.",
          "Use your real analytics and support workflows to measure quality after deployment."),
-        ("“ We swapped a 6-person support rotation for Nexi and first-response time dropped from four hours to under a minute. ”",
+        ("We swapped a 6-person support rotation for Nexi and first-response time dropped from four hours to under a minute.",
          "“ Add an approved customer quote here. Publish only with permission and supporting evidence. ”"),
-        ("“ The reasoning trace is what sold our team. We can see exactly why the agent said what it said, every time. ”",
+        ("The reasoning trace is what sold our team. We can see exactly why the agent said what it said, every time.",
          "“ Add an approved customer quote here. Publish only with permission and supporting evidence. ”"),
-        ("“ Setup took one afternoon. Two weeks later it was resolving 70% of tickets without touching a human. ”",
+        ("Setup took one afternoon. Two weeks later it was resolving 70% of tickets without touching a human.",
          "“ Add an approved customer quote here. Publish only with permission and supporting evidence. ”"),
         ("Priya Nandakumar", "Customer name (with permission)"),
         ("Marcus Webb", "Customer name (with permission)"),
