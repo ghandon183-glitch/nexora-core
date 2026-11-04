@@ -553,7 +553,7 @@ def patch_nexi_ai_font(root):
 
     remaining = []
     for path in root.rglob("*"):
-        if path.is_file() and path.suffix.lower() in TEXT_EXTS and "node_modules" not in path.parts:
+        if path.is_file() and path.suffix.lower() in {".ts", ".tsx", ".js", ".jsx"} and "node_modules" not in path.parts:
             if "next/font/google" in read_text(path):
                 remaining.append(str(path.relative_to(root)))
     if remaining:
