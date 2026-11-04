@@ -489,6 +489,15 @@ This ZIP is a front-end template, not a hosted AI agent, model, backend, or inte
     readme.write_text(current, encoding="utf-8")
 
 
+A11Y_CSS_OVERRIDES = {
+    "creative-agency": '[class~="text-violet/30"]{color:#a78bfa!important}',
+    "kiln-estates": '[class~="text-clay"]{color:#e7b18f!important}[class~="text-stone/50"]{color:#c5c9b8!important}',
+    "nexi-ai": '[class~="text-slate-400"]{color:#b7c6dc!important}[class~="text-slate-300"]{color:#cbd5e1!important}',
+    "premium-blog": '[class~="text-accent"]{color:#9a3412!important}[class~="text-accent-soft"]{color:#f2b38f!important}',
+    "premium-portfolio": '[class~="text-ink-mute"]{color:#a1a1aa!important}',
+    "solace-studio": '.bg-clay{background-color:#8f4021!important}[class~="text-cream/80"]{color:#e7e5d5!important}',
+}
+
 def normalize_template_key(key):
     return "vesper" if key.lower().startswith("nexora-template-12-vesper") else key.lower()
 
@@ -496,6 +505,8 @@ def patch_accessibility_text(root, key):
     slug = normalize_template_key(key)
     replacements = A11Y_TEXT_REPLACEMENTS.get(slug, [])
     touched = 0
+    css_override = A11Y_CSS_OVERRIDES.get(slug, "")
+    css_override_written = False
     for path in root.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in TEXT_EXTS:
             continue
@@ -510,6 +521,11 @@ def patch_accessibility_text(root, key):
         if not original:
             continue
         updated = original
+        if css_override and path.suffix.lower() == ".css" and not css_override_written:
+            updated += "\\n/* Nexora Core verified contrast overrides */\\n" + css_override + "\\n"
+            css_override_written = True
+        if css_override and path.name.lower() == "index.html" and "</head>" in updated and 'id="nexora-a11y-overrides"' not in updated:
+            updated = updated.replace("</head>", '<style id="nexora-a11y-overrides">' + css_override + '</style></head>', 1)
         for pattern, replacement in replacements:
             if "\\" in pattern:
                 updated = re.sub(pattern, replacement, updated, flags=re.I)
