@@ -491,79 +491,74 @@ This ZIP is a front-end template, not a hosted AI agent, model, backend, or inte
 
 
 def patch_nexi_ai_font(root):
-    """Bundle Sora locally so builds never depend on Google Fonts at build time."""
-    font_files = []
-    for path in root.rglob("*"):
-        if not path.is_file() or path.suffix.lower() not in TEXT_EXTS:
-            continue
-        if any(part in {"node_modules", ".next", ".git"} for part in path.parts):
-            continue
-        source = read_text(path)
-        if path.suffix.lower() in {".ts", ".tsx", ".js", ".jsx"} and "next/font/google" in source:
-            font_files.append((path, source))
+    """Bundle all Nexi display/body/mono fonts locally; no Google Fonts network at build time."""
+    layout_candidates = [root / "app" / "layout.tsx", root / "src" / "app" / "layout.tsx"]
+    layout_path = next((p for p in layout_candidates if p.exists()), None)
+    if layout_path is None:
+        candidates = list(root.rglob("layout.tsx"))
+        if len(candidates) != 1:
+            raise RuntimeError("Nexi AI app/layout.tsx could not be uniquely identified.")
+        layout_path = candidates[0]
+    layout = read_text(layout_path)
+    if not layout:
+        raise RuntimeError("Nexi AI app/layout.tsx is missing or unreadable.")
 
-    if not font_files:
-        local_layouts = [p for p in root.rglob("layout.tsx") if "@fontsource-variable/sora" in read_text(p)]
-        local_css = [p for p in root.rglob("globals.css") if '--font-sora:"Sora Variable"' in read_text(p)]
-        if local_layouts and local_css:
-            print("NEXI_LOCAL_FONT: already bundled")
-            return
-        suspects = []
-        for path in root.rglob("*.tsx"):
-            source = read_text(path)
-            if re.search(r"\bSora\b|\bfont\b", source, re.I):
-                suspects.append(str(path.relative_to(root)))
-        raise RuntimeError("Nexi AI remote Google font import was not found and local font is not configured. Candidate TSX files: " + ", ".join(suspects[:20]))
-
-    patched = 0
-    font_identifier = None
-    for path, source in font_files:
-        imported = re.search(
-            r"""import\s*\{[^}]*\bSora\b[^}]*\}\s*from\s*["']next/font/google["']\s*;?""",
-            source,
-            flags=re.S,
-        )
-        if not imported:
-            raise RuntimeError("Nexi AI uses next/font/google in an unsupported import form: " + str(path.relative_to(root)))
-        declaration = re.search(r"\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*Sora\s*\(", source)
-        if not declaration:
-            raise RuntimeError("Nexi AI Sora font declaration was not found beside its Google font import: " + str(path.relative_to(root)))
-        font_identifier = declaration.group(1)
-        source = source[:imported.start()] + 'import "@fontsource-variable/sora";' + source[imported.end():]
-        source, count = re.subn(
-            r"\bconst\s+" + re.escape(font_identifier) + r"\s*=\s*Sora\s*\(\s*\{.*?\}\s*\)\s*;?",
+    layout = re.sub(
+        r"""import\s*\{[^}]*\}\s*from\s*["']next/font/google["']\s*;?\s*""",
+        "",
+        layout,
+        flags=re.S,
+    )
+    font_declarations = (
+        ("inter", "Inter"),
+        ("jetbrainsMono", "JetBrains_Mono"),
+        ("sora", "Sora"),
+    )
+    for identifier, constructor in font_declarations:
+        layout = re.sub(
+            r"\bconst\s+" + re.escape(identifier) + r"\s*=\s*" + re.escape(constructor) + r"\s*\(\s*\{.*?\}\s*\)\s*;?",
             "",
-            source,
+            layout,
             count=1,
             flags=re.S,
         )
-        if count != 1:
-            raise RuntimeError("Nexi AI Sora font declaration could not be safely removed: " + str(path.relative_to(root)))
-        source = source.replace("$" + "{" + font_identifier + ".variable}", "")
-        path.write_text(source, encoding="utf-8")
-        patched += 1
+        for suffix in ("variable", "className"):
+            layout = layout.replace("$" + "{" + identifier + "." + suffix + "}", "")
+            layout = layout.replace(identifier + "." + suffix, "")
 
-    css_path = root / "app" / "globals.css"
-    if not css_path.exists():
-        css_candidates = list(root.rglob("globals.css"))
-        if len(css_candidates) != 1:
-            raise RuntimeError("Nexi AI globals.css could not be uniquely identified for the local font family.")
-        css_path = css_candidates[0]
+    local_imports = (
+        'import "@fontsource-variable/inter";',
+        'import "@fontsource/jetbrains-mono/400.css";',
+        'import "@fontsource/jetbrains-mono/500.css";',
+        'import "@fontsource-variable/sora";',
+    )
+    for import_line in local_imports:
+        if import_line not in layout:
+            layout = import_line + "\n" + layout
+
+    if "next/font/google" in layout or re.search(r"\b(?:Inter|JetBrains_Mono|Sora)\s*\(", layout):
+        raise RuntimeError("Nexi AI still contains a remote Google font or unresolved font constructor.")
+    if re.search(r"\$\{(?:inter|jetbrainsMono|sora)\.(?:variable|className)\}", layout):
+        raise RuntimeError("Nexi AI layout still references a removed next/font class.")
+
+    layout_path.write_text(layout, encoding="utf-8")
+    css_candidates = [root / "app" / "globals.css", root / "src" / "app" / "globals.css"]
+    css_path = next((p for p in css_candidates if p.exists()), None)
+    if css_path is None:
+        candidates = list(root.rglob("globals.css"))
+        if len(candidates) != 1:
+            raise RuntimeError("Nexi AI globals.css could not be uniquely identified.")
+        css_path = candidates[0]
     css = read_text(css_path)
     if not css:
-        raise RuntimeError("Nexi AI globals.css is empty; cannot register the local font family.")
-    font_rule = '\n:root{--font-sora:"Sora Variable",ui-sans-serif,system-ui,sans-serif;}\n'
-    if '--font-sora:"Sora Variable"' not in css:
-        css_path.write_text(css + font_rule, encoding="utf-8")
-
-    remaining = []
-    for path in root.rglob("*"):
-        if path.is_file() and path.suffix.lower() in {".ts", ".tsx", ".js", ".jsx"} and "node_modules" not in path.parts:
-            if "next/font/google" in read_text(path):
-                remaining.append(str(path.relative_to(root)))
-    if remaining:
-        raise RuntimeError("Nexi AI still references next/font/google after patching: " + ", ".join(remaining[:10]))
-    print("NEXI_LOCAL_FONT: patched", patched, "Google font import(s)")
+        raise RuntimeError("Nexi AI globals.css is empty; cannot register local font families.")
+    font_rule = '\n:root{--font-sora:"Sora Variable",ui-sans-serif,system-ui,sans-serif;--font-inter:"Inter Variable",ui-sans-serif,system-ui,sans-serif;--font-jetbrains-mono:"JetBrains Mono",ui-monospace,monospace;}\n'
+    for token in ('--font-sora:"Sora Variable"', '--font-inter:"Inter Variable"', '--font-jetbrains-mono:"JetBrains Mono"'):
+        if token not in css:
+            css += font_rule
+            break
+    css_path.write_text(css, encoding="utf-8")
+    print("NEXI_LOCAL_FONTS: Inter, JetBrains Mono, and Sora are bundled locally")
 
 def normalize_template_key(key):
     return "vesper" if key.lower().startswith("nexora-template-12-vesper") else key.lower()
@@ -882,6 +877,8 @@ def harden(archive):
                     section.pop("shadcn", None)
             if key == "nexi-ai":
                 deps["@fontsource-variable/sora"] = "^5.2.6"
+                deps["@fontsource-variable/inter"] = "^5.2.6"
+                deps["@fontsource/jetbrains-mono"] = "^5.2.6"
             if "next" in deps: deps["next"] = STABLE_NEXT
             elif "next" in dev: dev["next"] = STABLE_NEXT
             if "eslint-config-next" in dev: dev["eslint-config-next"] = STABLE_NEXT
