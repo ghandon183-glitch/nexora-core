@@ -509,7 +509,7 @@ def patch_nexi_ai_font(root):
     )
     if declarations == 0 and re.search(r"\bSora\s*\(", layout):
         raise RuntimeError("Nexi AI Sora font declaration could not be safely replaced.")
-    layout = layout.replace("\${sora.variable}", "")
+    layout = layout.replace("$" + "{sora.variable}", "")
     if "next/font/google" in layout or "sora.variable" in layout or re.search(r"\bSora\s*\(", layout):
         raise RuntimeError("Nexi AI still contains a remote Sora font reference after patching.")
     layout_path.write_text(layout, encoding="utf-8")
