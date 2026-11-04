@@ -1,8 +1,8 @@
 [
   {
     "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
-    "bytes": 135473,
-    "sha256": "932d6f6179e7283d873e8cef918a4d06350b552f975bd005d53e215d90a2f159",
+    "bytes": 135467,
+    "sha256": "f52de177a87898802d5e8803bfb994b946bd8ee5341d37a64be99d0a6ce0b645",
     "files": 47,
     "readmes": [
       "README.md"
@@ -77,8 +77,8 @@
   },
   {
     "package": "admin-dashboard.zip",
-    "bytes": 85219,
-    "sha256": "effc3fd9cf35e0d6459ceca2084c37fda9f0acd836c5e11b73b128762f54c7f9",
+    "bytes": 85220,
+    "sha256": "5f0ebb2bbec1f67bbe853ea737302269fda2dd46811d06fb9e09d4979bce3893",
     "files": 40,
     "readmes": [
       "admin-dashboard-template/README.md"
@@ -147,8 +147,8 @@
   },
   {
     "package": "aether.zip",
-    "bytes": 10444372,
-    "sha256": "b9f6bc2689f42d734401962b09ff31518e05fad4830ff7bf75ff9dae2b0360a1",
+    "bytes": 10449893,
+    "sha256": "39f515cceba1a857a1b18b9e0eabf4372bbdfcb2014d59accea9c151708dc630",
     "files": 52,
     "readmes": [
       "README.md"
@@ -221,7 +221,8 @@
           "react-dom": "19.2.4",
           "tailwind-merge": "^3.3.1",
           "three": "^0.185.1",
-          "tw-animate-css": "^1.4.0"
+          "tw-animate-css": "^1.4.0",
+          "next-intl": "^4.13.2"
         },
         "devDependencies": {
           "@tailwindcss/postcss": "^4.3.3",
@@ -246,8 +247,8 @@
   },
   {
     "package": "aurelia-store.zip",
-    "bytes": 1727447,
-    "sha256": "fc54db18737d5f771cbd66dca30491f5c15bdfaa405958b76be12945fb19a578",
+    "bytes": 1727471,
+    "sha256": "78cddce0b40170d86fe7a9d0e3141594b0223d33440a2ec38ef58334a033c1b3",
     "files": 43,
     "readmes": [
       "aurelia-store/README.md"
@@ -325,8 +326,8 @@
   },
   {
     "package": "creative-agency.zip",
-    "bytes": 83845,
-    "sha256": "3758f08bb6a62b3175388473055034fb8d2cbd307df51c9c3c64bc23ac42423a",
+    "bytes": 83926,
+    "sha256": "3cf5e065548c510773ad87eb8241e69c8cfc3ec58ea81d363ad70dae99f134e5",
     "files": 43,
     "readmes": [
       "creative-agency-template/README.md"
@@ -393,8 +394,8 @@
   },
   {
     "package": "kiln-estates.zip",
-    "bytes": 1918283,
-    "sha256": "c9150284d181c6bfb646958d0a9fb466045daf159b54559a299da84fbc8cac5d",
+    "bytes": 1918360,
+    "sha256": "b6b4ee886afc955c6d55254a38f92270ac5363646d2bf192e132bda10651e258",
     "files": 38,
     "readmes": [
       "README.md"
@@ -465,8 +466,8 @@
   },
   {
     "package": "modern-saas.zip",
-    "bytes": 84469,
-    "sha256": "192f6e2e27678f31812dfc1a3422a4da5ecda7e4714782e9284ebe53f9cda3c1",
+    "bytes": 84471,
+    "sha256": "cbb4972110854b6cc6818e3d5b70501f8a36d76fd13405bf0552f5e3886d396d",
     "files": 44,
     "readmes": [
       "modern-saas-template/README.md"
@@ -532,8 +533,8 @@
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 80944,
-    "sha256": "6d0ba601c861739381e9fa8876002722618d420610b33ffc7ca68ffc03d01e54",
+    "bytes": 81357,
+    "sha256": "36c91dd7135bed25a2b89f299e5a2a459005e2c3dadbb12c4a164dfdf0132e40",
     "files": 32,
     "readmes": [
       "README.md"
@@ -594,8 +595,8 @@
   },
   {
     "package": "premium-blog.zip",
-    "bytes": 79937,
-    "sha256": "0d3df6a87c1a83589cbcfa2716f7f61688c81b1684f1612dbc44a1615d6ba269",
+    "bytes": 80040,
+    "sha256": "79157b66e9be4e05fdc2ec5b6f6469ec22c479e3579898ab7edb3e883a4f6539",
     "files": 36,
     "readmes": [
       "premium-blog/README.md"
@@ -661,8 +662,8 @@
   },
   {
     "package": "premium-portfolio.zip",
-    "bytes": 664545,
-    "sha256": "c64af2c69457281a73acfc82fca13d9516080d4aab1501c301eea0cd75261371",
+    "bytes": 664608,
+    "sha256": "bcf440e53a3e6826ce0b350dffad89c005bbdca258fd4947fee575432e30fda9",
     "files": 47,
     "readmes": [
       "premium-portfolio/README.md"
@@ -745,8 +746,8 @@
   },
   {
     "package": "premium-restaurant.zip",
-    "bytes": 75585,
-    "sha256": "0cc29c39a9c79f74f047e312587704c8a678c9dd26f9f8f8f1b3edea3903b144",
+    "bytes": 75650,
+    "sha256": "a2a7e4f06f587536fa8e8ffef65c992264cdb24eda6c317fd29b206028bebde3",
     "files": 35,
     "readmes": [
       "premium-restaurant/README.md"
@@ -812,8 +813,8 @@
   },
   {
     "package": "solace-studio.zip",
-    "bytes": 13807387,
-    "sha256": "f9d713162e872438680648e3e60f1e9c205e872865eae4cbb9d27042f13ad469",
+    "bytes": 13807468,
+    "sha256": "de5bab46a4bd2bf24606153d7212f793cdade79a8d9571463a35f0916d55d17d",
     "files": 55,
     "readmes": [
       "solace-studio/README.md"
