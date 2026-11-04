@@ -196,7 +196,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4174 --directory public >/tmp/nexora-public.log 2>&1 &
+          # Next.js static export stores React Server Component payloads as .txt files.
+          # Python's default text/plain MIME can make the local test server behave unlike Next/Cloudflare.
+          python3 - <<'PY' >/tmp/nexora-public.log 2>&1 &
+          from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+          import os
+          os.chdir("public")
+          class NexoraStaticHandler(SimpleHTTPRequestHandler):
+              def guess_type(self, path):
+                  if path.lower().endswith(".txt"):
+                      return "text/x-component"
+                  return super().guess_type(path)
+          ThreadingHTTPServer(("127.0.0.1", 4174), NexoraStaticHandler).serve_forever()
+          PY
           server=$!
           trap 'kill $server 2>/dev/null || true' EXIT
           sleep 2
