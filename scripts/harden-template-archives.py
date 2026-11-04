@@ -733,12 +733,15 @@ def patch_accessibility_text(root, key):
         if slug == "premium-portfolio" and path.suffix.lower() in {".tsx", ".jsx", ".html", ".txt"}:
             updated = updated.replace('href="https://example.com/studionorth"', 'href="#contact"')
             updated = updated.replace('"href":"https://example.com/studionorth"', '"href":"#contact"')
+            updated = updated.replace(r'\"href\":\"https://example.com/studionorth\"', r'\"href\":\"#contact\"')
             updated = updated.replace('target="_blank" rel="noopener noreferrer"', '')
             updated = updated.replace('"target":"_blank","rel":"noopener noreferrer",', '')
+            updated = updated.replace(r'\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",', '')
             updated = updated.replace("Instagram (demo)", "Instagram — connect profile")
             updated = updated.replace("Dribbble (demo)", "Dribbble — connect profile")
             updated = updated.replace("GitHub (demo)", "GitHub — connect profile")
             updated = updated.replace('"children":"(demo)"', '"children":"(connect profile)"')
+            updated = updated.replace(r'\"children\":\"(demo)\"', r'\"children\":\"(connect profile)\"')
         if slug in PLACEHOLDER_LINK_TARGETS and path.suffix.lower() in {".tsx", ".jsx", ".html", ".txt"}:
             updated = patch_template_link_destinations(updated, slug)
         if slug == "nexi-ai" and path.name.lower() == "index.html":
