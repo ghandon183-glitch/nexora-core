@@ -563,6 +563,154 @@ def patch_nexi_ai_font(root):
 def normalize_template_key(key):
     return "vesper" if key.lower().startswith("nexora-template-12-vesper") else key.lower()
 
+
+PLACEHOLDER_LINK_TARGETS = {
+    "aurelia-store": {
+        "aurelia": "#top", "view all pieces": "#featured",
+        "rings": "#categories", "necklaces": "#categories", "ceramics": "#categories",
+        "candles & scent": "#categories", "our process": "#categories", "materials": "#categories",
+        "journal": "#reviews", "wholesale": "#contact", "shipping": "#contact",
+        "returns": "#contact", "care guide": "#contact", "contact": "#contact",
+        "privacy": "#contact", "terms": "#contact",
+    },
+    "modern-saas": {
+        "features": "#product", "pricing": "#pricing", "how it works": "#how-it-works",
+        "changelog": "#faq", "about": "#product", "contact": "#contact",
+        "privacy": "#faq", "terms": "#faq",
+    },
+    "nexi-ai": {
+        "nexi ai": "#product", "features": "#product", "pricing": "#pricing",
+        "how it works": "#how-it-works", "faq": "#faq",
+    },
+}
+
+def patch_placeholder_links(content, slug):
+    targets = PLACEHOLDER_LINK_TARGETS.get(slug)
+    if not targets:
+        return content
+    pattern = re.compile(r"<(a|Link)\b([^>]*)>(.*?)</\1>", flags=re.I | re.S)
+    def replace_anchor(match):
+        tag, attrs, inner = match.group(1), match.group(2), match.group(3)
+        href = re.search(r"""(\bhref\s*=\s*)(["'])#\2""", attrs, flags=re.I)
+        if not href:
+            return match.group(0)
+        label = re.sub(r"<!--.*?-->", " ", inner, flags=re.S)
+        label = re.sub(r"<[^>]*>", " ", label)
+        label = label.replace("&amp;", "&").replace("&#x27;", "'").replace("&quot;", '"')
+        label = re.sub(r"\s+", " ", label).strip().lower()
+        target = "#contact"
+        for key, value in targets.items():
+            if label == key or key in label:
+                target = value
+                break
+        new_attrs = attrs[:href.start()] + href.group(1) + '"' + target + '"' + attrs[href.end():]
+        return "<" + tag + new_attrs + ">" + inner + "</" + tag + ">"
+    return pattern.sub(replace_anchor, content)
+
+def add_id_to_section_containing(content, needle, target_id):
+    pattern = re.compile(r"<section\b[^>]*>[\s\S]*?</section>", flags=re.I)
+    for match in list(pattern.finditer(content)):
+        section = match.group(0)
+        if needle not in section:
+            continue
+        opening_end = section.find(">")
+        opening = section[:opening_end]
+        if re.search(r"\bid\s*=", opening, flags=re.I):
+            return content
+        patched = opening + ' id="' + target_id + '"' + section[opening_end:]
+        return content[:match.start()] + patched + content[match.end():]
+    return content
+
+def patch_template_link_destinations(content, slug):
+    if slug == "aurelia-store":
+        if not re.search(r"<header\b[^>]*\bid=['"]top['"]", content, flags=re.I):
+            content = re.sub(r"<header\b", '<header id="top"', content, count=1, flags=re.I)
+        content = add_id_to_section_containing(content, "New pieces, restocks, and studio notes", "contact")
+    elif slug == "modern-saas":
+        if not re.search(r"<footer\b[^>]*\bid=['"]contact['"]", content, flags=re.I):
+            content = re.sub(r"<footer\b", '<footer id="contact"', content, count=1, flags=re.I)
+    elif slug == "nexi-ai":
+        content = add_id_to_section_containing(content, "Your first agent is free to build.", "contact")
+    content = patch_placeholder_links(content, slug)
+    return content
+
+def patch_nexi_ai_published_copy(content):
+    replacements = [
+        ("2.4M+", "Your data"),
+        ("Conversations handled", "Connect approved knowledge sources"),
+        ("99.9%", "Your rules"),
+        ("Uptime SLA", "Configure verified safeguards"),
+        ("&lt;200ms", "Your team"),
+        ("Avg response time", "Keep escalation under your control"),
+        ("Ship a production-ready AI support agent in a weekend — trained on your docs, wired to your tools, and live on your site by tonight. No ML team required.",
+         "A polished starting point for an AI support product website. Customize the copy, connect your real services, and publish only capabilities you have verified."),
+        ("Online — replies instantly", "Illustrative sample"),
+        ("● Live", "DEMO"),
+        ("Hi! Can I get a refund on order #4821? It arrived damaged.", "I need help with an order that arrived damaged."),
+        ("So sorry about that! I&#x27;ve checked order #4821 — I can issue a full refund right now, or send a free replacement. Which works better?",
+         "This example shows how a support agent might explain next steps. A real product must verify the order and follow its configured refund policy."),
+        ("Resolved in 12s", "Example workflow"),
+        ("No human handoff needed", "Illustrative content only"),
+        ("Connects with", "Example categories"),
+        ("OpenAI", "AI service"), ("Anthropic", "Model provider"),
+        ("Slack", "Support inbox"), ("Zendesk", "Help desk"), ("Stripe", "Billing"),
+        ("Trained on your docs", "Knowledge sources"),
+        ("Point it at your help center, PDFs, or a Notion workspace. It learns your product in minutes, not weeks.",
+         "Describe the sources your implementation can actually ingest and the setup steps required."),
+        ("20+ integrations", "Your integrations"),
+        ("Slack, Zendesk, Stripe, and your own API — connect in a few clicks.",
+         "List only integrations your product really supports and that you have tested."),
+        ("Sub-200ms replies", "Measured response times"),
+        ("Edge-deployed inference keeps conversations feeling instant.",
+         "Add response-time benchmarks only after measuring them in your own deployment."),
+        ("Guardrails built in", "Configurable controls"),
+        ("Set boundaries on tone, topics, and actions the agent can take — with a human handoff for anything outside them.",
+         "Explain the controls, permissions, and human-escalation paths your implementation really provides."),
+        ("Live analytics", "Operational analytics"),
+        ("Resolution rate, sentiment, and drop-off, updated in real time.",
+         "Show only metrics your deployed product actually measures and can substantiate."),
+        ("40+ languages", "Language support"),
+        ("Detects and replies in the customer&#x27;s language automatically.",
+         "List supported languages only after validating answer quality in each language."),
+        ("Live in an afternoon, not a quarter", "A clear path from setup to launch"),
+        ("Link your docs, help center, and APIs. Nexi indexes everything automatically.",
+         "Connect the knowledge sources supported by your implementation and verify the sync."),
+        ("Define what the agent can do, say, and escalate — in plain language, no code.",
+         "Configure the instructions, permissions, and escalation rules your product supports."),
+        ("Drop a single snippet into your site. The agent is live and learning immediately.",
+         "Integrate the approved widget or API and test it in a staging environment before launch."),
+        ("Watch it resolve tickets", "Monitor and improve"),
+        ("Track every conversation, reasoning step, and outcome from the live dashboard.",
+         "Use your real analytics and support workflows to measure quality after deployment."),
+        ("“ We swapped a 6-person support rotation for Nexi and first-response time dropped from four hours to under a minute. ”",
+         "“ Add an approved customer quote here. Publish only with permission and supporting evidence. ”"),
+        ("“ The reasoning trace is what sold our team. We can see exactly why the agent said what it said, every time. ”",
+         "“ Add an approved customer quote here. Publish only with permission and supporting evidence. ”"),
+        ("“ Setup took one afternoon. Two weeks later it was resolving 70% of tickets without touching a human. ”",
+         "“ Add an approved customer quote here. Publish only with permission and supporting evidence. ”"),
+        ("Priya Nandakumar", "Customer name (with permission)"),
+        ("Marcus Webb", "Customer name (with permission)"),
+        ("Ana Torres", "Customer name (with permission)"),
+        ("Head of Support, Loopline", "Approved role and company"),
+        ("CTO, Fieldstack", "Approved role and company"),
+        ("Founder, Portside", "Approved role and company"),
+        ("Your first agent is free to build.", "Ready to make this template yours?"),
+        ("Connect a data source and have it answering real questions in the next ten minutes.",
+         "Connect your real signup, contact, or demo destination here before publishing."),
+        ("Start Building Free", "Explore sample pricing"),
+    ]
+    for old, new in replacements:
+        content = content.replace(old, new)
+    if "Sample plans and prices — replace these with your actual offer and terms before publishing." not in content:
+        content = re.sub(
+            r'(<section\b[^>]*id="pricing"[^>]*>[\s\S]*?)(<div class="mt-16 grid gap-6 lg:grid-cols-3")',
+            r'\1<p class="mt-5 text-center text-sm text-slate-300">Sample plans and prices — replace these with your actual offer and terms before publishing.</p>\2',
+            content,
+            count=1,
+            flags=re.I,
+        )
+    return content
+
 def patch_accessibility_text(root, key):
     slug = normalize_template_key(key)
     replacements = A11Y_TEXT_REPLACEMENTS.get(slug, [])
@@ -581,6 +729,10 @@ def patch_accessibility_text(root, key):
         if not original:
             continue
         updated = original
+        if slug in PLACEHOLDER_LINK_TARGETS and path.suffix.lower() in {".tsx", ".jsx", ".html", ".txt"}:
+            updated = patch_template_link_destinations(updated, slug)
+        if slug == "nexi-ai" and path.name.lower() == "index.html":
+            updated = patch_nexi_ai_published_copy(updated)
         for pattern, replacement in replacements:
             if "\\" in pattern:
                 updated = re.sub(pattern, replacement, updated, flags=re.I)
