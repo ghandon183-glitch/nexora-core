@@ -147,11 +147,16 @@ jobs:
               echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
               continue
             fi
-            if (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit); then
-              echo "$name: npm install PASS"
+            if [ ! -f "$dir/package-lock.json" ]; then
+              echo "$name: package-lock.json MISSING"
+              echo '- package-lock.json: FAIL (missing)' >> .deep-audit/REPORT.md
+              failures=$((failures+1)); continue
+            fi
+            if (cd "$dir" && npm ci --legacy-peer-deps --no-fund --no-audit); then
+              echo "$name: npm ci PASS"
             else
-              echo "$name: npm install FAIL"
-              echo '- npm install: FAIL' >> .deep-audit/REPORT.md
+              echo "$name: npm ci FAIL"
+              echo '- npm ci: FAIL' >> .deep-audit/REPORT.md
               failures=$((failures+1)); continue
             fi
             if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
@@ -176,7 +181,9 @@ jobs:
               if (cd "$dir" && npm run lint); then
                 echo '- lint: PASS' >> .deep-audit/REPORT.md
               else
-                echo '- lint: ADVISORY FAIL (non-blocking; see job log)' >> .deep-audit/REPORT.md
+                echo "$name: lint FAIL"
+                echo '- lint: FAIL' >> .deep-audit/REPORT.md
+                failures=$((failures+1))
               fi
             else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
             if (cd "$dir" && npm audit --audit-level=high --omit=dev); then
@@ -236,6 +243,7 @@ jobs:
                   const href = (a.getAttribute('href') || '').trim();
                   const label = (a.innerText || a.getAttribute('aria-label') || '').trim().slice(0,80);
                   if (!href || href === '#' || /^javascript:/i.test(href)) return [{label,href,reason:'placeholder-or-empty'}];
+                  if (/example\\.(com|net|org)|yourdomain|localhost|127\\.0\\.0\\.1/i.test(href)) return [{label,href,reason:'placeholder-domain'}];
                   if (href.startsWith('#')) {
                     let target = href.slice(1);
                     try { target = decodeURIComponent(target); } catch {}
