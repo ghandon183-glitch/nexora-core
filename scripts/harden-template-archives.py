@@ -489,6 +489,38 @@ This ZIP is a front-end template, not a hosted AI agent, model, backend, or inte
     readme.write_text(current, encoding="utf-8")
 
 
+
+def patch_nexi_ai_font(root):
+    """Bundle Sora locally so builds never depend on Google Fonts at build time."""
+    layout_path = root / "app" / "layout.tsx"
+    layout = read_text(layout_path)
+    if not layout:
+        raise RuntimeError("Nexi AI app/layout.tsx is missing; cannot make font loading deterministic.")
+    import_pattern = r"""import\s*\{\s*Sora\s*\}\s*from\s*["']next/font/google["']\s*;?"""
+    layout, imports = re.subn(import_pattern, 'import "@fontsource-variable/sora";', layout, count=1)
+    if imports == 0 and 'import "@fontsource-variable/sora";' not in layout:
+        raise RuntimeError("Nexi AI expected next/font/google Sora import was not found; refusing a partial font patch.")
+    layout, declarations = re.subn(
+        r"""const\s+sora\s*=\s*Sora\s*\(\s*\{.*?\}\s*\)\s*;?""",
+        "",
+        layout,
+        count=1,
+        flags=re.S,
+    )
+    if declarations == 0 and re.search(r"\bSora\s*\(", layout):
+        raise RuntimeError("Nexi AI Sora font declaration could not be safely replaced.")
+    layout = layout.replace("\${sora.variable}", "")
+    if "next/font/google" in layout or "sora.variable" in layout or re.search(r"\bSora\s*\(", layout):
+        raise RuntimeError("Nexi AI still contains a remote Sora font reference after patching.")
+    layout_path.write_text(layout, encoding="utf-8")
+    css_path = root / "app" / "globals.css"
+    css = read_text(css_path)
+    if not css:
+        raise RuntimeError("Nexi AI app/globals.css is missing; cannot register the local font family.")
+    font_rule = '\n:root{--font-sora:"Sora Variable",ui-sans-serif,system-ui,sans-serif;}\n'
+    if '--font-sora:"Sora Variable"' not in css:
+        css_path.write_text(css + font_rule, encoding="utf-8")
+
 def normalize_template_key(key):
     return "vesper" if key.lower().startswith("nexora-template-12-vesper") else key.lower()
 
@@ -529,12 +561,28 @@ def patch_accessibility_text(root, key):
                         updated = re.sub(r"(\[data-theme=light\]\{)", r"\1--teal-bright:#0f5257;--danger:#b91c1c;", updated)
                 if slug == "creative-agency" and "[data-theme=dark] .text-violet{color:#a683ff}" not in updated:
                     updated += "\n[data-theme=dark] .text-violet{color:#a683ff}"
+                contrast_overrides = {
+                    "kiln-estates": '[class~="text-clay"]{color:#f0b18f!important}[class*="text-stone"]{color:#c5c7b3!important}',
+                    "creative-agency": '[class~="text-violet/30"]{color:#a78bfa!important}',
+                    "nexi-ai": '[class~="text-slate-400"],[class~="text-slate-500"]{color:#cbd5e1!important}',
+                    "premium-blog": '[class~="bg-accent-soft"][class~="text-accent"]{color:#7c2d12!important}[class~="text-accent-soft"]{color:#fdba74!important}',
+                    "premium-portfolio": '[class~="text-ink-mute"]{color:#a1a1aa!important}',
+                    "solace-studio": '[class~="bg-clay"]{background-color:#8f4021!important}[class~="text-cream/80"]{color:#e7e5d5!important}',
+                }
+                override = contrast_overrides.get(slug, "")
+                if override and override not in updated:
+                    updated += "\n/* WCAG AA contrast corrections */\n" + override + "\n"
             if updated != original:
                 path.write_text(updated, encoding="utf-8")
                 touched += 1
             continue
         if slug == "kiln-estates":
-            updated = re.sub(r"<h4(\b[^>]*)>Explore</h4>", r"<h3\1>Explore</h3>", updated)
+            updated = re.sub(
+                r"<h4(\b[^>]*)>(Explore|Studio)</h4>",
+                lambda m: "<h3" + m.group(1) + ">" + m.group(2) + "</h3>",
+                updated,
+                flags=re.I,
+            )
         if slug == "nexi-ai":
             updated = re.sub(r"<h4(\b[^>]*)>Product</h4>", r"<h3\1>Product</h3>", updated)
         if slug == "premium-blog":
@@ -575,13 +623,17 @@ def patch_accessibility_text(root, key):
             )
         # Put unlabelled page sections inside the main landmark when the exported
         # document has a header/footer shell but no existing main element.
-        if slug == "kiln-estates":
-            def wrap_main(match):
-                header, middle, footer = match.group(1), match.group(2), match.group(3)
-                if re.search(r"<main\b", middle, re.I):
-                    return match.group(0)
-                return header + '<main id="main-content">' + middle + "</main>" + footer
-            updated = re.sub(r"(</header>)(.*?)(<footer\b)", wrap_main, updated, flags=re.I | re.S)
+        if slug == "kiln-estates" and not re.search(r"<main\b", updated, re.I):
+            body_match = re.search(r"(<body\b[^>]*>)(.*?)(</body>)", updated, flags=re.I | re.S)
+            if body_match:
+                body_content = body_match.group(2)
+                header_end = re.search(r"</header\s*>", body_content, flags=re.I)
+                footer_start = re.search(r"<footer\b", body_content, flags=re.I)
+                start = header_end.end() if header_end else 0
+                end = footer_start.start() if footer_start else len(body_content)
+                if end > start:
+                    body_content = body_content[:start] + '<main id="main-content">' + body_content[start:end] + "</main>" + body_content[end:]
+                    updated = updated[:body_match.start(2)] + body_content + updated[body_match.end(2):]
         if updated != original:
             try:
                 path.write_text(updated, encoding="utf-8")
@@ -614,6 +666,7 @@ def harden(archive):
             patch_aether_source(root)
         if key == "nexi-ai":
             patch_nexi_ai_source(root)
+            patch_nexi_ai_font(root)
         patch_accessibility_text(root, key)
         package_file = root / "package.json"
         pkg = None
@@ -625,6 +678,8 @@ def harden(archive):
                 for section in (deps, dev):
                     section.pop("@vercel/analytics", None)
                     section.pop("shadcn", None)
+            if key == "nexi-ai":
+                deps["@fontsource-variable/sora"] = "^5.2.6"
             if "next" in deps: deps["next"] = STABLE_NEXT
             elif "next" in dev: dev["next"] = STABLE_NEXT
             if "eslint-config-next" in dev: dev["eslint-config-next"] = STABLE_NEXT
