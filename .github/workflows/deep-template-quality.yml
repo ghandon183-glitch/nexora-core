@@ -142,43 +142,65 @@ jobs:
             name=$(basename "$dir")
             echo "## $name" >> .deep-audit/REPORT.md
             echo "=== PACKAGE: $name ==="
-            if [ ! -f "$dir/package.json" ]; then
-              echo "$name: static package (no package.json) — N/A"
-              echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
-              continue
+            pkg_dir="$dir"
+            if [ ! -f "$pkg_dir/package.json" ]; then
+              mapfile -t manifests < <(find "$dir" -type f -name package.json \
+                -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/dist/*' -not -path '*/out/*' | sort)
+              if [ "${#manifests[@]}" -eq 1 ]; then
+                pkg_dir=$(dirname "${manifests[0]}")
+              elif [ "${#manifests[@]}" -gt 1 ]; then
+                candidates=()
+                for manifest in "${manifests[@]}"; do
+                  candidate=$(dirname "$manifest")
+                  if [ -f "$candidate/next.config.js" ] || [ -f "$candidate/next.config.mjs" ] || [ -f "$candidate/next.config.ts" ] || [ -d "$candidate/app" ] || [ -d "$candidate/src/app" ]; then
+                    candidates+=("$candidate")
+                  fi
+                done
+                if [ "${#candidates[@]}" -eq 1 ]; then
+                  pkg_dir="${candidates[0]}"
+                else
+                  echo "$name: ambiguous package roots (${#manifests[@]} manifests)"
+                  echo '- package root: FAIL (ambiguous package.json files)' >> .deep-audit/REPORT.md
+                  failures=$((failures+1)); continue
+                fi
+              else
+                echo "$name: static package (no package.json) — N/A"
+                echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
+                continue
+              fi
             fi
-            if [ ! -f "$dir/package-lock.json" ]; then
-              echo "$name: package-lock.json MISSING"
+            echo "- package root: ${pkg_dir#$dir/}" >> .deep-audit/REPORT.md
+            if [ ! -f "$pkg_dir/package-lock.json" ]; then
+              echo "$name: package-lock.json MISSING in $pkg_dir"
               echo '- package-lock.json: FAIL (missing)' >> .deep-audit/REPORT.md
               failures=$((failures+1)); continue
             fi
-            if (cd "$dir" && npm ci --legacy-peer-deps --no-fund --no-audit); then
+            if (cd "$pkg_dir" && npm ci --legacy-peer-deps --no-fund --no-audit); then
               echo "$name: npm ci PASS"
             else
               echo "$name: npm ci FAIL"
               echo '- npm ci: FAIL' >> .deep-audit/REPORT.md
               failures=$((failures+1)); continue
             fi
-            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
-              if (cd "$dir" && npm run build); then
+            if (cd "$pkg_dir" && node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"); then
+              if (cd "$pkg_dir" && npm run build); then
                 echo "$name: build PASS"; echo '- build: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: build FAIL"; echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
             else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
-            # Next.js build already performs TypeScript validation. Do not run tsc over its generated .next output.
-            if node -e "const p=require('./$dir/package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"; then
+            if (cd "$pkg_dir" && node -e "const p=require('./package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"); then
               echo '- typecheck: covered by Next.js build' >> .deep-audit/REPORT.md
-            elif find "$dir" -path "$dir/node_modules" -prune -o -path "$dir/.next" -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .; then
-              if (cd "$dir" && npx tsc --noEmit); then
+            elif find "$pkg_dir" -path "$pkg_dir/node_modules" -prune -o -path "$pkg_dir/.next" -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .; then
+              if (cd "$pkg_dir" && npx tsc --noEmit); then
                 echo "$name: typecheck PASS"; echo '- typecheck: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: typecheck FAIL"; echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
             else echo '- typecheck: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"; then
-              rm -rf "$dir/.next"
-              if (cd "$dir" && npm run lint); then
+            if (cd "$pkg_dir" && node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"); then
+              rm -rf "$pkg_dir/.next"
+              if (cd "$pkg_dir" && npm run lint); then
                 echo '- lint: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: lint FAIL"
@@ -186,7 +208,7 @@ jobs:
                 failures=$((failures+1))
               fi
             else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if (cd "$dir" && npm audit --audit-level=high --omit=dev); then
+            if (cd "$pkg_dir" && npm audit --audit-level=high --omit=dev); then
               echo "$name: npm audit PASS"; echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md
             else
               echo "$name: npm audit FAIL"; echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
