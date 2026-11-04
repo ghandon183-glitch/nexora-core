@@ -351,6 +351,15 @@ def patch_nexi_ai_source(root):
     replace_source(root, "components/nav.tsx",
         'href="#" className="text-sm font-medium text-slate-300 hover:text-white"',
         'href="#contact" className="text-sm font-medium text-slate-300 hover:text-white"')
+    replace_source(root, "components/nav.tsx",
+        '<a href="#" className="flex items-center gap-2.5">',
+        '<a href="#product" className="flex items-center gap-2.5">')
+    replace_source(root, "components/footer.tsx",
+        "An AI support agent your customers can trust — trained on your docs, live on your\n              site by tonight.",
+        "An editable landing-page template for AI support and automation products.\n              Connect your own service and publish only verified capabilities.")
+    replace_source(root, "app/layout.tsx",
+        'title: "Nexi AI | Deploy an AI Agent Your Customers Trust",\n  description:\n    "Ship a production-ready AI support agent in a weekend — trained on your docs, wired to your tools, live on your site by tonight.",',
+        'title: "Nexi AI | AI Support Product Landing Page Template",\n  description:\n    "An editable Next.js landing-page template for AI support, chatbot, and automation products. It ships sample UI and copy, not a hosted AI backend.",')
     replace_all_source(root, "components/footer.tsx",
         '<h4 className="text-sm font-semibold text-white">',
         '<h3 className="text-sm font-semibold text-white">')
@@ -522,7 +531,11 @@ def patch_accessibility_text(root, key):
             continue
         updated = original
         if css_override and path.suffix.lower() == ".css" and not css_override_written:
-            updated += "\\n/* Nexora Core verified contrast overrides */\\n" + css_override + "\\n"
+            # Remove any earlier override block, including the literal "\\n"
+            # residue an older hardener wrote into shipped stylesheets.
+            updated = re.sub(r"\\n/\* Nexora Core verified contrast overrides \*/\\n.*", "", updated, flags=re.S)
+            updated = re.sub(r"\n/\* Nexora Core verified contrast overrides \*/\n.*", "", updated, flags=re.S)
+            updated = updated.rstrip("\n") + "\n\n/* Nexora Core verified contrast overrides */\n" + css_override + "\n"
             css_override_written = True
         if css_override and path.name.lower() == "index.html" and "</head>" in updated and 'id="nexora-a11y-overrides"' not in updated:
             updated = updated.replace("</head>", '<style id="nexora-a11y-overrides">' + css_override + '</style></head>', 1)
@@ -607,6 +620,26 @@ def patch_accessibility_text(root, key):
     if touched:
         print(f"A11Y {slug}: patched {touched} source/export text files")
 
+def patch_placeholder_links(root, key):
+    """Replace dead href="#" links with a real target or an explicit disabled state."""
+    slug = normalize_template_key(key)
+    if slug == "aurelia-store":
+        replace_source(root, "components/nav.tsx",
+            '<header className="sticky top-0 z-50',
+            '<header id="top" className="sticky top-0 z-50')
+        replace_source(root, "components/nav.tsx",
+            '<a href="#" className="font-display text-2xl tracking-tight text-ink">',
+            '<a href="#top" className="font-display text-2xl tracking-tight text-ink">')
+        replace_source(root, "components/featured-products.tsx",
+            'href="#"\n              className="text-sm font-semibold text-ink underline',
+            'href="#categories"\n              className="text-sm font-semibold text-ink underline')
+        # Footer destinations are not implemented in this single-page demo; ship
+        # them as an explicit disabled state instead of dead links.
+        replace_all_source(root, "components/footer.tsx", 'href="#"', 'aria-disabled="true"')
+    if slug == "modern-saas":
+        replace_all_source(root, "components/sections/footer.tsx", 'href="#"', 'aria-disabled="true"')
+
+
 def patch_demo_exports():
     demo_root = Path("public/demo")
     if not demo_root.is_dir():
@@ -630,6 +663,7 @@ def harden(archive):
             patch_aether_source(root)
         if key == "nexi-ai":
             patch_nexi_ai_source(root)
+        patch_placeholder_links(root, key)
         patch_accessibility_text(root, key)
         package_file = root / "package.json"
         pkg = None
@@ -641,6 +675,9 @@ def harden(archive):
                 for section in (deps, dev):
                     section.pop("@vercel/analytics", None)
                     section.pop("shadcn", None)
+                # AETHER's middleware and i18n routing import next-intl. Without
+                # declaring it, `npm ci && npm run build` fails for customers.
+                deps.setdefault("next-intl", "^4.13.2")
             if "next" in deps: deps["next"] = STABLE_NEXT
             elif "next" in dev: dev["next"] = STABLE_NEXT
             if "eslint-config-next" in dev: dev["eslint-config-next"] = STABLE_NEXT
@@ -730,7 +767,10 @@ def main():
             raise SystemExit(f"Requested package archive was not found: {target}")
     if not archives: raise SystemExit("No template ZIPs found.")
     for archive in archives: harden(archive)
-    patch_demo_exports()
+    # Patch built demo exports only during a full run. A targeted single-package
+    # run must not rewrite the published demos of other products.
+    if not target:
+        patch_demo_exports()
 
 if __name__ == "__main__":
     main()

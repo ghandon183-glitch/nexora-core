@@ -1,2 +1,6 @@
-:HL["/demo/nexi-ai/_next/static/chunks/0swrh7bivzfj8.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"D9h404Z8H40M-p5E9mNjw"}
+:HL["/demo/nexi-ai/_next/static/chunks/3zuo-hlxz_2so.css","style"]
+:HL["/demo/nexi-ai/_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/nexi-ai/_next/static/media/9a321a2c78eff0b5-s.p.1bkzbscqrt8rl.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/nexi-ai/_next/static/media/bc8ed407dc77c57a-s.p.1hey5yyym6mz_.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+1:[["children",{"s":"__PAGE__","h":160}]]
+0:{"b":"Elr1V4ghE4xa1FSbxfniE","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
