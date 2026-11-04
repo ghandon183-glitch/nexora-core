@@ -222,16 +222,18 @@ jobs:
                 await page.addScriptTag({content:axe.source});
                 const a11y = await page.evaluate(async()=>await axe.run(document));
                 const importantViolations = a11y.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
-                const sameOriginFailed = failed.filter(request => request.url.startsWith(base));
+                // Ignore only browser-cancelled speculative navigations (Next.js Link prefetch).
+                // Every actual same-origin network failure remains release-blocking.
+                const sameOriginFailed = failed.filter(request => request.url.startsWith(base) && request.failure !== 'net::ERR_ABORTED');
                 console.log('CONSOLE_ERRORS ' + demo + ' ' + JSON.stringify(errors));
                 console.log('PAGE_ERRORS ' + demo + ' ' + JSON.stringify(pageErrors));
                 console.log('FAILED_REQUESTS ' + demo + ' ' + JSON.stringify(sameOriginFailed));
                 console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,details:v.nodes.slice(0,8).map(n=>({target:n.target,html:n.html,failureSummary:n.failureSummary}))}))));
                 await page.setViewportSize({width:390,height:844});
                 const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
-                const productionBlocking = demo === 'vesper';
-                const ok = errors.length===0 && pageErrors.length===0 && !overflow && (!productionBlocking || (sameOriginFailed.length===0 && importantViolations.length===0));
-                console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' blocking=' + (productionBlocking ? 'production' : 'advisory-template') + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11yImportant=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
+                // Every shipped demo is a customer-facing product surface: all violations block release.
+                const ok = errors.length===0 && pageErrors.length===0 && sameOriginFailed.length===0 && a11y.violations.length===0 && !overflow;
+                console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' blocking=release ' + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11ySerious=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
                 if(!ok) failures++;
               } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
               await page.close();
