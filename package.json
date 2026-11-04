@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "audit:security": "node scripts/audit-dependencies.mjs",
+    "gate:packages": "python3 scripts/verify-template-packages.py",
+    "gate:demos": "node scripts/template-quality-gate.mjs",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
