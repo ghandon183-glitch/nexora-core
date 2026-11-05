@@ -44,6 +44,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated audit artefacts (reports, screenshots, per-package logs)
+/.deep-audit/
+
 # cloudflare / opennext
 .open-next
 .wrangler
+
+# python bytecode
+__pycache__/
+*.pyc

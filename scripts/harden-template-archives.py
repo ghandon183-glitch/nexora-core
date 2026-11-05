@@ -498,6 +498,210 @@ This ZIP is a front-end template, not a hosted AI agent, model, backend, or inte
     readme.write_text(current, encoding="utf-8")
 
 
+LINT_FLAT_CONFIG = '''import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+]);
+'''
+
+LINT_SOURCE_FIXES = {
+    "aurelia-store": [
+        ("components/hero.tsx", "See what's new", "See what&apos;s new"),
+        ("components/newsletter.tsx", "You're on the list. Look out for our next studio note.",
+         "You&apos;re on the list. Look out for our next studio note."),
+        ("components/reviews.tsx", '\"{review.quote}\"', "&ldquo;{review.quote}&rdquo;"),
+    ],
+}
+
+INTERNAL_HREF_RE = re.compile(r"""href=(?:\"(/(?!/)[^\"]*)\"|'(/(?!/)[^']*)'|\{`(/(?!/)[^`]*)`\})""")
+
+
+def ensure_lint_setup(root, deps, dev):
+    """Ship a lint script that actually runs.
+
+    Two packages shipped `lint: eslint .` without eslint in their manifest, and
+    three shipped ESLint configs that cannot load: two contain TypeScript
+    syntax in a .mjs file, one uses FlatCompat, which crashes on the pinned
+    minimatch. A broken lint command is a broken customer command, so the
+    config is rewritten (never the rules) and the tooling is declared.
+    """
+    changed = []
+    if "eslint" not in dev and "eslint" not in deps:
+        dev["eslint"] = "^9"
+        changed.append("declared eslint ^9")
+    if "eslint-config-next" not in dev and "eslint-config-next" not in deps:
+        dev["eslint-config-next"] = STABLE_NEXT
+        changed.append(f"declared eslint-config-next {STABLE_NEXT}")
+
+    candidates = sorted(root.glob("eslint.config.*"))
+    target = root / "eslint.config.mjs"
+    current = read_text(candidates[0]) if candidates else ""
+    invalid = (
+        not current
+        or "import type" in current
+        or "FlatCompat" in current
+        or re.search(r"const\s+\w+\s*:\s*\w+\s*=", current) is not None
+    )
+    if invalid:
+        for extra in candidates:
+            if extra != target and extra.suffix.lower() in {".js", ".cjs", ".mjs", ".ts", ".mts"}:
+                extra.unlink()
+        target.write_text(LINT_FLAT_CONFIG, encoding="utf-8")
+        changed.append("rewrote eslint.config.mjs as valid flat config")
+    return changed
+
+
+def linkify_internal_anchors(root):
+    """Use next/link for internal navigation (lint rule no-html-link-for-pages)."""
+    converted = 0
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in {".tsx", ".jsx"}:
+            continue
+        if any(part in {"node_modules", ".next", "out", "build"} for part in path.parts):
+            continue
+        original = read_text(path)
+        if not original or "<a" not in original:
+            continue
+        touched = {"value": False}
+
+        def replace_anchor(match):
+            opening, inner = match.group(1), match.group(2)
+            if not INTERNAL_HREF_RE.search(opening):
+                return match.group(0)
+            touched["value"] = True
+            return "<Link" + opening + ">" + inner + "</Link>"
+
+        updated = re.sub(r"<a\b([^>]*)>(.*?)</a>", replace_anchor, original, flags=re.S)
+        if not touched["value"]:
+            continue
+        if "next/link" not in updated:
+            directive = re.match(r"\s*(['\"])use client\1;?\s*\n", updated)
+            import_line = 'import Link from "next/link";\n'
+            if directive:
+                updated = updated[: directive.end()] + import_line + updated[directive.end():]
+            else:
+                updated = import_line + updated
+        path.write_text(updated, encoding="utf-8")
+        converted += 1
+    if converted:
+        print(f"LINT links: converted internal anchors to next/link in {converted} files")
+
+
+def patch_lint_source(root, key):
+    for relative, old, new in LINT_SOURCE_FIXES.get(key, []):
+        replace_source(root, relative, old, new)
+
+
+def patch_nexi_ai_font(root):
+    """Bundle all Nexi display/body/mono fonts locally; no Google Fonts network at build time."""
+    layout_candidates = [root / "app" / "layout.tsx", root / "src" / "app" / "layout.tsx"]
+    layout_path = next((p for p in layout_candidates if p.exists()), None)
+    if layout_path is None:
+        candidates = list(root.rglob("layout.tsx"))
+        if len(candidates) != 1:
+            raise RuntimeError("Nexi AI app/layout.tsx could not be uniquely identified.")
+        layout_path = candidates[0]
+    layout = read_text(layout_path)
+    if not layout:
+        raise RuntimeError("Nexi AI app/layout.tsx is missing or unreadable.")
+
+    layout = re.sub(
+        r"""import\s*\{[^}]*\}\s*from\s*["']next/font/google["']\s*;?\s*""",
+        "",
+        layout,
+        flags=re.S,
+    )
+    font_declarations = (
+        ("inter", "Inter"),
+        ("jetbrainsMono", "JetBrains_Mono"),
+        ("sora", "Sora"),
+    )
+    for identifier, constructor in font_declarations:
+        layout = re.sub(
+            r"\bconst\s+" + re.escape(identifier) + r"\s*=\s*" + re.escape(constructor) + r"\s*\(\s*\{.*?\}\s*\)\s*;?",
+            "",
+            layout,
+            count=1,
+            flags=re.S,
+        )
+        for suffix in ("variable", "className"):
+            layout = layout.replace("$" + "{" + identifier + "." + suffix + "}", "")
+            layout = layout.replace(identifier + "." + suffix, "")
+
+    local_imports = (
+        'import "@fontsource-variable/inter";',
+        'import "@fontsource/jetbrains-mono/400.css";',
+        'import "@fontsource/jetbrains-mono/500.css";',
+        'import "@fontsource-variable/sora";',
+    )
+    for import_line in local_imports:
+        if import_line not in layout:
+            layout = import_line + "\n" + layout
+
+    if "next/font/google" in layout or re.search(r"\b(?:Inter|JetBrains_Mono|Sora)\s*\(", layout):
+        raise RuntimeError("Nexi AI still contains a remote Google font or unresolved font constructor.")
+    if re.search(r"\$\{(?:inter|jetbrainsMono|sora)\.(?:variable|className)\}", layout):
+        raise RuntimeError("Nexi AI layout still references a removed next/font class.")
+
+    layout_path.write_text(layout, encoding="utf-8")
+    css_candidates = [root / "app" / "globals.css", root / "src" / "app" / "globals.css"]
+    css_path = next((p for p in css_candidates if p.exists()), None)
+    if css_path is None:
+        candidates = list(root.rglob("globals.css"))
+        if len(candidates) != 1:
+            raise RuntimeError("Nexi AI globals.css could not be uniquely identified.")
+        css_path = candidates[0]
+    css = read_text(css_path)
+    if not css:
+        raise RuntimeError("Nexi AI globals.css is empty; cannot register local font families.")
+    font_rule = '\n:root{--font-sora:"Sora Variable",ui-sans-serif,system-ui,sans-serif;--font-inter:"Inter Variable",ui-sans-serif,system-ui,sans-serif;--font-jetbrains-mono:"JetBrains Mono",ui-monospace,monospace;}\n'
+    for token in ('--font-sora:"Sora Variable"', '--font-inter:"Inter Variable"', '--font-jetbrains-mono:"JetBrains Mono"'):
+        if token not in css:
+            css += font_rule
+            break
+    css_path.write_text(css, encoding="utf-8")
+    print("NEXI_LOCAL_FONTS: Inter, JetBrains Mono, and Sora are bundled locally")
+
+
+def align_peer_dependencies(key, deps, dev):
+    """Make a package's manifest resolvable with a plain `npm install`.
+
+    Vite 8 declares `peerOptional esbuild@"^0.27.0 || ^0.28.0"`. Pinning the
+    older `esbuild@^0.25` makes the documented install command fail with
+    ERESOLVE, which the old `--legacy-peer-deps` flags in CI and the release
+    scripts hid from customers. Align the declared range instead.
+    """
+    combined = {**dev, **deps}
+    changed = []
+    # React 19.3+ react-dom declares `peer react@^19.3.1`, so a package pinned to
+    # react 19.2.4 cannot resolve with a plain `npm install`.
+    if "@react-three/fiber" in deps or "@react-three/drei" in deps:
+        for name in ("react", "react-dom"):
+            current = deps.get(name)
+            if current is not None and str(current).lstrip("^") < "19.3.1":
+                deps[name] = "^19.3.1"
+                changed.append(f"{name} {current} -> ^19.3.1 (react-dom 19.3 peer requirement)")
+    vite_range = combined.get("vite")
+    if not vite_range:
+        return changed
+    match = re.search(r"(\d+)", str(vite_range))
+    major = int(match.group(1)) if match else 0
+    allowed = {"^0.27.0", "^0.28.0", "0.27.0", "0.28.0"}
+    for section in (deps, dev):
+        current = section.get("esbuild")
+        if current is None:
+            continue
+        if major >= 8 and str(current) not in allowed:
+            section["esbuild"] = "^0.28.0"
+            changed.append(f"esbuild {current} -> ^0.28.0 (required by vite {vite_range})")
+    return changed
+
+
 A11Y_CSS_OVERRIDES = {
     "creative-agency": '[class~="text-violet/30"]{color:#a78bfa!important}',
     "kiln-estates": '[class~="text-clay"]{color:#e7b18f!important}[class~="text-stone/50"]{color:#c5c9b8!important}',
@@ -663,6 +867,7 @@ def harden(archive):
             patch_aether_source(root)
         if key == "nexi-ai":
             patch_nexi_ai_source(root)
+            patch_nexi_ai_font(root)
         patch_placeholder_links(root, key)
         patch_accessibility_text(root, key)
         package_file = root / "package.json"
@@ -678,6 +883,29 @@ def harden(archive):
                 # AETHER's middleware and i18n routing import next-intl. Without
                 # declaring it, `npm ci && npm run build` fails for customers.
                 deps.setdefault("next-intl", "^4.13.2")
+            if key == "nexi-ai":
+                # Fonts are bundled locally (no Google Fonts network at build time).
+                deps["@fontsource-variable/sora"] = "^5.2.6"
+                deps["@fontsource-variable/inter"] = "^5.2.6"
+                deps["@fontsource/jetbrains-mono"] = "^5.2.6"
+            for change in align_peer_dependencies(key, deps, dev):
+                print(f"PEER {key}: {change}")
+            is_next = "next" in deps or "next" in dev
+            if not is_next and "eslint" not in str(pkg.get("scripts", {}).get("lint", "")):
+                # Vite/static packages do not use Next's ESLint tooling. Remove it
+                # if an earlier hardener run added it, and drop the generated config.
+                for section in (deps, dev):
+                    section.pop("eslint-config-next", None)
+                    section.pop("eslint", None)
+                generated = root / "eslint.config.mjs"
+                if generated.exists() and "eslint-config-next/core-web-vitals" in (read_text(generated) or ""):
+                    generated.unlink()
+            if is_next and "lint" in pkg.get("scripts", {}):
+                for change in ensure_lint_setup(root, deps, dev):
+                    print(f"LINT {key}: {change}")
+            if is_next:
+                linkify_internal_anchors(root)
+            patch_lint_source(root, key)
             if "next" in deps: deps["next"] = STABLE_NEXT
             elif "next" in dev: dev["next"] = STABLE_NEXT
             if "eslint-config-next" in dev: dev["eslint-config-next"] = STABLE_NEXT
@@ -743,8 +971,10 @@ def harden(archive):
                 encoding="utf-8")
 
         if pkg:
-            subprocess.run(["npm", "install", "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund", "--legacy-peer-deps"], cwd=root, check=True, timeout=900)
-            subprocess.run(["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund", "--legacy-peer-deps"], cwd=root, check=True, timeout=900)
+            # No --legacy-peer-deps: the shipped manifest must resolve with the
+            # exact command customers run. A peer conflict has to fail here.
+            subprocess.run(["npm", "install", "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund"], cwd=root, check=True, timeout=900)
+            subprocess.run(["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"], cwd=root, check=True, timeout=900)
             shutil.rmtree(root / "node_modules", ignore_errors=True)
 
         temp_zip = Path(tmp) / "rebuilt.zip"

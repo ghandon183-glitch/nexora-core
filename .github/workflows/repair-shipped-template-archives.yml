@@ -134,9 +134,9 @@ jobs:
                   lock = package_dir / "package-lock.json"
                   if lock.exists():
                       lock.unlink()
-                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "install", "", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
                   subprocess.run(["npm", "audit", "fix", "--omit=dev"], cwd=package_dir, check=True)
-                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
+                  subprocess.run(["npm", "install", "", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
                   subprocess.run(["npm", "run", "build"], cwd=package_dir, check=True)
                   if archive_name == "aether.zip":
                       subprocess.run(["npm", "run", "lint"], cwd=package_dir, check=True)

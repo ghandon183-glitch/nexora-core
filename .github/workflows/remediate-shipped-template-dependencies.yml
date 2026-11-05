@@ -77,7 +77,7 @@ jobs:
           for name in aether kiln-estates nexi-ai; do
             echo "=== VERIFY $name ==="
             cd "/tmp/nexora-remediate/$name"
-            npm install --legacy-peer-deps --no-fund --no-audit
+            npm install --no-fund --no-audit
             npm run build
             npm audit --audit-level=high --omit=dev
             cd "$GITHUB_WORKSPACE"

@@ -163,9 +163,31 @@ def run(cmd: list[str], cwd: Path, timeout: int = 900) -> tuple[int, str]:
     return proc.returncode, (proc.stdout or "") + (proc.stderr or "")
 
 
+def verify_peer_resolution(product: dict, failures: list[str], workdir: Path, pkg: dict) -> str:
+    """Prove the shipped manifest resolves without --legacy-peer-deps.
+
+    `npm ci` only proves the committed lockfile installs. A customer who runs
+    `npm install`, adds a dependency, or regenerates the lock hits the peer
+    graph in package.json, so that graph has to be resolvable on its own.
+    """
+    scratch = workdir / f"{product['slug']}-peers"
+    scratch.mkdir(parents=True, exist_ok=True)
+    (scratch / "package.json").write_text(json.dumps(pkg, indent=2) + "\n", encoding="utf-8")
+    code, output = run(
+        ["npm", "install", "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund"],
+        scratch,
+        timeout=600,
+    )
+    if code == 0:
+        return "PASS"
+    detail = " ".join(line.strip() for line in output.splitlines() if line.startswith("npm error"))[:500]
+    failures.append(f"{product['label']}: manifest does not resolve with `npm install` (ERESOLVE): {detail}")
+    return "FAIL"
+
+
 def verify_build(product: dict, failures: list[str], workdir: Path) -> dict:
     archive = DOWNLOADS / product["zip"]
-    result = {"install": "NOT RUN", "build": "NOT RUN", "lint": "NOT RUN", "audit": "NOT RUN", "issues": []}
+    result = {"install": "NOT RUN", "peer_resolution": "NOT RUN", "build": "NOT RUN", "lint": "NOT RUN", "audit": "NOT RUN", "issues": []}
     if not archive.is_file():
         return result
 
@@ -188,8 +210,9 @@ def verify_build(product: dict, failures: list[str], workdir: Path) -> dict:
     pkg = json.loads((root / "package.json").read_text(encoding="utf-8"))
     scripts = pkg.get("scripts", {})
     lock = root / "package-lock.json"
-    code, output = run(["npm", "ci", "--no-audit", "--no-fund", "--legacy-peer-deps"], root) if lock.exists() else run(
-        ["npm", "install", "--no-audit", "--no-fund", "--legacy-peer-deps"], root
+    result["peer_resolution"] = verify_peer_resolution(product, failures, workdir, pkg)
+    code, output = run(["npm", "ci", "--no-audit", "--no-fund"], root) if lock.exists() else run(
+        ["npm", "install", "--no-audit", "--no-fund"], root
     )
     if code != 0:
         result["install"] = "FAIL"

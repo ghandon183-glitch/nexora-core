@@ -97,7 +97,7 @@ jobs:
           export default nextConfig;
           EOF
           cd .aether-capture
-          npm install --legacy-peer-deps --no-fund --no-audit
+          npm install --no-fund --no-audit
           npm run build
           cd ..
           test -d .aether-capture/out
@@ -112,7 +112,7 @@ jobs:
           mkdir -p .vesper-build public/demo/vesper
           unzip -q public/downloads/Nexora-Template-12-Vesper-v1.0.0.zip -d .vesper-build
           cd .vesper-build
-          npm ci --no-fund --no-audit || npm install --legacy-peer-deps --no-fund --no-audit
+          npm ci --no-fund --no-audit || npm install --no-fund --no-audit
           npm run build -- --base=./
           cd ..
           test -d .vesper-build/dist
