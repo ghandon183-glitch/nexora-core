@@ -3,7 +3,7 @@
 > Automated review only. External references are flagged for human license verification; dependency metadata URLs are intentionally excluded.
 
 ## Nexora-Template-12-Vesper-v1.0.0.zip
-- Archive: 135,467 bytes
+- Archive: 132,858 bytes
 - Files: 47
 - README: YES
 - License: YES
@@ -14,8 +14,8 @@
 - External asset references detected: 6
 
 ## admin-dashboard.zip
-- Archive: 85,220 bytes
-- Files: 40
+- Archive: 86,658 bytes
+- Files: 41
 - README: YES
 - License: YES
 - Asset license manifest: YES
@@ -25,8 +25,8 @@
 - External asset references detected: 4
 
 ## aether.zip
-- Archive: 10,449,893 bytes
-- Files: 52
+- Archive: 10,487,240 bytes
+- Files: 53
 - README: YES
 - License: YES
 - Asset license manifest: YES
@@ -36,7 +36,7 @@
 - External asset references detected: 8
 
 ## aurelia-store.zip
-- Archive: 1,727,471 bytes
+- Archive: 1,727,579 bytes
 - Files: 43
 - README: YES
 - License: YES
@@ -47,8 +47,8 @@
 - External asset references detected: 3
 
 ## creative-agency.zip
-- Archive: 83,926 bytes
-- Files: 43
+- Archive: 85,015 bytes
+- Files: 44
 - README: YES
 - License: YES
 - Asset license manifest: YES
@@ -58,7 +58,7 @@
 - External asset references detected: 4
 
 ## kiln-estates.zip
-- Archive: 1,918,360 bytes
+- Archive: 1,918,536 bytes
 - Files: 38
 - README: YES
 - License: YES
@@ -69,7 +69,7 @@
 - External asset references detected: 5
 
 ## modern-saas.zip
-- Archive: 84,471 bytes
+- Archive: 84,646 bytes
 - Files: 44
 - README: YES
 - License: YES
@@ -80,7 +80,7 @@
 - External asset references detected: 3
 
 ## nexi-ai.zip
-- Archive: 81,357 bytes
+- Archive: 81,710 bytes
 - Files: 32
 - README: YES
 - License: YES
@@ -91,7 +91,7 @@
 - External asset references detected: 3
 
 ## premium-blog.zip
-- Archive: 80,040 bytes
+- Archive: 80,289 bytes
 - Files: 36
 - README: YES
 - License: YES
@@ -102,7 +102,7 @@
 - External asset references detected: 3
 
 ## premium-portfolio.zip
-- Archive: 664,608 bytes
+- Archive: 664,789 bytes
 - Files: 47
 - README: YES
 - License: YES
@@ -113,7 +113,7 @@
 - External asset references detected: 4
 
 ## premium-restaurant.zip
-- Archive: 75,650 bytes
+- Archive: 75,858 bytes
 - Files: 35
 - README: YES
 - License: YES
@@ -124,8 +124,8 @@
 - External asset references detected: 3
 
 ## solace-studio.zip
-- Archive: 13,807,468 bytes
-- Files: 55
+- Archive: 13,838,945 bytes
+- Files: 56
 - README: YES
 - License: YES
 - Asset license manifest: YES
