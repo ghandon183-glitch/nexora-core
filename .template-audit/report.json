@@ -1,8 +1,8 @@
 [
   {
     "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
-    "bytes": 132872,
-    "sha256": "d659a92872033b6a2d7ff9cf0ec813ff0bb033eb080c19b2f9c30298b2f35b86",
+    "bytes": 132865,
+    "sha256": "dcf65a10e8e83dcf11d3370151c05ec6572b04ef50ef3af79050e710be68d6de",
     "files": 47,
     "readmes": [
       "README.md"
@@ -148,7 +148,7 @@
   {
     "package": "aether.zip",
     "bytes": 10435478,
-    "sha256": "85791f69f41f05ca6433fb9143d4b6b9968198f14fbb5d48e25033e5629a8940",
+    "sha256": "b62ed58f502fad3bda380eca6546d189a03f1cf509c01448c8eea4c6a77cfb2f",
     "files": 52,
     "readmes": [
       "README.md"
@@ -397,7 +397,7 @@
   {
     "package": "kiln-estates.zip",
     "bytes": 1918536,
-    "sha256": "17102e3c8465cba5f9669358998a60a347273bb8556d4ee436164987a85f26ce",
+    "sha256": "84f0f1ca8c99f42552ac88f04c052e85b380bff8b366b281af8a1df39c7918a9",
     "files": 38,
     "readmes": [
       "README.md"
@@ -536,7 +536,7 @@
   {
     "package": "nexi-ai.zip",
     "bytes": 81710,
-    "sha256": "de8af70fe6d445ff8370c5a42dba785f347e4be6d5624c071ea1ccd637006bf0",
+    "sha256": "5d894f6b73aeafcfda65f0e9afa27cbf13281ada6e3f67d99248227e21a3b652",
     "files": 32,
     "readmes": [
       "README.md"

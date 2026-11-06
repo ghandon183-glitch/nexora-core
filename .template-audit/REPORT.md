@@ -3,7 +3,7 @@
 > Automated review only. External references are flagged for human license verification; dependency metadata URLs are intentionally excluded.
 
 ## Nexora-Template-12-Vesper-v1.0.0.zip
-- Archive: 132,872 bytes
+- Archive: 132,865 bytes
 - Files: 47
 - README: YES
 - License: YES
