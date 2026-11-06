@@ -1,2 +1,4 @@
-:HL["/demo/nexi-ai/_next/static/chunks/0swrh7bivzfj8.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"D9h404Z8H40M-p5E9mNjw"}
+:HL["/demo/nexi-ai/_next/static/chunks/2w_f9ss4yprm4.css","style"]
+:HC["/",""]
+1:[["children",{"s":"__PAGE__","h":160}]]
+0:{"b":"jmc0beL3KnCfaVjkG7qrE","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-export default function ProductDemoVideo({ src, demoUrl }: { src?: string; demoUrl?: string }) {
+export default function ProductDemoVideo({ src, demoUrl, templateSlug }: { src?: string; demoUrl?: string; templateSlug?: string }) {
   const [demoLoaded, setDemoLoaded] = useState(false);
   if (!src) return null;
 
@@ -51,6 +51,8 @@ export default function ProductDemoVideo({ src, demoUrl }: { src?: string; demoU
                   <button
                     type="button"
                     onClick={() => setDemoLoaded(true)}
+                    data-analytics-event="live_demo_click"
+                    data-analytics-template={templateSlug}
                     className="rounded-full border border-white/30 bg-black/70 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-300 hover:text-cyan-200"
                   >
                     Load interactive demo
@@ -63,6 +65,8 @@ export default function ProductDemoVideo({ src, demoUrl }: { src?: string; demoU
                 href={demoUrl}
                 target="_blank"
                 rel="noreferrer"
+                data-analytics-event="live_demo_click"
+                data-analytics-template={templateSlug}
                 className="inline-flex rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:border-cyan-300 hover:text-cyan-200"
               >
                 Open full live demo ↗

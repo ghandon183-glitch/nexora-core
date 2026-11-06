@@ -1,4 +1,4 @@
-:HL["/demo/aurelia-store/_next/static/chunks/13g0txi3mphhx.css","style"]
+:HL["/demo/aurelia-store/_next/static/chunks/0z8dld3zmp2az.css","style"]
 :HC["/",""]
 :HL["/demo/aurelia-store/images/ring-bee.jpg","image"]
 :HL["/demo/aurelia-store/images/rings-pair.jpg","image"]
@@ -8,4 +8,5 @@
 :HL["/demo/aurelia-store/images/vase-dried-flowers.jpg","image"]
 :HL["/demo/aurelia-store/images/ceramic-vases-colorful.jpg","image"]
 :HL["/demo/aurelia-store/images/ring-cluster.jpg","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"Be9kNgiZ3knJkxpsK5VNO"}
+1:[["children",{"s":"__PAGE__","h":160}]]
+0:{"b":"K0F_UiFUBnGVSCuxcPeTY","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

@@ -1,0 +1,17 @@
+{
+  "$comment": "Single source of truth for the 12 shipped products. Both the archive verifier and the browser quality gate read this file, so a product cannot be silently skipped.",
+  "products": [
+    { "slug": "vesper", "label": "Vesper", "zip": "Nexora-Template-12-Vesper-v1.0.0.zip", "demo": "vesper", "runtime": "vite" },
+    { "slug": "admin-dashboard", "label": "Admin Dashboard", "zip": "admin-dashboard.zip", "demo": "admin-dashboard", "runtime": "next" },
+    { "slug": "aether", "label": "AETHER", "zip": "aether.zip", "demo": "aether", "runtime": "next" },
+    { "slug": "aurelia-store", "label": "Aurelia Store", "zip": "aurelia-store.zip", "demo": "aurelia-store", "runtime": "next" },
+    { "slug": "creative-agency", "label": "Creative Agency", "zip": "creative-agency.zip", "demo": "creative-agency", "runtime": "next" },
+    { "slug": "kiln-estates", "label": "Kiln Estates", "zip": "kiln-estates.zip", "demo": "kiln-estates", "runtime": "next" },
+    { "slug": "modern-saas", "label": "Modern SaaS", "zip": "modern-saas.zip", "demo": "modern-saas", "runtime": "next" },
+    { "slug": "nexi-ai", "label": "Nexi AI", "zip": "nexi-ai.zip", "demo": "nexi-ai", "runtime": "next" },
+    { "slug": "premium-blog", "label": "Premium Blog", "zip": "premium-blog.zip", "demo": "premium-blog", "runtime": "next" },
+    { "slug": "premium-portfolio", "label": "Premium Portfolio", "zip": "premium-portfolio.zip", "demo": "premium-portfolio", "runtime": "next" },
+    { "slug": "premium-restaurant", "label": "Premium Restaurant", "zip": "premium-restaurant.zip", "demo": "premium-restaurant", "runtime": "next" },
+    { "slug": "solace-studio", "label": "Solace Studio", "zip": "solace-studio.zip", "demo": "solace-studio", "runtime": "next" }
+  ]
+}

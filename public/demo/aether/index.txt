@@ -1,0 +1,33 @@
+1:"$Sreact.fragment"
+2:"/demo/aether/_next/static/chunks/1piptclql4ztr.js"
+3:"/demo/aether/_next/static/chunks/38k3pbe9i8i24.js"
+4:I[38873,["$2","$3"],"ScrollProgress"]
+5:I[74575,["$2","$3"],"Cursor"]
+6:I[89259,["$2","$3"],"default"]
+7:I[80511,["$2","$3"],"default"]
+9:"/demo/aether/_next/static/chunks/0xkxom7bzflhe.js"
+a:"/demo/aether/_next/static/chunks/1bp7fw5fg1yvt.js"
+b:I[61550,["$2","$3","$9","$a"],"Navbar"]
+c:I[87333,["$2","$3","$9","$a"],"Hero"]
+d:I[91963,["$2","$3","$9","$a"],"Marquee"]
+e:I[52302,["$2","$3","$9","$a"],"Projects"]
+f:I[5462,["$2","$3","$9","$a"],"Studio"]
+10:I[12134,["$2","$3","$9","$a"],"Footer"]
+11:I[20057,["$2","$3"],"OutletBoundary"]
+12:"$Sreact.suspense"
+14:"ViewportBoundary"
+15:I[20057,["$2","$3"],"$14"]
+17:"MetadataBoundary"
+18:I[20057,["$2","$3"],"$17"]
+1a:I[67044,["$2","$3"],"default",1]
+:HL["/demo/aether/_next/static/chunks/2ltbgy5j1noeb.css","style"]
+:HL["/demo/aether/_next/static/media/07a39a8a4660cc7c-s.p.0r6juujl39pe6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/aether/_next/static/media/605ce01b664af129-s.p.0wgildi0cnwt9.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/aether/_next/static/media/d902bc2bfdd0a4cb-s.p.1g73gv09-xcb6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/aether/_next/static/media/e63b65bb308a9351-s.p.3j3877k49yy0l.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+8:[["children",{"s":"__PAGE__","h":512,"d":{"r":["$","$1","c",{"children":[["$","main",null,{"className":"relative","children":[["$","$Lb",null,{}],["$","$Lc",null,{}],["$","$Ld",null,{}],["$","$Le",null,{}],["$","$Lf",null,{}],["$","$L10",null,{}]]}],[["$","script","script-0",{"src":"/demo/aether/_next/static/chunks/0xkxom7bzflhe.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/demo/aether/_next/static/chunks/1bp7fw5fg1yvt.js","async":true,"nonce":"$undefined"}]],["$","$L11",null,{"children":["$","$12",null,{"name":"Next.MetadataOutlet","children":"$@13"}]}]]}],"p":false,"v":null}}]]
+0:{"P":null,"c":["",""],"q":"","i":false,"t":{"t":{"s":"","h":528,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/demo/aether/_next/static/chunks/2ltbgy5j1noeb.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/demo/aether/_next/static/chunks/1piptclql4ztr.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/demo/aether/_next/static/chunks/38k3pbe9i8i24.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"dark bg-background MwEO2a_variable Gb1_vG_variable ZPbyaG_variable","children":["$","body",null,{"className":"font-sans antialiased grain","children":[["$","$L4",null,{}],["$","$L5",null,{}],["$","$L6",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}]}]]}],"p":false,"v":null},"c":"$Q8"},"h":{"r":["$","$1","h",{"children":[null,["$","$L15",null,{"children":"$L16"}],["$","$L18",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$12",null,{"name":"Next.Metadata","children":"$L19"}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":false,"v":null}},"m":"$undefined","G":["$1a",[["$","link","0",{"rel":"stylesheet","href":"/demo/aether/_next/static/chunks/2ltbgy5j1noeb.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"r":"$undefined","s":"$undefined","a":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"-IkQhkdNHbzZji1ZGwiBJ"}
+16:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","2",{"name":"theme-color","content":"#1a1815"}],["$","meta","3",{"name":"color-scheme","content":"dark"}]]
+1b:I[74144,["$2","$3"],"IconMark"]
+13:null
+19:[["$","title","0",{"children":"AETHER — Premium Creative Studio Template"}],["$","meta","1",{"name":"description","content":"A world-class, motion-first creative studio and branding agency template. WebGL-powered, cinematic and marketplace-ready for agencies, art directors and luxury brands."}],["$","meta","2",{"name":"generator","content":"v0.app"}],["$","meta","3",{"name":"keywords","content":"creative studio,portfolio template,luxury branding,design agency,art director,webgl,interactive,awwwards"}],["$","meta","4",{"property":"og:title","content":"AETHER — Premium Creative Studio Template"}],["$","meta","5",{"property":"og:description","content":"A cinematic, motion-first, WebGL-powered template for premium creative studios and luxury brands."}],["$","meta","6",{"property":"og:type","content":"website"}],["$","meta","7",{"name":"twitter:card","content":"summary"}],["$","meta","8",{"name":"twitter:title","content":"AETHER — Premium Creative Studio Template"}],["$","meta","9",{"name":"twitter:description","content":"A cinematic, motion-first, WebGL-powered template for premium creative studios and luxury brands."}],["$","link","10",{"rel":"icon","href":"/icon-light-32x32.png","media":"(prefers-color-scheme: light)"}],["$","link","11",{"rel":"icon","href":"/icon-dark-32x32.png","media":"(prefers-color-scheme: dark)"}],["$","link","12",{"rel":"icon","href":"/icon.svg","type":"image/svg+xml"}],["$","link","13",{"rel":"apple-touch-icon","href":"/apple-icon.png"}],["$","$L1b","14",{}]]

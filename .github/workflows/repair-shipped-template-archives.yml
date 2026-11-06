@@ -24,132 +24,28 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - name: Repair, build, audit, and repack affected shipped packages
+      # The source fixes ship in scripts/harden-template-archives.py and nowhere
+      # else. This workflow used to carry its own copy of the AETHER rewrites,
+      # which drifted: once the canonical hardener replaced `pointer.useRef`
+      # with a `pointerRef` prop, the older copy still matched two anchors and
+      # injected `sharedPointer.copy(...)` without ever inserting the
+      # `const sharedPointer` declaration it depended on, so `npx tsc --noEmit`
+      # failed with TS2304 on components/webgl/hero-scene.tsx. Delegating here
+      # keeps one patcher and makes the operator re-run idempotent.
+      - name: Re-harden the shipped archives with the canonical patcher
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import json, shutil, subprocess, tempfile, zipfile
-
-          targets = ["aether.zip", "kiln-estates.zip", "nexi-ai.zip"]
-          root = Path.cwd()
-          for archive_name in targets:
-              archive = root / "public" / "downloads" / archive_name
-              if not archive.exists():
-                  raise SystemExit(f"Required shipped archive missing: {archive}")
-              with tempfile.TemporaryDirectory(prefix="nexora-package-") as tmp:
-                  work = Path(tmp)
-                  with zipfile.ZipFile(archive) as zf:
-                      zf.extractall(work)
-                  manifests = list(work.rglob("package.json"))
-                  manifests = [p for p in manifests if "node_modules" not in p.parts and ".next" not in p.parts]
-                  if len(manifests) != 1:
-                      raise SystemExit(f"{archive_name}: expected one package.json, found {len(manifests)}")
-                  package_dir = manifests[0].parent
-                  manifest = json.loads(manifests[0].read_text())
-                  section = "dependencies" if "next" in manifest.get("dependencies", {}) else "devDependencies"
-                  if "next" not in manifest.get(section, {}):
-                      raise SystemExit(f"{archive_name}: Next.js dependency not declared")
-                  manifest[section]["next"] = "16.4.2"
-                  if archive_name == "aether.zip":
-                      manifest.setdefault("devDependencies", {})["eslint"] = "^9.39.5"
-                      manifest["devDependencies"]["eslint-config-next"] = "16.4.2"
-                      eslint_config = (
-                          'import { defineConfig, globalIgnores } from "eslint/config";\n'
-                          'import nextVitals from "eslint-config-next/core-web-vitals";\n'
-                          'import nextTs from "eslint-config-next/typescript";\n'
-                          'export default defineConfig([...nextVitals, ...nextTs, globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"])]);\n'
-                      )
-                      (package_dir / "eslint.config.mjs").write_text(eslint_config)
-                  manifests[0].write_text(json.dumps(manifest, indent=2) + "\n")
-
-                  if archive_name == "aether.zip":
-                      # Keep one package manager/lockfile and align the README with the npm lockfile.
-                      pnpm_lock = package_dir / "pnpm-lock.yaml"
-                      if pnpm_lock.exists():
-                          pnpm_lock.unlink()
-                      readme = package_dir / "README.md"
-                      if readme.exists():
-                          readme_text = readme.read_text()
-                          readme_text = readme_text.replace("pnpm install", "npm install")
-                          readme_text = readme_text.replace("pnpm dev", "npm run dev")
-                          readme_text = readme_text.replace("pnpm build && pnpm start", "npm run build && npm run start")
-                          readme.write_text(readme_text)
-
-                      cursor = package_dir / "components/motion/cursor.tsx"
-                      if cursor.exists():
-                          source = cursor.read_text()
-                          source = source.replace("    setEnabled(true)\n", "    const enableFrame = requestAnimationFrame(() => setEnabled(true))\n", 1)
-                          source = source.replace("      cancelAnimationFrame(raf)\n", "      cancelAnimationFrame(raf)\n      cancelAnimationFrame(enableFrame)\n", 1)
-                          cursor.write_text(source)
-
-                      reveal = package_dir / "components/motion/reveal.tsx"
-                      if reveal.exists():
-                          source = reveal.read_text()
-                          source = source.replace(
-                              "const EASE = [0.16, 1, 0.3, 1] as const\n",
-                              "const EASE = [0.16, 1, 0.3, 1] as const\n\nconst motionTags = {\n  span: motion.span,\n  h1: motion.h1,\n  h2: motion.h2,\n  h3: motion.h3,\n  p: motion.p,\n}\n",
-                              1,
-                          )
-                          source = source.replace("const Comp = Tag as any", "const Comp = Tag")
-                          source = source.replace("const MotionTag = motion[Tag] as any", "const MotionTag = motionTags[Tag]")
-                          reveal.write_text(source)
-
-                      scene = package_dir / "components/webgl/hero-scene.tsx"
-                      if scene.exists():
-                          source = scene.read_text()
-                          source = source.replace(
-                              "function Core({ reducedMotion }: { reducedMotion: boolean }) {",
-                              "const sharedPointer = new THREE.Vector2(0, 0)\nlet sharedScroll = 0\n\nfunction Core({ reducedMotion }: { reducedMotion: boolean }) {",
-                              1,
-                          )
-                          source = source.replace(
-                              "      )\n      lastMove.current = performance.now()",
-                              "      )\n      sharedPointer.copy(target.current)\n      lastMove.current = performance.now()",
-                              1,
-                          )
-                          source = source.replace(
-                              "      scroll = Math.min(window.scrollY / (window.innerHeight || 1), 1)",
-                              "      scroll = Math.min(window.scrollY / (window.innerHeight || 1), 1)\n      sharedScroll = scroll",
-                              1,
-                          )
-                          source = source.replace("    ;(Core as any)._pointer = () => pointer.current\n", "")
-                          source = source.replace("    ;(Core as any)._scroll = () => scroll\n", "")
-                          source = source.replace(
-                              "    pointer.current.lerp(target.current, 1 - Math.pow(0.0015, d))",
-                              "    pointer.current.lerp(target.current, 1 - Math.pow(0.0015, d))\n    sharedPointer.copy(pointer.current)",
-                              1,
-                          )
-                          source = source.replace("    u.uScroll.value = (Core as any)._scroll ? (Core as any)._scroll() : 0", "    u.uScroll.value = sharedScroll")
-                          source = source.replace("    const p = (Core as any)._pointer ? (Core as any)._pointer() : { x: 0, y: 0 }", "    const p = sharedPointer")
-                          source = source.replace(
-                              "    const positions = new Float32Array(count * 3)\n    const scales = new Float32Array(count)",
-                              "    const positions = new Float32Array(count * 3)\n    const scales = new Float32Array(count)\n    let seed = 0xA37E\n    const random = () => {\n      seed = (seed * 1664525 + 1013904223) >>> 0\n      return seed / 4294967296\n    }",
-                              1,
-                          )
-                          source = source.replace("Math.random()", "random()")
-                          scene.write_text(source)
-
-                  lock = package_dir / "package-lock.json"
-                  if lock.exists():
-                      lock.unlink()
-                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
-                  subprocess.run(["npm", "audit", "fix", "--omit=dev"], cwd=package_dir, check=True)
-                  subprocess.run(["npm", "install", "--legacy-peer-deps", "--no-fund", "--no-audit"], cwd=package_dir, check=True)
-                  subprocess.run(["npm", "run", "build"], cwd=package_dir, check=True)
-                  if archive_name == "aether.zip":
-                      subprocess.run(["npm", "run", "lint"], cwd=package_dir, check=True)
-                      subprocess.run(["npx", "tsc", "--noEmit"], cwd=package_dir, check=True)
-                  subprocess.run(["npm", "audit", "--audit-level=high", "--omit=dev"], cwd=package_dir, check=True)
-                  rebuilt = archive.with_suffix(".zip.tmp")
-                  with zipfile.ZipFile(rebuilt, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
-                      for path in sorted(work.rglob("*")):
-                          if path.is_file() and "node_modules" not in path.parts and ".next" not in path.parts:
-                              zf.write(path, path.relative_to(work).as_posix())
-                  rebuilt.replace(archive)
-                  print(f"REPAIRED AND AUDITED: {archive_name}")
-          PY
+          for archive in aether.zip kiln-estates.zip nexi-ai.zip; do
+            NEXORA_PACKAGE_TARGET="$archive" python3 scripts/harden-template-archives.py
+          done
+      - name: Verify the rebuilt archives on a clean extraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-template-packages.py \
+            --only aether,kiln-estates,nexi-ai \
+            --out .deep-audit/repair-report.json
       - name: Commit repaired archives only after every build and audit passes
         shell: bash
         run: |

@@ -76,7 +76,7 @@ export async function POST(request: Request) {
   }
 
   const template = getTemplate(templateSlug);
-  if (!template) {
+  if (!template || template.hidden) {
     return NextResponse.json({ ok: false, error: "Template not found" }, { status: 404 });
   }
 
