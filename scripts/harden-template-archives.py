@@ -1230,6 +1230,27 @@ def patch_creative_agency_source(root):
         cta.write_text(cta_text, encoding="utf-8")
 
 
+def patch_vesper_env_example(root):
+    """Vesper is a static Vite template that reads no environment variables, but it
+    shipped an AI Studio boilerplate `.env.example` naming `GEMINI_API_KEY` and an
+    "AI Studio UI" secrets panel that does not exist for this product.
+    """
+    env_file = root / ".env.example"
+    text = read_text(env_file) if env_file.exists() else ""
+    if not text or ("AI Studio" not in text and "GEMINI_API_KEY" not in text):
+        return
+    env_file.write_text(
+        "# Vesper is a static React + Vite template: the browser bundle reads no\n"
+        "# environment variables at runtime, and every demo value in src/data is\n"
+        "# local to the package. Add placeholders here only for integrations you\n"
+        "# add yourself, for example:\n"
+        "# VITE_API_BASE_URL=\n"
+        "# Only VITE_-prefixed names reach the browser bundle, so never put a real\n"
+        "# secret in this file or in any VITE_ variable.\n",
+        encoding="utf-8",
+    )
+
+
 def harden(archive):
     key = archive.stem
     title, description = PRODUCTS.get(key, (key.replace("-", " ").title(), "A Nexora template package."))
@@ -1244,6 +1265,8 @@ def harden(archive):
         if key == "nexi-ai":
             patch_nexi_ai_source(root)
             patch_nexi_ai_font(root)
+        if normalize_template_key(key) == "vesper":
+            patch_vesper_env_example(root)
         patch_placeholder_links(root, key)
         patch_accessibility_text(root, key)
         ensure_reduced_motion(root)

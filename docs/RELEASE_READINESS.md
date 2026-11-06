@@ -255,8 +255,16 @@ this report.
    above); no CI result exists for any commit after `01b138b`, and approval needs
    the repository owner.
 4. AETHER's rebuilt export was built successfully but its `out/` was **not**
-   published into `public/demo/aether/`, and Vesper has no static-export build
-   step, so both demos are still the pre-fix exports.
+   published into `public/demo/aether/`, so that demo is still the pre-fix
+   export. Vesper's demo **is** rebuilt (2026-11-06): `npx vite build --base=./`
+   from the shipped ZIP, published to `public/demo/vesper/` and served with
+   relative assets (`/demo/vesper/` → 200 for `index.html`, CSS and JS); its
+   browser verdict is still the chromium crash recorded above.
+   Vesper ZIP: `npm ci`, `npm run build` and `npm run lint` (`tsc --noEmit`)
+   exit 0 on a clean extraction, SHA-256
+   `dcf65a10e8e83dcf11d3370151c05ec6572b04ef50ef3af79050e710be68d6de`.
+   Its shipped `.env.example` was AI Studio boilerplate naming `GEMINI_API_KEY`
+   for a template that reads no environment variables; it now says so honestly.
 5. Purchase/order/download delivery was not exercised: it needs the deployed
    Cloudflare environment and existing test-mode fixtures. Payment, PayMeGate and
    Gmail systems were not modified.
