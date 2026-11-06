@@ -1,8 +1,8 @@
 [
   {
     "package": "Nexora-Template-12-Vesper-v1.0.0.zip",
-    "bytes": 132865,
-    "sha256": "dcf65a10e8e83dcf11d3370151c05ec6572b04ef50ef3af79050e710be68d6de",
+    "bytes": 132879,
+    "sha256": "b12fcdaf8ad7d53e8d5a2800869d94d25ed3ded993ec331e8abb9944609df29e",
     "files": 47,
     "readmes": [
       "README.md"
@@ -78,7 +78,7 @@
   {
     "package": "admin-dashboard.zip",
     "bytes": 86658,
-    "sha256": "a4cabc143becb7a2d4773c88655ec930d7336d646a99d461559ff8791ce1f2c8",
+    "sha256": "0f7875a5fcfd4645a62533aa7cddd5872c69a21752791a5a6e0b2381322b51b4",
     "files": 41,
     "readmes": [
       "admin-dashboard-template/README.md"
@@ -148,7 +148,7 @@
   {
     "package": "aether.zip",
     "bytes": 10435478,
-    "sha256": "b62ed58f502fad3bda380eca6546d189a03f1cf509c01448c8eea4c6a77cfb2f",
+    "sha256": "1befc743efd1c48648abf090c0dde93c2116e2b7f58b979d57d919ea2c40f719",
     "files": 52,
     "readmes": [
       "README.md"
@@ -250,7 +250,7 @@
   {
     "package": "aurelia-store.zip",
     "bytes": 1727579,
-    "sha256": "4ccdf1d6ff89a26b3deca5ef73d4a3f2504bb6d31d9a2b3f13bcf0e6fb8e5f34",
+    "sha256": "a70273d79c875ff7ec1ac83d1c2734f9327ed735524c107a2c2607967190fd26",
     "files": 43,
     "readmes": [
       "aurelia-store/README.md"
@@ -329,7 +329,7 @@
   {
     "package": "creative-agency.zip",
     "bytes": 85015,
-    "sha256": "b6b4b75a66a3961b091a15f1ed136ac2f598ca2f1df913cd385ff1320529c836",
+    "sha256": "0dc934a17c9faea0e4987c5ddafd21a4fe58586ae3dd637b36f2cc5286f321ae",
     "files": 44,
     "readmes": [
       "creative-agency-template/README.md"
@@ -397,7 +397,7 @@
   {
     "package": "kiln-estates.zip",
     "bytes": 1918536,
-    "sha256": "84f0f1ca8c99f42552ac88f04c052e85b380bff8b366b281af8a1df39c7918a9",
+    "sha256": "cefe5879972d3ad2181343d05cbcbf84f26c3a19422a6b1eaa4de564e72edef5",
     "files": 38,
     "readmes": [
       "README.md"
@@ -469,7 +469,7 @@
   {
     "package": "modern-saas.zip",
     "bytes": 84646,
-    "sha256": "8243ab01f5fb00614452d3cc004dd0573b0a01d5a6d804622991cb2f50a397c5",
+    "sha256": "a3a6dd705e4dfb4cff7a35b341aa6f7a3973319985d3366012e3e1c6804a35db",
     "files": 44,
     "readmes": [
       "modern-saas-template/README.md"
@@ -535,8 +535,8 @@
   },
   {
     "package": "nexi-ai.zip",
-    "bytes": 81710,
-    "sha256": "5d894f6b73aeafcfda65f0e9afa27cbf13281ada6e3f67d99248227e21a3b652",
+    "bytes": 82619,
+    "sha256": "c90a5633186b6daf652dab58793d8e0e97a850b1e08b52789f7e914e11c26ba4",
     "files": 32,
     "readmes": [
       "README.md"
@@ -601,7 +601,7 @@
   {
     "package": "premium-blog.zip",
     "bytes": 80289,
-    "sha256": "b32084654c96977aa22e27597f15393bad59ba7608558bbd3377bb435655ebc1",
+    "sha256": "bf99d08c25736ed077158c60dbba936d265b8c1a8312606567ee2de2e2dcdee0",
     "files": 36,
     "readmes": [
       "premium-blog/README.md"
@@ -668,7 +668,7 @@
   {
     "package": "premium-portfolio.zip",
     "bytes": 664789,
-    "sha256": "60232ee1f8aa45606f950916818f98dcf059a45fad9446880a13931254bc6d3e",
+    "sha256": "acb4ac2215c6bbf7795e19319fdbce44c111f12bee58caa3cc2afae38117080f",
     "files": 47,
     "readmes": [
       "premium-portfolio/README.md"
@@ -752,7 +752,7 @@
   {
     "package": "premium-restaurant.zip",
     "bytes": 75858,
-    "sha256": "df9978d78ecc1f7f50f6be5cdd8ca29eecaac381abac56391e7d24a996ff2368",
+    "sha256": "7eec59c5279cc815c53cb0ccd03c2c41086331286c3d6f730cbcf2c72a3a5854",
     "files": 35,
     "readmes": [
       "premium-restaurant/README.md"
@@ -819,7 +819,7 @@
   {
     "package": "solace-studio.zip",
     "bytes": 13838914,
-    "sha256": "1acc323c21daf141a714d6a6c2f224f61cc5514b2c1a9bb1333e98e19395e4d2",
+    "sha256": "4fae3f44c449daeb2d6a2f04dac69e9f548d3a8c5e56aa193e5816bc42e466bd",
     "files": 56,
     "readmes": [
       "solace-studio/README.md"
