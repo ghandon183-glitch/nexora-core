@@ -3,7 +3,7 @@
 > Automated review only. External references are flagged for human license verification; dependency metadata URLs are intentionally excluded.
 
 ## Nexora-Template-12-Vesper-v1.0.0.zip
-- Archive: 132,858 bytes
+- Archive: 132,872 bytes
 - Files: 47
 - README: YES
 - License: YES
@@ -25,8 +25,8 @@
 - External asset references detected: 4
 
 ## aether.zip
-- Archive: 10,487,240 bytes
-- Files: 53
+- Archive: 10,435,478 bytes
+- Files: 52
 - README: YES
 - License: YES
 - Asset license manifest: YES
@@ -124,7 +124,7 @@
 - External asset references detected: 3
 
 ## solace-studio.zip
-- Archive: 13,838,945 bytes
+- Archive: 13,838,914 bytes
 - Files: 56
 - README: YES
 - License: YES
