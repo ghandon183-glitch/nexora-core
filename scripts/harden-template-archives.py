@@ -206,6 +206,22 @@ def patch_aether_source(root):
         if re.search(r"shadcn/tailwind\.css", read_text(css_file), re.I):
             raise RuntimeError("AETHER still imports removed shadcn/tailwind.css; refusing to ship a broken ZIP.")
 
+    # Ship exactly one lockfile (the npm one this package is verified with) and
+    # document the commands that lockfile supports.
+    pnpm_lock = root / "pnpm-lock.yaml"
+    if pnpm_lock.exists():
+        pnpm_lock.unlink()
+    readme = root / "README.md"
+    readme_text = read_text(readme)
+    if readme_text and "pnpm " in readme_text:
+        readme.write_text(
+            readme_text
+            .replace("pnpm install", "npm install")
+            .replace("pnpm dev", "npm run dev")
+            .replace("pnpm build && pnpm start", "npm run build && npm run start"),
+            encoding="utf-8",
+        )
+
 
 A11Y_TEXT_REPLACEMENTS = {
     "kiln-estates": [

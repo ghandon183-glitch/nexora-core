@@ -111,6 +111,22 @@ base path (28 files in Kiln Estates) because `next/image` does not prefix them.
 guard to every package's `globals.css`, so CSS motion (the Nexi dots included)
 stops for visitors who ask for it.
 
+### Shipped-archive repair workflow (2026-11-06)
+
+`Repair shipped template dependency archives` failed with
+`components/webgl/hero-scene.tsx(155,7) and (180,5): error TS2304: Cannot find
+name 'sharedPointer'`. The cause was duplicated patch logic: that workflow kept
+its own copy of the AETHER rewrites and applied it on top of an already-hardened
+archive, so its `sharedPointer.copy(...)` insertions still matched while the
+`const sharedPointer` declaration they depended on no longer did (the canonical
+hardener uses a `pointerRef` prop instead). The workflow now runs
+`scripts/harden-template-archives.py` and
+`scripts/verify-template-packages.py --only aether,kiln-estates,nexi-ai` instead
+of carrying a second patcher. `aether.zip` was rebuilt from that path:
+`npx tsc --noEmit` 0 errors, `npm run lint` 0 errors, build succeeds, single
+`package-lock.json` (`pnpm-lock.yaml` removed), SHA-256
+`85791f69f41f05ca6433fb9143d4b6b9968198f14fbb5d48e25033e5629a8940`.
+
 ## Package verification (ZIP → clean extract → documented install → build → lint → audit)
 
 Produced by `python3 scripts/verify-template-packages.py` on commit `7611975`.
