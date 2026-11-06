@@ -6,7 +6,10 @@ on:
   push:
     paths:
       - "public/downloads/**"
-      - "public/demo/vesper/**"
+      - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+      - ".github/workflows/audit-template-packages.yml"
+      - "public/demo/**"
       - ".github/workflows/deep-template-quality.yml"
       - "lib/data/templates.ts"
       - "lib/data/template-guides.ts"
@@ -15,7 +18,10 @@ on:
   pull_request:
     paths:
       - "public/downloads/**"
-      - "public/demo/vesper/**"
+      - "scripts/harden-template-archives.py"
+      - ".github/workflows/harden-template-archives.yml"
+      - ".github/workflows/audit-template-packages.yml"
+      - "public/demo/**"
       - ".github/workflows/deep-template-quality.yml"
       - "lib/data/templates.ts"
       - "lib/data/template-guides.ts"
@@ -136,44 +142,73 @@ jobs:
             name=$(basename "$dir")
             echo "## $name" >> .deep-audit/REPORT.md
             echo "=== PACKAGE: $name ==="
-            if [ ! -f "$dir/package.json" ]; then
-              echo "$name: static package (no package.json) — N/A"
-              echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
-              continue
+            pkg_dir="$dir"
+            if [ ! -f "$pkg_dir/package.json" ]; then
+              mapfile -t manifests < <(find "$dir" -type f -name package.json \
+                -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/dist/*' -not -path '*/out/*' | sort)
+              if [ "${#manifests[@]}" -eq 1 ]; then
+                pkg_dir=$(dirname "${manifests[0]}")
+              elif [ "${#manifests[@]}" -gt 1 ]; then
+                candidates=()
+                for manifest in "${manifests[@]}"; do
+                  candidate=$(dirname "$manifest")
+                  if [ -f "$candidate/next.config.js" ] || [ -f "$candidate/next.config.mjs" ] || [ -f "$candidate/next.config.ts" ] || [ -d "$candidate/app" ] || [ -d "$candidate/src/app" ]; then
+                    candidates+=("$candidate")
+                  fi
+                done
+                if [ "${#candidates[@]}" -eq 1 ]; then
+                  pkg_dir="${candidates[0]}"
+                else
+                  echo "$name: ambiguous package roots (${#manifests[@]} manifests)"
+                  echo '- package root: FAIL (ambiguous package.json files)' >> .deep-audit/REPORT.md
+                  failures=$((failures+1)); continue
+                fi
+              else
+                echo "$name: static package (no package.json) — N/A"
+                echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
+                continue
+              fi
             fi
-            if (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit); then
-              echo "$name: npm install PASS"
-            else
-              echo "$name: npm install FAIL"
-              echo '- npm install: FAIL' >> .deep-audit/REPORT.md
+            echo "- package root: ${pkg_dir#$dir/}" >> .deep-audit/REPORT.md
+            if [ ! -f "$pkg_dir/package-lock.json" ]; then
+              echo "$name: package-lock.json MISSING in $pkg_dir"
+              echo '- package-lock.json: FAIL (missing)' >> .deep-audit/REPORT.md
               failures=$((failures+1)); continue
             fi
-            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
-              if (cd "$dir" && npm run build); then
+            if (cd "$pkg_dir" && npm ci --legacy-peer-deps --no-fund --no-audit); then
+              echo "$name: npm ci PASS"
+            else
+              echo "$name: npm ci FAIL"
+              echo '- npm ci: FAIL' >> .deep-audit/REPORT.md
+              failures=$((failures+1)); continue
+            fi
+            if (cd "$pkg_dir" && node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"); then
+              if (cd "$pkg_dir" && npm run build); then
                 echo "$name: build PASS"; echo '- build: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: build FAIL"; echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
             else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
-            # Next.js build already performs TypeScript validation. Do not run tsc over its generated .next output.
-            if node -e "const p=require('./$dir/package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"; then
+            if (cd "$pkg_dir" && node -e "const p=require('./package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"); then
               echo '- typecheck: covered by Next.js build' >> .deep-audit/REPORT.md
-            elif find "$dir" -path "$dir/node_modules" -prune -o -path "$dir/.next" -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .; then
-              if (cd "$dir" && npx tsc --noEmit); then
+            elif find "$pkg_dir" -path "$pkg_dir/node_modules" -prune -o -path "$pkg_dir/.next" -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .; then
+              if (cd "$pkg_dir" && npx tsc --noEmit); then
                 echo "$name: typecheck PASS"; echo '- typecheck: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: typecheck FAIL"; echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
             else echo '- typecheck: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"; then
-              rm -rf "$dir/.next"
-              if (cd "$dir" && npm run lint); then
+            if (cd "$pkg_dir" && node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"); then
+              rm -rf "$pkg_dir/.next"
+              if (cd "$pkg_dir" && npm run lint); then
                 echo '- lint: PASS' >> .deep-audit/REPORT.md
               else
-                echo '- lint: ADVISORY FAIL (non-blocking; see job log)' >> .deep-audit/REPORT.md
+                echo "$name: lint FAIL"
+                echo '- lint: FAIL' >> .deep-audit/REPORT.md
+                failures=$((failures+1))
               fi
             else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if (cd "$dir" && npm audit --audit-level=high --omit=dev); then
+            if (cd "$pkg_dir" && npm audit --audit-level=high --omit=dev); then
               echo "$name: npm audit PASS"; echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md
             else
               echo "$name: npm audit FAIL"; echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
@@ -190,7 +225,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4174 --directory public >/tmp/nexora-public.log 2>&1 &
+          python3 - <<'PY' >/tmp/nexora-public.log 2>&1 &
+          from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+          class NextStaticHandler(SimpleHTTPRequestHandler):
+              def guess_type(self, path):
+                  if path.lower().endswith(".txt"):
+                      return "text/x-component"
+                  return super().guess_type(path)
+          ThreadingHTTPServer(("127.0.0.1", 4174), lambda *args, **kwargs: NextStaticHandler(*args, directory="public", **kwargs)).serve_forever()
+          PY
           server=$!
           trap 'kill $server 2>/dev/null || true' EXIT
           sleep 2
@@ -204,28 +247,115 @@ jobs:
             const browser = await chromium.launch({headless:true});
             let failures = 0;
             for (const demo of demos) {
-              const file = `public/demo/${demo}/index.html`;
-              if (!fs.existsSync(file)) { console.log(`${demo}: NOT FOUND`); continue; }
+              const file = 'public/demo/' + demo + '/index.html';
+              const isAether = demo === 'aether';
+              if (!fs.existsSync(file) && !isAether) { console.log(demo + ': NOT FOUND'); continue; }
               const page = await browser.newPage({viewport:{width:1440,height:900}});
-              const errors=[]; const pageErrors=[]; const failed=[];
-              page.on('console',m=>{if(m.type()==='error') errors.push(m.text())});
-              page.on('pageerror',e=>pageErrors.push(String(e)));
-              page.on('requestfailed',r=>failed.push(r.url()));
+              const demoUrl = isAether ? 'https://nexora-aether-demo.nxora.workers.dev/' : base + '/demo/' + demo + '/';
+              const demoOrigin = isAether ? 'https://nexora-aether-demo.nxora.workers.dev' : base;
+              const errors=[]; const pageErrors=[]; const failed=[]; const mutations=[]; const mutationResponses=[];
+              page.on('console',m=>{if(m.type()==='error') errors.push({text:m.text(),location:m.location()})});
+              page.on('pageerror',e=>pageErrors.push({message:e.message,stack:e.stack || null}));
+              page.on('requestfailed',r=>failed.push({url:r.url(),failure:r.failure()?.errorText || 'unknown'}));
+              page.on('request',r=>{if(!['GET','HEAD'].includes(r.method())) mutations.push({url:r.url(),method:r.method()})});
+              page.on('response',r=>{if(!['GET','HEAD'].includes(r.request().method())) mutationResponses.push({url:r.url(),status:r.status()})});
               try {
-                await page.goto(`http://127.0.0.1:4174/demo/${demo}/index.html`,{waitUntil:'networkidle',timeout:30000});
+                await page.goto(demoUrl,{waitUntil:'networkidle',timeout:30000});
+                const linkIssues = await page.locator('a[href]').evaluateAll(anchors => anchors.flatMap(a => {
+                  const href = (a.getAttribute('href') || '').trim();
+                  const label = (a.innerText || a.getAttribute('aria-label') || '').trim().slice(0,80);
+                  if (!href || href === '#' || /^javascript:/i.test(href)) return [{label,href,reason:'placeholder-or-empty'}];
+                  if (/example\\.(com|net|org)|yourdomain|localhost|127\\.0\\.0\\.1/i.test(href)) return [{label,href,reason:'placeholder-domain'}];
+                  if (href.startsWith('#')) {
+                    let target = href.slice(1);
+                    try { target = decodeURIComponent(target); } catch {}
+                    if (target && !document.getElementById(target)) return [{label,href,reason:'missing-fragment-target'}];
+                  }
+                  return [];
+                }));
+                const routeTargets = await page.locator('a[href]').evaluateAll(anchors => [...new Set(anchors.map(a => {
+                  try {
+                    const u = new URL(a.href, location.href);
+                    const prefix = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
+                    if (u.origin === location.origin && u.pathname.startsWith(prefix) && u.pathname !== location.pathname) return u.href;
+                  } catch {}
+                  return null;
+                }).filter(Boolean))]);
+                const routeIssues=[];
+                for (const target of routeTargets) {
+                  try { const response = await page.request.get(target,{timeout:8000}); if (response.status() >= 400) routeIssues.push({url:target,status:response.status()}); }
+                  catch (e) { routeIssues.push({url:target,error:String(e)}); }
+                }
+                const buttonIssues=[];
+                const initialUrl=page.url();
+                const buttonCount=await page.locator('button:visible').count();
+                for (let i=0;i<buttonCount;i++) {
+                  const button=page.locator('button:visible').nth(i);
+                  const type=(await button.getAttribute('type') || '').toLowerCase();
+                  const inForm=await button.evaluate(el=>!!el.closest('form'));
+                  if (type==='submit' || inForm) continue;
+                  const label=((await button.innerText().catch(()=>'')) || await button.getAttribute('aria-label') || 'unlabelled button').replace(/\s+/g,' ').trim().slice(0,80);
+                  await page.evaluate(()=>document.getAnimations().forEach(a=>{try{a.finish()}catch{}}));
+                  const before=await page.evaluate(()=>({html:document.body.innerHTML,url:location.href,scroll:window.scrollY,values:Array.from(document.querySelectorAll('input,textarea,select')).map(e=>(e.value||'')+':'+(e.checked||false)).join('|')}));
+                  const mutationStart=mutations.length;
+                  let popupCount=0;
+                  const popupHandler=p=>{popupCount++;p.close().catch(()=>{})};
+                  page.on('popup',popupHandler);
+                  let clickError=null;
+                  try { await button.click({timeout:3000}); await page.waitForTimeout(150); }
+                  catch(e) { clickError=String(e); }
+                  await page.evaluate(()=>document.getAnimations().forEach(a=>{try{a.finish()}catch{}})).catch(()=>{});
+                  const after=await page.evaluate(()=>({html:document.body.innerHTML,url:location.href,scroll:window.scrollY,values:Array.from(document.querySelectorAll('input,textarea,select')).map(e=>(e.value||'')+':'+(e.checked||false)).join('|')})).catch(()=>null);
+                  page.off('popup',popupHandler);
+                  const changed=popupCount>0 || mutations.length>mutationStart || (after && (before.html!==after.html || before.url!==after.url || before.scroll!==after.scroll || before.values!==after.values));
+                  if(clickError || !changed) buttonIssues.push({label,error:clickError,reason:clickError?'click-failed':'no-observable-action'});
+                  if(page.url()!==initialUrl || i<buttonCount-1) await page.goto(initialUrl,{waitUntil:'networkidle',timeout:30000});
+                }
+                const formIssues=[];
+                const formCount=await page.locator('form').count();
+                for(let i=0;i<formCount;i++){
+                  const form=page.locator('form').nth(i);
+                  const submit=form.locator('button[type="submit"],input[type="submit"],button:not([type])').first();
+                  if(await submit.count()===0){formIssues.push({form:i,reason:'no-submit-control'});continue;}
+                  const fields=form.locator('input:not([type="hidden"]),textarea,select');
+                  for(let k=0;k<await fields.count();k++){
+                    const field=fields.nth(k);
+                    const tag=await field.evaluate(el=>el.tagName.toLowerCase());
+                    const type=(await field.getAttribute('type')||'').toLowerCase();
+                    if(type==='checkbox'||type==='radio'){await field.check().catch(()=>{});}
+                    else if(tag==='select'){await field.selectOption({index:0}).catch(()=>{});}
+                    else if(type==='email'){await field.fill('qa@example.invalid').catch(()=>{});}
+                    else {await field.fill('Nexora QA test').catch(()=>{});}
+                  }
+                  const beforeText=await page.locator('body').innerText();
+                  const beforeUrl=page.url();
+                  const mutationStart=mutations.length;
+                  const responseStart=mutationResponses.length;
+                  await submit.click({timeout:3000}).catch(()=>{});
+                  await page.waitForTimeout(300);
+                  const afterText=await page.locator('body').innerText().catch(()=>'');
+                  const formChanged=afterText!==beforeText || page.url()!==beforeUrl || mutations.length>mutationStart;
+                  const badMutation=mutationResponses.slice(responseStart).some(x=>x.status>=400);
+                  if(!formChanged || badMutation) formIssues.push({form:i,reason:badMutation?'submission-request-failed':'no-observable-submit-result'});
+                  if(page.url()!==initialUrl || i<formCount-1) await page.goto(initialUrl,{waitUntil:'networkidle',timeout:30000});
+                }
+                await page.goto(demoUrl,{waitUntil:'networkidle',timeout:30000});
                 await page.addScriptTag({content:axe.source});
                 const a11y = await page.evaluate(async()=>await axe.run(document));
-                const importantViolations = a11y.violations.filter(v => v.impact === 'critical' || v.impact === 'serious');
-                const sameOriginFailed = failed.filter(url => url.startsWith(base));
-                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,html:v.nodes.slice(0,8).map(n=>n.html)}))));
+                const sameOriginFailed = failed.filter(request => request.url.startsWith(demoOrigin) && !/ERR_ABORTED/i.test(request.failure));
+                console.log('CONSOLE_ERRORS ' + demo + ' ' + JSON.stringify(errors));
+                console.log('PAGE_ERRORS ' + demo + ' ' + JSON.stringify(pageErrors));
                 console.log('FAILED_REQUESTS ' + demo + ' ' + JSON.stringify(sameOriginFailed));
+                console.log('LINK_ISSUES ' + demo + ' ' + JSON.stringify(linkIssues));
+                console.log('ROUTE_ISSUES ' + demo + ' ' + JSON.stringify(routeIssues));
+                console.log('BUTTON_ISSUES ' + demo + ' ' + JSON.stringify(buttonIssues));
+                console.log('FORM_ISSUES ' + demo + ' ' + JSON.stringify(formIssues));
+                console.log('A11Y_DETAILS ' + demo + ' ' + JSON.stringify(a11y.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,details:v.nodes.slice(0,8).map(n=>({target:n.target,html:n.html,failureSummary:n.failureSummary}))}))));
                 await page.setViewportSize({width:390,height:844});
                 const overflow = await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth + 2);
-                const productionBlocking = demo === 'vesper';
-                const ok = errors.length===0 && pageErrors.length===0 && !overflow && (!productionBlocking || (sameOriginFailed.length===0 && importantViolations.length===0));
-                console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' blocking=' + (productionBlocking ? 'production' : 'advisory-template') + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11yImportant=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
-                if(!ok) failures++;
-              } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
+                const ok = errors.length===0 && pageErrors.length===0 && sameOriginFailed.length===0 && linkIssues.length===0 && routeIssues.length===0 && buttonIssues.length===0 && formIssues.length===0 && a11y.violations.length===0 && !overflow;
+                console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' console=' + errors.length + ' page=' + pageErrors.length + ' failedRequests=' + sameOriginFailed.length + ' links=' + linkIssues.length + ' routes=' + routeIssues.length + ' buttons=' + buttonIssues.length + ' forms=' + formIssues.length + ' a11y=' + a11y.violations.length + ' overflow=' + overflow);
+                if(!ok) failures++;              } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
               await page.close();
             }
             await browser.close();
