@@ -1230,6 +1230,119 @@ def patch_creative_agency_source(root):
         cta.write_text(cta_text, encoding="utf-8")
 
 
+NEXI_FOCUS_CSS = """
+/* Nexora Core visible focus ring. The browser default outline inherits
+   currentColor, which resolves to near-black on the dark hero and is invisible
+   there, so every keyboard focus gets one consistent ring. */
+:focus-visible {
+  outline: 2px solid #7dd3fc !important;
+  outline-offset: 2px !important;
+}
+"""
+
+NEXI_README_COMMANDS = """## Requirements
+
+- Node.js **20.9 or newer** (Next.js 16 requires `>=20.9.0`; Node.js 22 LTS is
+  what this package is tested with).
+- npm, which ships with Node.js.
+
+## Commands
+
+```bash
+npm ci          # install exactly the versions in package-lock.json
+npm run dev     # development server on http://localhost:3000
+npm run lint    # eslint
+npm run build   # production build
+npm run start   # serve the production build (script: next start)
+```
+
+### Static demo export
+
+`next.config.ts` reads the `STATIC_EXPORT` environment variable:
+
+```bash
+STATIC_EXPORT=true npm run build
+```
+
+With `STATIC_EXPORT=true` the build writes a static export to `out/`, sets
+`basePath` to `/demo/nexi-ai` and disables Next.js image optimisation, which is
+exactly how the marketplace demo is produced. Serve `out/` from a directory that
+keeps that prefix, for example `python3 -m http.server --directory .` next to a
+`demo/nexi-ai/` folder, and the page is available at `/demo/nexi-ai/`. Without
+the variable the template builds and runs normally at the site root.
+"""
+
+NEXI_QUICKSTART_COMMANDS = """## Commands for this package
+
+Node.js 20.9 or newer is required (Next.js 16).
+
+```bash
+npm ci                            # install dependencies
+npm run dev                       # http://localhost:3000
+npm run lint                      # eslint
+npm run build                     # production build
+npm run start                     # serve the production build
+STATIC_EXPORT=true npm run build  # static demo export into out/
+```
+
+`STATIC_EXPORT=true` builds a static export in `out/` with `basePath`
+`/demo/nexi-ai` and unoptimised images. Without it the build targets a normal
+Next.js deployment at the site root.
+"""
+
+
+def patch_nexi_focus_ring(root):
+    css_file = root / "app" / "globals.css"
+    css_text = read_text(css_file)
+    if not css_text:
+        raise RuntimeError("Nexi AI app/globals.css is missing.")
+    if "Nexora Core visible focus ring" in css_text:
+        return
+    css_file.write_text(css_text.rstrip("\n") + "\n" + NEXI_FOCUS_CSS, encoding="utf-8")
+
+
+def patch_nexi_docs(root):
+    readme = root / "README.md"
+    readme_text = read_text(readme)
+    if not readme_text:
+        raise RuntimeError("Nexi AI README.md is missing.")
+    updated = readme_text
+    stale_fonts = (
+        "- **Fonts**: configured in `app/layout.tsx` — Sora (display/headings), Inter\n"
+        "  (body), JetBrains Mono (used for the numbered steps). Swap any of the three\n"
+        "  `next/font/google` imports to change the whole site's typography."
+    )
+    if stale_fonts in updated:
+        updated = updated.replace(
+            stale_fonts,
+            "- **Fonts**: Sora (display/headings), Inter (body) and JetBrains Mono\n"
+            "  (numbered steps) are bundled locally from `@fontsource*` and imported in\n"
+            "  `app/layout.tsx`, so the build needs no network access. Swap those imports\n"
+            "  and the `--font-*` variables in `app/globals.css` to change the typography.",
+            1,
+        )
+    if "## Commands" not in updated:
+        marker = "## Customizing"
+        if marker in updated:
+            updated = updated.replace(marker, NEXI_README_COMMANDS + "\n" + marker, 1)
+        else:
+            updated = updated.rstrip("\n") + "\n\n" + NEXI_README_COMMANDS
+    if "next/font/google" in updated:
+        # The font section is the only place that claim can survive; surfacing it
+        # loudly beats shipping documentation that contradicts the code.
+        raise RuntimeError("Nexi AI README still claims next/font/google after the docs patch.")
+    if updated != readme_text:
+        readme.write_text(updated, encoding="utf-8")
+
+    quickstart = root / "QUICKSTART.md"
+    quickstart_text = read_text(quickstart)
+    if quickstart_text and "npm ci" not in quickstart_text:
+        quickstart.write_text(
+            quickstart_text.rstrip("\n") + "\n\n" + NEXI_QUICKSTART_COMMANDS,
+            encoding="utf-8",
+        )
+
+
 def patch_vesper_env_example(root):
     """Vesper is a static Vite template that reads no environment variables, but it
     shipped an AI Studio boilerplate `.env.example` naming `GEMINI_API_KEY` and an
@@ -1267,9 +1380,15 @@ def harden(archive):
             patch_nexi_ai_font(root)
         if normalize_template_key(key) == "vesper":
             patch_vesper_env_example(root)
+        if normalize_template_key(key) == "nexi-ai":
+            patch_nexi_docs(root)
         patch_placeholder_links(root, key)
         patch_accessibility_text(root, key)
         ensure_reduced_motion(root)
+        # After the contrast/reduced-motion writers: they rewrite the tail of
+        # globals.css, so the focus ring has to be appended last.
+        if normalize_template_key(key) == "nexi-ai":
+            patch_nexi_focus_ring(root)
         if key == "kiln-estates":
             patch_kiln_estates_source(root)
         if key == "nexi-ai":
