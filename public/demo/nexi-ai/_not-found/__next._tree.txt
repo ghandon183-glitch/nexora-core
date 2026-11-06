@@ -1,4 +1,4 @@
-:HL["/demo/nexi-ai/_next/static/chunks/3zuo-hlxz_2so.css","style"]
+:HL["/demo/nexi-ai/_next/static/chunks/2w_f9ss4yprm4.css","style"]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
-0:{"b":"Elr1V4ghE4xa1FSbxfniE","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"jmc0beL3KnCfaVjkG7qrE","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

@@ -1,4 +1,4 @@
-:HL["/demo/aurelia-store/_next/static/chunks/1ugb--6_e8-7a.css","style"]
+:HL["/demo/aurelia-store/_next/static/chunks/0z8dld3zmp2az.css","style"]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
-0:{"b":"VEE4fvNzwb0Mqk3GC_7lX","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"K0F_UiFUBnGVSCuxcPeTY","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

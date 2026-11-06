@@ -704,7 +704,8 @@ def align_peer_dependencies(key, deps, dev):
 
 A11Y_CSS_OVERRIDES = {
     "creative-agency": '[class~="text-violet/30"]{color:#a78bfa!important}',
-    "kiln-estates": '[class~="text-clay"]{color:#e7b18f!important}[class~="text-stone/50"]{color:#c5c9b8!important}',
+    "admin-dashboard": '[data-theme=dark] .recharts-tooltip-item-name,[data-theme=dark] .recharts-tooltip-item-value{color:#e2e8f0!important}[data-theme=light] .recharts-tooltip-item-name,[data-theme=light] .recharts-tooltip-item-value{color:#1f2937!important}',
+    "kiln-estates": '[class~="text-clay"]{color:#8f4021!important}.bg-forest [class~="text-clay"]{color:#e7b18f!important}[class~="text-stone/50"]{color:#c5c9b8!important}',
     "nexi-ai": '[class~="text-slate-400"]{color:#b7c6dc!important}[class~="text-slate-300"]{color:#cbd5e1!important}',
     "premium-blog": '[class~="text-accent"]{color:#9a3412!important}[class~="text-accent-soft"]{color:#f2b38f!important}',
     "premium-portfolio": '[class~="text-ink-mute"]{color:#a1a1aa!important}',
@@ -854,6 +855,365 @@ def patch_demo_exports():
             patch_accessibility_text(root, slug)
 
 
+REDUCED_MOTION_CSS = """
+/* Nexora Core reduced-motion guard: every CSS animation and transition stops
+   when the visitor asks for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+"""
+
+NOTIFICATION_BELL_TSX = '''"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Bell } from "lucide-react";
+
+const NOTIFICATIONS = [
+  { title: "Trial converted", body: "Acme Studio moved to the Growth plan.", age: "12m" },
+  { title: "Payment failed", body: "Card declined for Northwind Labs.", age: "1h" },
+  { title: "New signup", body: "3 accounts created in the last hour.", age: "2h" },
+];
+
+export default function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    const onClick = (event: MouseEvent) => {
+      if (container.current && !container.current.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClick);
+    };
+  }, [open]);
+
+  return (
+    <div ref={container} className="relative">
+      <button
+        type="button"
+        aria-label="Notifications"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={() => setOpen((value) => !value)}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-text-muted transition hover:border-amber hover:text-amber"
+      >
+        <Bell size={16} />
+      </button>
+      {open ? (
+        <div
+          role="dialog"
+          aria-label="Notifications"
+          className="absolute right-0 top-11 z-50 w-72 rounded-xl border border-line bg-bg p-4 shadow-xl"
+        >
+          <p className="font-display text-sm font-semibold text-text">Notifications</p>
+          <ul className="mt-3 space-y-3">
+            {NOTIFICATIONS.map((item) => (
+              <li key={item.title} className="border-b border-line pb-3 last:border-0 last:pb-0">
+                <p className="text-sm font-medium text-text">{item.title}</p>
+                <p className="text-xs text-text-muted">{item.body}</p>
+                <p className="mt-1 font-mono text-[11px] text-text-muted">{item.age} ago</p>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="mt-4 w-full rounded-lg border border-line px-3 py-2 text-xs font-medium text-text-muted transition hover:text-text"
+          >
+            Close
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+'''
+
+START_PROJECT_TSX = '''"use client";
+
+import { useEffect, useState } from "react";
+import Button from "@/components/ui/button";
+
+export default function StartProject({ className = "" }: { className?: string }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <>
+      <Button className={className} onClick={() => setOpen(true)} aria-haspopup="dialog">
+        Start a project
+      </Button>
+      {open ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-6"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="start-project-title"
+            className="w-full max-w-md rounded-2xl border border-line bg-bg p-8"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="start-project-title" className="font-display text-2xl font-bold text-text">
+              Start a project
+            </h2>
+            <p className="mt-3 text-sm text-text-muted">
+              This demo has no contact backend. Add your own form, scheduling link, or email
+              address here before publishing.
+            </p>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setOpen(false)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+'''
+
+
+def ensure_reduced_motion(root):
+    """Append the reduced-motion guard to the package's main stylesheet."""
+    candidates = [
+        root / "app" / "globals.css",
+        root / "src" / "app" / "globals.css",
+        root / "styles" / "globals.css",
+        root / "src" / "styles" / "globals.css",
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        current = read_text(path)
+        if not current or "Nexora Core reduced-motion guard" in current:
+            return
+        path.write_text(current.rstrip("\n") + "\n" + REDUCED_MOTION_CSS, encoding="utf-8")
+        return
+
+
+def patch_kiln_estates_source(root):
+    # React #418 came from the exported HTML being edited after the build: the
+    # server document said <h3>/<main>, the client bundle still rendered
+    # <h4>/no-main. Apply the same structure in the React tree instead.
+    for page in sorted(root.glob("app/**/page.tsx")):
+        current = read_text(page)
+        if not current or "<Navbar />" not in current or '<main id="main-content">' in current:
+            continue
+        updated = current.replace("<Navbar />", '<Navbar />\n\n      <main id="main-content">', 1)
+        if "<Footer />" not in updated:
+            raise RuntimeError(f"Kiln page {page} has a navbar but no footer to close <main>.")
+        updated = updated.replace("<Footer />", "</main>\n\n      <Footer />", 1)
+        page.write_text(updated, encoding="utf-8")
+    footer = root / "components" / "Footer.tsx"
+    footer_text = read_text(footer)
+    if footer_text:
+        updated = footer_text.replace(
+            '<h4 className="font-mono text-xs uppercase tracking-[0.2em] text-clay">Studio</h4>',
+            '<h3 className="font-mono text-xs uppercase tracking-[0.2em] text-clay">Studio</h3>',
+        )
+        if updated != footer_text:
+            footer.write_text(updated, encoding="utf-8")
+    # Locale-independent number formatting so server and client agree.
+    home = root / "app" / "page.tsx"
+    home_text = read_text(home)
+    if home_text and "hero.sqft.toLocaleString()" in home_text:
+        home.write_text(
+            home_text.replace('hero.sqft.toLocaleString()', 'hero.sqft.toLocaleString("en-US")'),
+            encoding="utf-8",
+        )
+
+
+def patch_nexi_motion(root):
+    """Three framer-motion dots repeated forever, ignoring reduced motion."""
+    card = root / "components" / "agent-chat-card.tsx"
+    current = read_text(card)
+    if not current:
+        raise RuntimeError("Nexi AI agent-chat-card.tsx is missing.")
+    if "animate-pulse" in current:
+        return
+    # A JS-driven loop cannot be stopped reliably after mount: the visitor's
+    # preference is already set, but the WAAPI animation keeps iterating. A CSS
+    # pulse is governed by the reduced-motion guard in globals.css instead.
+    css_dots = '''{[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-400"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              />
+            ))}'''
+    updated, count = re.subn(r"\{\[0, 1, 2\]\.map\(\(i\) => \(\s*<motion\.span\b[\s\S]*?/>\s*\)\)\}", css_dots, current, count=1)
+    if count != 1:
+        raise RuntimeError("Nexi AI typing-dot animation changed; refusing a silent partial patch.")
+    updated = updated.replace('import { motion, useReducedMotion } from "framer-motion";', 'import { motion } from "framer-motion";')
+    updated = updated.replace("  const reduceMotion = useReducedMotion();\n\n", "")
+    card.write_text(updated, encoding="utf-8")
+
+
+PORTFOLIO_SOCIALS_BLOCK = '''{socials.map((s) =>
+              s.demo ? (
+                <span
+                  key={s.label}
+                  aria-disabled="true"
+                  title="Demo placeholder — replace with your own profile URL"
+                  className="inline-flex items-center gap-1.5 text-sm text-ink-mute"
+                >
+                  {s.label}
+                  <span className="text-[0.65rem]">(demo)</span>
+                </span>
+              ) : (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className="group inline-flex items-center gap-1.5 text-sm text-ink-soft"
+                  {...(s.href.startsWith("http")
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                >
+                  {s.label}
+                  <ArrowUpRight
+                    size={12}
+                    className="opacity-0 transition-opacity group-hover:opacity-100"
+                  />
+                </a>
+              ),
+            )}'''
+
+
+def patch_portfolio_source(root):
+    """Demo social profiles have no real destination; do not ship dead links."""
+    footer = root / "components" / "footer.tsx"
+    current = read_text(footer)
+    if not current:
+        raise RuntimeError("Premium Portfolio footer.tsx is missing.")
+    if "s.demo ?" not in current:
+        block = re.compile(r"\{socials\.map\(\(s\) => \(\s*<a.*?</a>\s*\)\)\}", re.S)
+        if not block.search(current):
+            raise RuntimeError("Premium Portfolio socials markup changed; refusing a silent partial patch.")
+        footer.write_text(block.sub(PORTFOLIO_SOCIALS_BLOCK, current, count=1), encoding="utf-8")
+
+    contact = root / "components" / "contact.tsx"
+    contact_text = read_text(contact)
+    if contact_text and 'role="status"' not in contact_text:
+        updated = contact_text.replace(
+            '<div className="flex h-full min-h-[20rem] flex-col items-center justify-center text-center">',
+            '<div\n                  role="status"\n                  aria-live="polite"\n                  className="flex h-full min-h-[20rem] flex-col items-center justify-center text-center"\n                >',
+            1,
+        )
+        updated = updated.replace(
+            '                    Demo form — no data is sent or stored.',
+            '                    Demo form — nothing is sent or stored. Connect your own form endpoint\n                    before publishing.',
+            1,
+        )
+        if updated != contact_text:
+            contact.write_text(updated, encoding="utf-8")
+
+
+def patch_admin_dashboard_source(root):
+    topbar = root / "components" / "layout" / "topbar.tsx"
+    current = read_text(topbar)
+    if not current:
+        raise RuntimeError("Admin Dashboard topbar.tsx is missing.")
+    if "<NotificationBell />" in current:
+        (root / "components" / "layout" / "notification-bell.tsx").write_text(
+            NOTIFICATION_BELL_TSX, encoding="utf-8"
+        )
+        return
+    updated = current.replace(
+        'import { Search, Bell } from "lucide-react";',
+        'import { Search } from "lucide-react";\nimport NotificationBell from "@/components/layout/notification-bell";',
+        1,
+    )
+    button = '''        <button
+          aria-label="Notifications"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-text-muted transition hover:border-amber hover:text-amber"
+        >
+          <Bell size={16} />
+        </button>'''
+    if button not in updated:
+        raise RuntimeError("Admin Dashboard notification button changed; refusing a silent partial patch.")
+    updated = updated.replace(button, "        <NotificationBell />", 1)
+    topbar.write_text(updated, encoding="utf-8")
+    (root / "components" / "layout" / "notification-bell.tsx").write_text(
+        NOTIFICATION_BELL_TSX, encoding="utf-8"
+    )
+
+
+def patch_creative_agency_source(root):
+    grid = root / "components" / "sections" / "work-grid.tsx"
+    current = read_text(grid)
+    if not current:
+        raise RuntimeError("Creative Agency work-grid.tsx is missing.")
+    if "aria-pressed=" not in current:
+        old = '''          <button
+            key={cat}
+            onClick={() => setActive(cat)}'''
+        new = '''          <button
+            key={cat}
+            type="button"
+            aria-pressed={active === cat}
+            onClick={() => setActive(cat)}'''
+        if old not in current:
+            raise RuntimeError("Creative Agency filter buttons changed; refusing a silent partial patch.")
+        grid.write_text(current.replace(old, new, 1), encoding="utf-8")
+
+    (root / "components" / "sections" / "start-project.tsx").write_text(
+        START_PROJECT_TSX, encoding="utf-8"
+    )
+    navbar = root / "components" / "sections" / "navbar.tsx"
+    nav_text = read_text(navbar)
+    if not nav_text:
+        raise RuntimeError("Creative Agency navbar.tsx is missing.")
+    if "StartProject" not in nav_text:
+        if '<Button className="hidden sm:inline-flex">Start a project</Button>' not in nav_text:
+            raise RuntimeError("Creative Agency navbar CTA changed; refusing a silent partial patch.")
+        nav_text = nav_text.replace(
+            'import Button from "@/components/ui/button";',
+            'import StartProject from "@/components/sections/start-project";',
+            1,
+        ).replace(
+            '<Button className="hidden sm:inline-flex">Start a project</Button>',
+            '<StartProject className="hidden sm:inline-flex" />',
+            1,
+        )
+        navbar.write_text(nav_text, encoding="utf-8")
+    cta = root / "components" / "sections" / "cta.tsx"
+    cta_text = read_text(cta)
+    if not cta_text:
+        raise RuntimeError("Creative Agency cta.tsx is missing.")
+    if "StartProject" not in cta_text:
+        if "<Button>Start a project</Button>" not in cta_text:
+            raise RuntimeError("Creative Agency CTA button changed; refusing a silent partial patch.")
+        cta_text = cta_text.replace(
+            'import Button from "@/components/ui/button";',
+            'import StartProject from "@/components/sections/start-project";',
+            1,
+        ).replace("<Button>Start a project</Button>", "<StartProject />", 1)
+        cta.write_text(cta_text, encoding="utf-8")
+
+
 def harden(archive):
     key = archive.stem
     title, description = PRODUCTS.get(key, (key.replace("-", " ").title(), "A Nexora template package."))
@@ -870,6 +1230,17 @@ def harden(archive):
             patch_nexi_ai_font(root)
         patch_placeholder_links(root, key)
         patch_accessibility_text(root, key)
+        ensure_reduced_motion(root)
+        if key == "kiln-estates":
+            patch_kiln_estates_source(root)
+        if key == "nexi-ai":
+            patch_nexi_motion(root)
+        if key == "premium-portfolio":
+            patch_portfolio_source(root)
+        if key == "admin-dashboard":
+            patch_admin_dashboard_source(root)
+        if key == "creative-agency":
+            patch_creative_agency_source(root)
         package_file = root / "package.json"
         pkg = None
         if package_file.exists():

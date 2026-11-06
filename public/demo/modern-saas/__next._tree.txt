@@ -1,8 +1,8 @@
-:HL["/demo/modern-saas/_next/static/chunks/3ud52xxp1osor.css","style"]
+:HL["/demo/modern-saas/_next/static/chunks/38k_vo90imren.css","style"]
+:HL["/demo/modern-saas/_next/static/media/0e70c1a03e160916-s.p.1rza4sc6zmljn.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/demo/modern-saas/_next/static/media/48eea41d8317494f-s.p.0wiir8udbzjvx.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/modern-saas/_next/static/media/81d2969dd5698a25-s.p.3j1d7eghsxtch.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/demo/modern-saas/_next/static/media/916cd8a3bde3edf8-s.p.0oace-s_gkfks.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/demo/modern-saas/_next/static/media/d6c1ff7e86974212-s.p.40sczeszzbjw1.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/demo/modern-saas/_next/static/media/ddb686d70dc9968d-s.p.16u3vygyjnhr0.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/demo/modern-saas/_next/static/media/edb99fec956915f8-s.p.32sris142tqlb.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 1:[["children",{"s":"__PAGE__","h":160}]]
-0:{"b":"DGaH6btGygSf9aIOBBRvQ","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"diqc25fDLWrdUMBGc5ura","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

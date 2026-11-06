@@ -213,7 +213,11 @@ async function exerciseForms(page, startUrl) {
       else if (type === "email") await field.fill("qa@example.invalid").catch(() => {});
       else await field.fill("Nexora QA test").catch(() => {});
     }
-    const before = await page.evaluate(() => ({ text: document.body.innerText, url: location.href }));
+    const before = await page.evaluate(() => ({
+      text: document.body.textContent || "",
+      status: [...document.querySelectorAll('[role="status"], [aria-live]')].map((n) => n.textContent || "").join("|"),
+      url: location.href,
+    }));
     const mutations = [];
     const onResponse = (r) => {
       if (!["GET", "HEAD"].includes(r.request().method()) && r.url().startsWith("http://127.0.0.1")) {
@@ -229,8 +233,16 @@ async function exerciseForms(page, startUrl) {
       submitError = String(err).split("\n")[0].slice(0, 200);
     }
     page.off("response", onResponse);
-    const after = await page.evaluate(() => ({ text: document.body.innerText, url: location.href })).catch(() => null);
-    const feedback = (after && after.text !== before.text) || (after && after.url !== before.url) || mutations.length > 0;
+    const after = await page.evaluate(() => ({
+      text: document.body.textContent || "",
+      status: [...document.querySelectorAll('[role="status"], [aria-live]')].map((n) => n.textContent || "").join("|"),
+      url: location.href,
+    })).catch(() => null);
+    const feedback =
+      (after && after.text !== before.text) ||
+      (after && after.status !== before.status && after.status.trim().length > 0) ||
+      (after && after.url !== before.url) ||
+      mutations.length > 0;
     const failedRequest = mutations.find((m) => Number(m.split(" ")[0]) >= 400);
     if (submitError) issues.push({ form: i, reason: "submit-failed", detail: submitError });
     else if (failedRequest) issues.push({ form: i, reason: "submission-request-failed", detail: failedRequest });
@@ -399,6 +411,9 @@ const { port } = server.address();
 const base = `http://127.0.0.1:${port}`;
 const browser = await chromium.launch({
   headless: true,
+  // CI uses Playwright's own download; a sandbox without root can point at a
+  // user-space browser build instead.
+  executablePath: process.env.CHROMIUM_PATH || undefined,
   args: ["--disable-dev-shm-usage"],
 });
 

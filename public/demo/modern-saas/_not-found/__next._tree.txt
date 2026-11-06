@@ -1,4 +1,4 @@
-:HL["/demo/modern-saas/_next/static/chunks/3ud52xxp1osor.css","style"]
+:HL["/demo/modern-saas/_next/static/chunks/38k_vo90imren.css","style"]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
-0:{"b":"DGaH6btGygSf9aIOBBRvQ","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"diqc25fDLWrdUMBGc5ura","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

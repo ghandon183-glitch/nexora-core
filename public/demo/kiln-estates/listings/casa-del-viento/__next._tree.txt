@@ -1,3 +1,10 @@
-:HL["/demo/kiln-estates/_next/static/chunks/3vwnjkjdqt7zh.css","style"]
-:HL["https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Work+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"listings","param":null,"prefetchHints":0,"slots":{"children":{"name":"slug","param":{"type":"d","key":"casa-del-viento","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"yZALoIb_uZU4RAQUWjdfl"}
+:HL["/demo/kiln-estates/_next/static/chunks/00mc4wi9166ks.css","style"]
+:HL["/demo/kiln-estates/_next/static/media/37118adc619b7803-s.p.3kq6k02b2ysv1.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/kiln-estates/_next/static/media/916cd8a3bde3edf8-s.p.0oace-s_gkfks.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/kiln-estates/_next/static/media/d6c1ff7e86974212-s.p.40sczeszzbjw1.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/kiln-estates/_next/static/media/ddb686d70dc9968d-s.p.16u3vygyjnhr0.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/demo/kiln-estates/_next/static/media/edb99fec956915f8-s.p.32sris142tqlb.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+3:[["children",{"s":"__PAGE__","h":160}]]
+2:[["children",{"s":{"n":"slug","t":"d","k":"casa-del-viento","s":[]},"h":96,"c":"$Q3"}]]
+1:[["children",{"s":"listings","h":96,"c":"$Q2"}]]
+0:{"b":"9AhyfiiFehqefeDpf0yd8","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
