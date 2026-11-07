@@ -112,12 +112,14 @@ jobs:
           EOF
           cd .aether-capture
           npm ci --no-fund --no-audit
-          npm run build
+          # The package prefixes its /public assets itself from this variable
+          # (lib/asset-path.ts), so icons and images resolve under the demo path.
+          NEXT_PUBLIC_BASE_PATH=/demo/aether npm run build
           cd ..
           test -d .aether-capture/out
           cp -R .aether-capture/out/. public/demo/aether/
-          # Next.js basePath handles generated chunks; public assets referenced
-          # with root-relative /images/... URLs need the demo prefix as well.
+          # Safety net for any remaining root-relative /images/... reference the
+          # package does not build through assetPath().
           python3 - <<'PY'
           from pathlib import Path
           import re

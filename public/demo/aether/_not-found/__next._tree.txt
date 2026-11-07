@@ -1,4 +1,4 @@
-:HL["/demo/aether/_next/static/chunks/1oaoix5u3wob7.css","style"]
+:HL["/demo/aether/_next/static/chunks/0ivb84rv1w78x.css","style"]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
-0:{"b":"p-Qkc5MrUezAXXp3SXkNU","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"IU7NGnUBAkcufxVzopyYM","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
