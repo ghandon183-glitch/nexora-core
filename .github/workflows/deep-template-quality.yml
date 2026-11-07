@@ -203,6 +203,7 @@ jobs:
           (async()=>{
             const browser = await chromium.launch({headless:true});
             let failures = 0;
+            const failingDemos = [];
             for (const demo of demos) {
               const file = `public/demo/${demo}/index.html`;
               if (!fs.existsSync(file)) { console.log(`${demo}: NOT FOUND`); continue; }
@@ -224,13 +225,25 @@ jobs:
                 const productionBlocking = demo === 'vesper';
                 const ok = errors.length===0 && pageErrors.length===0 && !overflow && (!productionBlocking || (sameOriginFailed.length===0 && importantViolations.length===0));
                 console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' blocking=' + (productionBlocking ? 'production' : 'advisory-template') + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11yImportant=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
-                if(!ok) failures++;
+                if(!ok) {
+                  failures++;
+                  failingDemos.push(demo);
+                  // Surface the detail as check-run annotations so the failure is
+                  // readable without downloading the artifact.
+                  const oneLine = value => String(value).replace(/[%\r\n]+/g, ' ').slice(0, 220);
+                  for (const e of errors.slice(0, 12)) process.stdout.write(`::error title=${demo} console error::${oneLine(e)}\n`);
+                  for (const e of pageErrors.slice(0, 6)) process.stdout.write(`::error title=${demo} page error::${oneLine(e)}\n`);
+                  for (const u of [...sameOriginFailed, ...failed.filter(x => !x.startsWith(base))].slice(0, 12)) process.stdout.write(`::error title=${demo} request failed::${oneLine(u)}\n`);
+                  for (const v of importantViolations.slice(0, 12)) process.stdout.write(`::error title=${demo} a11y ${v.id} (${v.impact})::${oneLine(v.nodes.slice(0, 4).map(n => n.html).join(' | '))}\n`);
+                }
               } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
               await page.close();
             }
             await browser.close();
             fs.appendFileSync('.deep-audit/REPORT.md', `Runtime failures: ${failures}\n`);
             fs.writeFileSync('.deep-audit/runtime-failures.txt', String(failures));
+            fs.writeFileSync('.deep-audit/runtime-failing-demos.txt', failingDemos.join(','));
+            console.log('RUNTIME_FAILING_DEMOS=' + (failingDemos.join(',') || 'none'));
             process.exitCode = 0;
           })();
           NODE
@@ -256,8 +269,14 @@ jobs:
           runtime_failures=0
           if [ -f .deep-audit/package-failures.txt ]; then package_failures=$(cat .deep-audit/package-failures.txt); fi
           if [ -f .deep-audit/runtime-failures.txt ]; then runtime_failures=$(cat .deep-audit/runtime-failures.txt); fi
+          failing_demos="none"
+          if [ -f .deep-audit/runtime-failing-demos.txt ]; then failing_demos=$(cat .deep-audit/runtime-failing-demos.txt); [ -n "$failing_demos" ] || failing_demos="none"; fi
           echo "BLOCKING_PACKAGE_FAILURES=$package_failures"
           echo "RUNTIME_FAILURES=$runtime_failures"
+          echo "RUNTIME_FAILING_DEMOS=$failing_demos"
+          if [ "$runtime_failures" -ne 0 ]; then
+            echo "::error title=Runtime audit failures::${runtime_failures} demo(s) failed: ${failing_demos}"
+          fi
           if [ "$package_failures" -ne 0 ] || [ "$runtime_failures" -ne 0 ]; then
             echo "DEEP QUALITY GATE: FAIL"
             exit 1
