@@ -56,11 +56,12 @@ async function runAxe(page, name, label) {
     }),
   );
   const important = violations.filter((v) => v.impact === "critical" || v.impact === "serious");
-  record(
-    `${name} axe ${label}`,
-    important.length === 0,
-    important.map((v) => `${v.id}(${v.nodes.length})`).join(", "),
-  );
+  const detail = important
+    .flatMap((v) =>
+      v.nodes.slice(0, 3).map((n) => `${v.id} @ ${n.target.join(" ")} -> ${n.html.replace(/\s+/g, " ").slice(0, 90)} :: ${(n.failureSummary || "").replace(/\s+/g, " ").slice(0, 140)}`),
+    )
+    .join(" || ");
+  record(`${name} axe ${label}`, important.length === 0, detail);
 }
 
 async function aurelia(browser) {
