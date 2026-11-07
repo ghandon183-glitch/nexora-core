@@ -184,10 +184,77 @@ async function passiveDemo(browser, slug) {
   await context.close();
 }
 
+
+async function vesper(browser) {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const watched = watch(page);
+  const name = "vesper";
+
+  await page.goto(`${BASE}/demo/vesper/index.html`, { waitUntil: "networkidle", timeout: 45000 });
+
+  const velocity = page.getByRole("slider", { name: "Camera velocity vector" });
+  const originalVelocity = await velocity.inputValue();
+  await velocity.focus();
+  await velocity.press("ArrowRight");
+  const changedVelocity = await velocity.inputValue();
+  record(`${name} camera velocity slider changes value`, changedVelocity !== originalVelocity, `${originalVelocity} -> ${changedVelocity}`);
+  await velocity.press("ArrowLeft");
+  record(`${name} camera velocity slider restores value`, (await velocity.inputValue()) === originalVelocity);
+
+  const guidance = page.getByRole("slider", { name: "Latent guidance (CFG)" });
+  const originalGuidance = await guidance.inputValue();
+  await guidance.focus();
+  await guidance.press("ArrowRight");
+  const changedGuidance = await guidance.inputValue();
+  record(`${name} latent guidance slider changes value`, changedGuidance !== originalGuidance, `${originalGuidance} -> ${changedGuidance}`);
+  await guidance.press("ArrowLeft");
+  record(`${name} latent guidance slider restores value`, (await guidance.inputValue()) === originalGuidance);
+
+  const emulsion = page.getByLabel("Film emulsion");
+  const originalEmulsion = await emulsion.inputValue();
+  const alternateEmulsion = originalEmulsion === "Fuji Eterna 8553" ? "Eastman Double-X" : "Fuji Eterna 8553";
+  await emulsion.selectOption(alternateEmulsion);
+  record(`${name} film emulsion selection changes`, (await emulsion.inputValue()) === alternateEmulsion, alternateEmulsion);
+  await emulsion.selectOption(originalEmulsion);
+  record(`${name} film emulsion selection restores value`, (await emulsion.inputValue()) === originalEmulsion);
+
+  await page.getByRole("button", { name: "1:1", exact: true }).click();
+  record(`${name} aspect ratio selection changes`, (await page.getByRole("button", { name: "1:1", exact: true }).getAttribute("aria-pressed")) === "true");
+  await page.getByRole("button", { name: "16:9", exact: true }).click();
+  record(`${name} aspect ratio selection restores 16:9`, (await page.getByRole("button", { name: "16:9", exact: true }).getAttribute("aria-pressed")) === "true");
+
+  await page.getByRole("button", { name: "Pause preview playback" }).click();
+  const playButton = page.getByRole("button", { name: "Play preview playback" });
+  record(`${name} playback toggle pauses preview`, (await playButton.count()) === 1 && (await playButton.getAttribute("aria-pressed")) === "false");
+  await playButton.click();
+  const pauseButton = page.getByRole("button", { name: "Pause preview playback" });
+  record(`${name} playback toggle resumes preview`, (await pauseButton.count()) === 1 && (await pauseButton.getAttribute("aria-pressed")) === "true");
+
+  const timeline = page.getByRole("slider", { name: "Timeline position" });
+  const originalPosition = await timeline.getAttribute("aria-valuenow");
+  await timeline.focus();
+  await timeline.press("ArrowRight");
+  const changedPosition = await timeline.getAttribute("aria-valuenow");
+  record(`${name} timeline keyboard control changes position`, changedPosition !== originalPosition, `${originalPosition} -> ${changedPosition}`);
+  await timeline.press("ArrowLeft");
+  record(`${name} timeline keyboard control restores position`, (await timeline.getAttribute("aria-valuenow")) === originalPosition);
+
+  const seed = page.getByRole("spinbutton", { name: "Deterministic seed" });
+  const originalSeed = await seed.inputValue();
+  await seed.fill(String(Number(originalSeed) + 1));
+  record(`${name} deterministic seed input changes value`, (await seed.inputValue()) === String(Number(originalSeed) + 1));
+  await seed.fill(originalSeed);
+  record(`${name} deterministic seed restores value`, (await seed.inputValue()) === originalSeed);
+
+  await assertClean(name, page, watched);
+  await page.close();
+}
+
 const browser = await chromium.launch({ headless: true });
 try {
   await aurelia(browser);
   await modernSaas(browser);
+  await vesper(browser);
   for (const slug of ["vesper", "aether"]) {
     await passiveDemo(browser, slug);
   }
