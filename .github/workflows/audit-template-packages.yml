@@ -97,11 +97,21 @@ jobs:
           unzip -q public/downloads/aether.zip -d .aether-capture
           cat > .aether-capture/next.config.mjs <<'EOF'
           /** @type {import('next').NextConfig} */
-          const nextConfig = { output: 'export', basePath: '/demo/aether', trailingSlash: true, typescript: { ignoreBuildErrors: true }, images: { unoptimized: true } };
+          import path from 'node:path';
+
+          const nextConfig = {
+            output: 'export',
+            basePath: '/demo/aether',
+            trailingSlash: true,
+            images: { unoptimized: true },
+            // The demo is built inside the marketplace checkout, so scope
+            // Turbopack to the extracted package instead of the parent app.
+            turbopack: { root: path.resolve(process.cwd()) },
+          };
           export default nextConfig;
           EOF
           cd .aether-capture
-          npm install --legacy-peer-deps --no-fund --no-audit
+          npm ci --no-fund --no-audit
           npm run build
           cd ..
           test -d .aether-capture/out
@@ -133,14 +143,14 @@ jobs:
           mkdir -p .vesper-build public/demo/vesper
           unzip -q public/downloads/Nexora-Template-12-Vesper-v1.0.0.zip -d .vesper-build
           cd .vesper-build
-          npm ci --no-fund --no-audit || npm install --legacy-peer-deps --no-fund --no-audit
+          npm ci --no-fund --no-audit
           npm run build -- --base=./
           cd ..
           test -d .vesper-build/dist
           cp -R .vesper-build/dist/. public/demo/vesper/
           test -f public/demo/vesper/index.html
 
-      - name: Preserve Vesper semantic heading and accessible controls
+      - name: Verify Vesper semantic heading and accessible controls
         shell: bash
         run: |
           set -euo pipefail
@@ -163,29 +173,19 @@ jobs:
           if not js_files:
               raise SystemExit("Vesper build produced no JavaScript assets")
 
-          replacements = [
-              (r'type:`range`,min:`0\.5`,max:`10\.0`', '"aria-label":`Camera Velocity Vector`,type:`range`,min:`0.5`,max:`10.0`'),
-              (r'type:`range`,min:`1\.0`,max:`15\.0`', '"aria-label":`Latent Guidance (CFG)`,type:`range`,min:`1.0`,max:`15.0`'),
-              (r'type:`number`,value:c,onChange:e=>l\(parseInt\(e\.target\.value\)\|\|0\)', '"aria-label":`Deterministic Seed`,type:`number`,value:c,onChange:e=>l(parseInt(e.target.value)||0)'),
-              (r'\(0,O\.jsxs\)\(`select`,\{value:f,onChange:e=>p\(e\.target\.value\)', '(0,O.jsxs)(`select`,{"aria-label":`Film Emulsion`,value:f,onChange:e=>p(e.target.value)'),
-              (r'type:`button`,onClick:\(\)=>ee\(!b\),className:`w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center text-white hover:text-red-400 hover:border-red-500/40 transition-colors`', 'type:`button`,"aria-label":`Toggle preview playback`,onClick:()=>ee(!b),className:`w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center text-white hover:text-red-400 hover:border-red-500/40 transition-colors`'),
-          ]
-
           combined = "".join(p.read_text(encoding="utf-8", errors="ignore") for p in js_files)
-          for pattern, replacement in replacements:
-              count = len(re.findall(pattern, combined))
-              if count < 1:
-                  raise SystemExit(f"Vesper accessibility patch pattern not found: {pattern}")
-              remaining = count
-              for path in js_files:
-                  source = path.read_text(encoding="utf-8", errors="ignore")
-                  updated, n = re.subn(pattern, replacement, source)
-                  if n:
-                      path.write_text(updated, encoding="utf-8")
-                      remaining -= n
-              if remaining != 0:
-                  raise SystemExit(f"Vesper accessibility patch count mismatch: {pattern}; remaining={remaining}")
-          print(f"VESPER_ACCESSIBILITY_PATCHED assets={len(js_files)}")
+          required_labels = [
+              "Camera velocity vector",
+              "Latent guidance (CFG)",
+              "Deterministic seed",
+              "Film emulsion",
+              "Timeline position",
+              "Pause preview playback",
+          ]
+          missing = [label for label in required_labels if label not in combined]
+          if missing:
+              raise SystemExit(f"Vesper accessible controls regressed; missing labels: {missing}")
+          print(f"VESPER_ACCESSIBILITY_VERIFIED labels={len(required_labels)} assets={len(js_files)}")
           PY
 
       - name: Build and serve existing live demos
