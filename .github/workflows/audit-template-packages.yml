@@ -119,7 +119,7 @@ jobs:
                   source = path.read_text(encoding="utf-8")
               except UnicodeDecodeError:
                   continue
-              updated = re.sub(r"(?<![A-Za-z0-9:])/(images/)", r"/demo/aether/\\1", source)
+              updated = re.sub(r"(?<![A-Za-z0-9:])/(images/)", lambda match: "/demo/aether/" + match.group(1), source)
               if updated != source:
                   path.write_text(updated, encoding="utf-8")
           PY
