@@ -213,10 +213,10 @@ jobs:
             # Only require an .env.example when the project actually references
             # app-specific environment variables; platform-provided variables
             # are excluded from this customer setup check.
-            env_refs=$(grep -RhoE 'process\\.env\\.[A-Z][A-Z0-9_]*|import\\.meta\\.env\\.[A-Z][A-Z0-9_]*' "$package_dir" \
+            env_refs=$(grep -RhoE 'process\.env\.[A-Z][A-Z0-9_]*|import\.meta\.env\.[A-Z][A-Z0-9_]*' "$package_dir" \
               --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist --exclude-dir=out \
-              --exclude='package-lock.json' --exclude='*.map' 2>/dev/null | sed -E 's/.*(process\\.env\\.|import\\.meta\\.env\\.)//' | sort -u || true)
-            env_refs=$(printf '%s\\n' "$env_refs" | grep -Ev '^(NODE_ENV|VERCEL_ENV|NEXT_RUNTIME)$' || true)
+              --exclude='package-lock.json' --exclude='*.map' 2>/dev/null | sed -E 's/.*(process\.env\.|import\.meta\.env\.)//' | sort -u || true)
+            env_refs=$(printf '%s\n' "$env_refs" | grep -Ev '^(NODE_ENV|VERCEL_ENV|NEXT_RUNTIME)$' || true)
             if [ -n "$env_refs" ]; then
               missing_env=0
               while IFS= read -r variable; do
@@ -242,7 +242,7 @@ jobs:
           if [ "$failures" -ne 0 ]; then
             echo "Package quality gate has blocking failures; runtime audit will still run." >&2
           fi
-          printf '%s\\n' "$failures" > .deep-audit/package-failures.txt
+          printf '%s\n' "$failures" > .deep-audit/package-failures.txt
       - name: Runtime and accessibility audit of published demos
         shell: bash
         run: |
