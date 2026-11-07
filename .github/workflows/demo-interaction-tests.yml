@@ -1,0 +1,59 @@
+name: Demo interaction tests
+
+# Behavioural checks the load-and-audit pass cannot see: the Aurelia bag,
+# the Modern SaaS trial dialog, mobile widths and reduced motion.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "public/demo/aurelia-store/**"
+      - "public/demo/modern-saas/**"
+      - "public/demo/vesper/**"
+      - "public/demo/aether/**"
+      - "scripts/demo-interaction-tests.mjs"
+      - ".github/workflows/demo-interaction-tests.yml"
+  pull_request:
+    paths:
+      - "public/demo/aurelia-store/**"
+      - "public/demo/modern-saas/**"
+      - "public/demo/vesper/**"
+      - "public/demo/aether/**"
+      - "scripts/demo-interaction-tests.mjs"
+      - ".github/workflows/demo-interaction-tests.yml"
+
+concurrency:
+  group: nexora-demo-interactions-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  interactions:
+    name: Drive the demos in Chromium
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install browser tooling
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0 axe-core@4.11.0
+          npx playwright install --with-deps chromium
+
+      - name: Run interaction tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4174 --directory public >/tmp/nexora-public.log 2>&1 &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          sleep 2
+          curl -fsS -o /dev/null http://127.0.0.1:4174/demo/aurelia-store/index.html
+          BASE_URL=http://127.0.0.1:4174 node scripts/demo-interaction-tests.mjs

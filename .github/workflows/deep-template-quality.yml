@@ -136,47 +136,104 @@ jobs:
             name=$(basename "$dir")
             echo "## $name" >> .deep-audit/REPORT.md
             echo "=== PACKAGE: $name ==="
-            if [ ! -f "$dir/package.json" ]; then
+
+            # Customer ZIPs may contain a single project folder at their root.
+            # Find the actual package manifest instead of misclassifying those
+            # archives as static sites and silently skipping their quality gates.
+            package_json=$(find "$dir" -type f -name package.json \
+              -not -path '*/node_modules/*' -not -path '*/.next/*' \
+              -not -path '*/dist/*' -not -path '*/out/*' | sort | head -n 1)
+            if [ -z "$package_json" ]; then
               echo "$name: static package (no package.json) — N/A"
               echo '- package.json: N/A (static template)' >> .deep-audit/REPORT.md
               continue
             fi
-            if (cd "$dir" && npm install --legacy-peer-deps --no-fund --no-audit); then
-              echo "$name: npm install PASS"
+            package_dir=$(dirname "$package_json")
+            package_root=${package_dir#"$dir"/}
+            [ "$package_root" = "$package_dir" ] && package_root="."
+            echo "- package root: $package_root" >> .deep-audit/REPORT.md
+
+            if [ -f "$package_dir/package-lock.json" ]; then
+              if (cd "$package_dir" && npm ci --legacy-peer-deps --no-fund --no-audit); then
+                echo "$name: npm ci PASS"
+                echo '- clean install (npm ci): PASS' >> .deep-audit/REPORT.md
+              else
+                echo "$name: npm ci FAIL"
+                echo '- clean install (npm ci): FAIL' >> .deep-audit/REPORT.md
+                failures=$((failures+1)); continue
+              fi
             else
-              echo "$name: npm install FAIL"
-              echo '- npm install: FAIL' >> .deep-audit/REPORT.md
-              failures=$((failures+1)); continue
+              echo "$name: LOCKFILE MISSING"
+              echo '- clean install (npm ci): BLOCKED — package-lock.json missing from shipped ZIP' >> .deep-audit/REPORT.md
+              failures=$((failures+1))
+              if (cd "$package_dir" && npm install --legacy-peer-deps --no-fund --no-audit); then
+                echo "$name: npm install PASS (non-reproducible; lockfile missing)"
+                echo '- fallback npm install: PASS (does not satisfy reproducible-install requirement)' >> .deep-audit/REPORT.md
+              else
+                echo "$name: npm install FAIL"
+                echo '- fallback npm install: FAIL' >> .deep-audit/REPORT.md
+                failures=$((failures+1)); continue
+              fi
             fi
-            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"; then
-              if (cd "$dir" && npm run build); then
+
+            if (cd "$package_dir" && node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.build?0:1)"); then
+              if (cd "$package_dir" && npm run build); then
                 echo "$name: build PASS"; echo '- build: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: build FAIL"; echo '- build: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
-            else echo '- build: NOT RUN' >> .deep-audit/REPORT.md; fi
+            else echo '- build: NOT RUN (no build script)' >> .deep-audit/REPORT.md; fi
+
             # Next.js build already performs TypeScript validation. Do not run tsc over its generated .next output.
-            if node -e "const p=require('./$dir/package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"; then
+            if (cd "$package_dir" && node -e "const p=require('./package.json'); process.exit(((p.dependencies?.next || p.devDependencies?.next) && p.scripts?.build) ? 0 : 1)"); then
               echo '- typecheck: covered by Next.js build' >> .deep-audit/REPORT.md
-            elif find "$dir" -path "$dir/node_modules" -prune -o -path "$dir/.next" -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .; then
-              if (cd "$dir" && npx tsc --noEmit); then
+            elif (cd "$package_dir" && find . -path './node_modules' -prune -o -path './.next' -prune -o -path './dist' -prune -o -path './out' -prune -o -type f \( -name '*.ts' -o -name '*.tsx' \) -print | grep -q .); then
+              if (cd "$package_dir" && npx tsc --noEmit); then
                 echo "$name: typecheck PASS"; echo '- typecheck: PASS' >> .deep-audit/REPORT.md
               else
                 echo "$name: typecheck FAIL"; echo '- typecheck: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
               fi
-            else echo '- typecheck: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if node -e "const p=require('./$dir/package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"; then
-              rm -rf "$dir/.next"
-              if (cd "$dir" && npm run lint); then
+            else echo '- typecheck: NOT RUN (no TypeScript source)' >> .deep-audit/REPORT.md; fi
+
+            if (cd "$package_dir" && node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"); then
+              rm -rf "$package_dir/.next"
+              if (cd "$package_dir" && npm run lint); then
                 echo '- lint: PASS' >> .deep-audit/REPORT.md
               else
                 echo '- lint: ADVISORY FAIL (non-blocking; see job log)' >> .deep-audit/REPORT.md
               fi
-            else echo '- lint: NOT RUN' >> .deep-audit/REPORT.md; fi
-            if (cd "$dir" && npm audit --audit-level=high --omit=dev); then
+            else echo '- lint: NOT RUN (no lint script)' >> .deep-audit/REPORT.md; fi
+
+            if (cd "$package_dir" && npm audit --audit-level=high --omit=dev); then
               echo "$name: npm audit PASS"; echo '- npm audit high+: PASS' >> .deep-audit/REPORT.md
             else
               echo "$name: npm audit FAIL"; echo '- npm audit high+: FAIL' >> .deep-audit/REPORT.md; failures=$((failures+1))
+            fi
+
+            # Only require an .env.example when the project actually references
+            # app-specific environment variables; platform-provided variables
+            # are excluded from this customer setup check.
+            env_refs=$(grep -RhoE 'process\.env\.[A-Z][A-Z0-9_]*|import\.meta\.env\.[A-Z][A-Z0-9_]*' "$package_dir" \
+              --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist --exclude-dir=out \
+              --exclude='package-lock.json' --exclude='*.map' 2>/dev/null | sed -E 's/.*(process\.env\.|import\.meta\.env\.)//' | sort -u || true)
+            env_refs=$(printf '%s\n' "$env_refs" | grep -Ev '^(NODE_ENV|VERCEL_ENV|NEXT_RUNTIME)$' || true)
+            if [ -n "$env_refs" ]; then
+              missing_env=0
+              while IFS= read -r variable; do
+                [ -z "$variable" ] && continue
+                if [ ! -f "$package_dir/.env.example" ] || ! grep -Eq "^[[:space:]]*#?[[:space:]]*${variable}=" "$package_dir/.env.example"; then
+                  echo "$name: missing .env.example entry for $variable"
+                  missing_env=1
+                fi
+              done <<< "$env_refs"
+              if [ "$missing_env" -eq 0 ]; then
+                echo '- environment example: PASS' >> .deep-audit/REPORT.md
+              else
+                echo '- environment example: FAIL — required variables are undocumented' >> .deep-audit/REPORT.md
+                failures=$((failures+1))
+              fi
+            else
+              echo '- environment: no app-specific variables detected' >> .deep-audit/REPORT.md
             fi
             echo >> .deep-audit/REPORT.md
           done
@@ -203,6 +260,7 @@ jobs:
           (async()=>{
             const browser = await chromium.launch({headless:true});
             let failures = 0;
+            const failingDemos = [];
             for (const demo of demos) {
               const file = `public/demo/${demo}/index.html`;
               if (!fs.existsSync(file)) { console.log(`${demo}: NOT FOUND`); continue; }
@@ -224,13 +282,25 @@ jobs:
                 const productionBlocking = demo === 'vesper';
                 const ok = errors.length===0 && pageErrors.length===0 && !overflow && (!productionBlocking || (sameOriginFailed.length===0 && importantViolations.length===0));
                 console.log(demo + ': ' + (ok ? 'PASS' : 'FAIL') + ' blocking=' + (productionBlocking ? 'production' : 'advisory-template') + ' console=' + errors.length + ' page=' + pageErrors.length + ' sameOriginRequests=' + sameOriginFailed.length + ' a11yImportant=' + importantViolations.length + ' a11yTotal=' + a11y.violations.length + ' overflow=' + overflow);
-                if(!ok) failures++;
+                if(!ok) {
+                  failures++;
+                  failingDemos.push(demo);
+                  // Surface the detail as check-run annotations so the failure is
+                  // readable without downloading the artifact.
+                  const oneLine = value => String(value).replace(/[%\r\n]+/g, ' ').slice(0, 220);
+                  for (const e of errors.slice(0, 12)) process.stdout.write(`::error title=${demo} console error::${oneLine(e)}\n`);
+                  for (const e of pageErrors.slice(0, 6)) process.stdout.write(`::error title=${demo} page error::${oneLine(e)}\n`);
+                  for (const u of [...sameOriginFailed, ...failed.filter(x => !x.startsWith(base))].slice(0, 12)) process.stdout.write(`::error title=${demo} request failed::${oneLine(u)}\n`);
+                  for (const v of importantViolations.slice(0, 12)) process.stdout.write(`::error title=${demo} a11y ${v.id} (${v.impact})::${oneLine(v.nodes.slice(0, 4).map(n => n.html).join(' | '))}\n`);
+                }
               } catch(e) { console.log(`${demo}: FAIL ${e}`); failures++; }
               await page.close();
             }
             await browser.close();
             fs.appendFileSync('.deep-audit/REPORT.md', `Runtime failures: ${failures}\n`);
             fs.writeFileSync('.deep-audit/runtime-failures.txt', String(failures));
+            fs.writeFileSync('.deep-audit/runtime-failing-demos.txt', failingDemos.join(','));
+            console.log('RUNTIME_FAILING_DEMOS=' + (failingDemos.join(',') || 'none'));
             process.exitCode = 0;
           })();
           NODE
@@ -256,8 +326,14 @@ jobs:
           runtime_failures=0
           if [ -f .deep-audit/package-failures.txt ]; then package_failures=$(cat .deep-audit/package-failures.txt); fi
           if [ -f .deep-audit/runtime-failures.txt ]; then runtime_failures=$(cat .deep-audit/runtime-failures.txt); fi
+          failing_demos="none"
+          if [ -f .deep-audit/runtime-failing-demos.txt ]; then failing_demos=$(cat .deep-audit/runtime-failing-demos.txt); [ -n "$failing_demos" ] || failing_demos="none"; fi
           echo "BLOCKING_PACKAGE_FAILURES=$package_failures"
           echo "RUNTIME_FAILURES=$runtime_failures"
+          echo "RUNTIME_FAILING_DEMOS=$failing_demos"
+          if [ "$runtime_failures" -ne 0 ]; then
+            echo "::error title=Runtime audit failures::${runtime_failures} demo(s) failed: ${failing_demos}"
+          fi
           if [ "$package_failures" -ne 0 ] || [ "$runtime_failures" -ne 0 ]; then
             echo "DEEP QUALITY GATE: FAIL"
             exit 1
