@@ -6,13 +6,17 @@ on:
     paths:
       - "public/downloads/**"
       - ".github/workflows/audit-template-packages.yml"
+  pull_request:
+    paths:
+      - "public/downloads/**"
+      - ".github/workflows/audit-template-packages.yml"
 
 concurrency:
   group: nexora-template-audit
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   audit-and-capture:
@@ -93,7 +97,7 @@ jobs:
           unzip -q public/downloads/aether.zip -d .aether-capture
           cat > .aether-capture/next.config.mjs <<'EOF'
           /** @type {import('next').NextConfig} */
-          const nextConfig = { output: 'export', typescript: { ignoreBuildErrors: true }, images: { unoptimized: true } };
+          const nextConfig = { output: 'export', basePath: '/demo/aether', trailingSlash: true, typescript: { ignoreBuildErrors: true }, images: { unoptimized: true } };
           export default nextConfig;
           EOF
           cd .aether-capture
@@ -102,6 +106,23 @@ jobs:
           cd ..
           test -d .aether-capture/out
           cp -R .aether-capture/out/. public/demo/aether/
+          # Next.js basePath handles generated chunks; public assets referenced
+          # with root-relative /images/... URLs need the demo prefix as well.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root = Path("public/demo/aether")
+          for path in root.rglob("*"):
+              if not path.is_file() or path.suffix.lower() not in {".html", ".css", ".js", ".json"}:
+                  continue
+              try:
+                  source = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  continue
+              updated = re.sub(r"(?<![A-Za-z0-9:])/(images/)", r"/demo/aether/\\1", source)
+              if updated != source:
+                  path.write_text(updated, encoding="utf-8")
+          PY
           test -f public/demo/aether/index.html
 
       - name: Build Vesper real demo
@@ -248,43 +269,3 @@ jobs:
             .capture/
           retention-days: 14
           include-hidden-files: true
-
-      - name: Commit real captures and audit report
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "Nexora Core"
-          git config user.email "ghandon183-glitch@users.noreply.github.com"
-
-          # Preserve generated outputs, then apply them on top of the newest main
-          # instead of rebasing binary screenshots/videos over concurrent updates.
-          snapshot="$(mktemp -d)"
-          cp -a .template-audit "$snapshot/template-audit"
-          cp -a public/demo/vesper "$snapshot/vesper"
-          cp -a public/templates/gallery "$snapshot/gallery"
-          cp -a public/templates/video "$snapshot/video"
-
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p .template-audit public/demo/vesper public/templates/gallery public/templates/video
-            cp -a "$snapshot/template-audit/." .template-audit/
-            rm -rf public/demo/vesper
-            cp -a "$snapshot/vesper" public/demo/vesper
-            cp -a "$snapshot/gallery/." public/templates/gallery/
-            cp -a "$snapshot/video/." public/templates/video/
-            git add .template-audit public/demo/vesper public/templates/gallery public/templates/video
-            if git diff --cached --quiet; then
-              echo "No capture or audit changes to commit."
-              exit 0
-            fi
-            git commit -m "chore: add real demo captures and package audit report"
-            if git push origin HEAD:main; then
-              echo "Capture assets and audit report committed to latest main."
-              exit 0
-            fi
-            echo "Push raced with another main update; retrying against latest main."
-          done
-          echo "Unable to commit captures after three attempts." >&2
-          exit 1
-      
