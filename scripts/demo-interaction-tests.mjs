@@ -226,11 +226,15 @@ async function vesper(browser) {
   await page.getByRole("button", { name: "Pause preview playback" }).click();
   const playButton = page.getByRole("button", { name: "Play preview playback" });
   record(`${name} playback toggle pauses preview`, (await playButton.count()) === 1 && (await playButton.getAttribute("aria-pressed")) === "false");
-  await playButton.click();
-  const pauseButton = page.getByRole("button", { name: "Pause preview playback" });
-  record(`${name} playback toggle resumes preview`, (await pauseButton.count()) === 1 && (await pauseButton.getAttribute("aria-pressed")) === "true");
 
+  // The preview autoplays and advances the scrubber every 80ms, so the keyboard
+  // checks run while playback is paused; the resume check follows them.
   const timeline = page.getByRole("slider", { name: "Timeline position" });
+  if ((await timeline.getAttribute("aria-valuenow")) === "100") {
+    // The scrubber clamps at 100, so leave room for ArrowRight on the last frame.
+    await timeline.focus();
+    await timeline.press("ArrowLeft");
+  }
   const originalPosition = await timeline.getAttribute("aria-valuenow");
   await timeline.focus();
   await timeline.press("ArrowRight");
@@ -238,6 +242,10 @@ async function vesper(browser) {
   record(`${name} timeline keyboard control changes position`, changedPosition !== originalPosition, `${originalPosition} -> ${changedPosition}`);
   await timeline.press("ArrowLeft");
   record(`${name} timeline keyboard control restores position`, (await timeline.getAttribute("aria-valuenow")) === originalPosition);
+
+  await playButton.click();
+  const pauseButton = page.getByRole("button", { name: "Pause preview playback" });
+  record(`${name} playback toggle resumes preview`, (await pauseButton.count()) === 1 && (await pauseButton.getAttribute("aria-pressed")) === "true");
 
   const seed = page.getByRole("spinbutton", { name: "Deterministic seed" });
   const originalSeed = await seed.inputValue();
