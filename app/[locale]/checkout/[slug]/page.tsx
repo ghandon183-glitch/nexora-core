@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useRouter, Link } from "@/i18n/navigation";
 import { trackAnalyticsEvent } from "@/lib/analytics/track-event";
+import { shouldTrackPurchase } from "@/lib/analytics/purchase-dedupe";
 
 import { getTemplate } from "@/lib/data/get-template";
 import { useAuth } from "@/lib/context/auth-context";
@@ -166,6 +167,11 @@ export default function CheckoutPage() {
       }
     }
 
+    if (!shouldTrackPurchase(order.id)) {
+      purchaseTrackedRef.current = true;
+      return;
+    }
+
     purchaseTrackedRef.current = true;
     trackAnalyticsEvent("purchase", {
       transaction_id: order.id,
@@ -216,7 +222,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!template) {
+  if (!template || template.hidden) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#060B18]">
         <p className="text-slate-500">{t("templateNotFound")}</p>
