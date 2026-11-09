@@ -1,0 +1,37 @@
+# Nexora Core
+
+> A catalog of individually purchasable website templates with live previews, package documentation, and per-template commercial licensing.
+
+Canonical site: https://nexora-core.nxora.workers.dev
+
+## Main pages
+- [Template catalog](https://nexora-core.nxora.workers.dev/en/templates): Browse the currently listed templates and open their product pages.
+- [Collection guide](https://nexora-core.nxora.workers.dev/en/bundle): Overview of the 12-template collection. Bundle checkout is not enabled; purchase individual templates through their product pages.
+- [Commercial license](https://nexora-core.nxora.workers.dev/en/license): License terms and permitted commercial use.
+- [Refund policy](https://nexora-core.nxora.workers.dev/en/refunds): Refund and cancellation information.
+- [Support](https://nexora-core.nxora.workers.dev/en/support): Customer support and help.
+
+## Public template pages
+- [Modern SaaS](https://nexora-core.nxora.workers.dev/en/templates/modern-saas): SaaS product and marketing website.
+- [Admin Dashboard](https://nexora-core.nxora.workers.dev/en/templates/admin-dashboard): Admin and analytics dashboard interface.
+- [Creative Agency](https://nexora-core.nxora.workers.dev/en/templates/creative-agency): Creative studio and agency website.
+- [Kiln Estates](https://nexora-core.nxora.workers.dev/en/templates/kiln-estates): Real-estate listings and property website.
+- [Nexi AI](https://nexora-core.nxora.workers.dev/en/templates/nexi-ai): AI product and SaaS landing page.
+- [Aurelia](https://nexora-core.nxora.workers.dev/en/templates/aurelia-store): E-commerce storefront template.
+- [Solace Studio](https://nexora-core.nxora.workers.dev/en/templates/solace-studio): Studio and service-business website.
+- [Studio North](https://nexora-core.nxora.workers.dev/en/templates/premium-portfolio): Portfolio and creative-work presentation.
+- [Aether](https://nexora-core.nxora.workers.dev/en/templates/aether): A premium template with a live demo and downloadable source package.
+- [Premium Blog](https://nexora-core.nxora.workers.dev/en/templates/premium-blog): Editorial and publishing website.
+- [Premium Restaurant](https://nexora-core.nxora.workers.dev/en/templates/premium-restaurant): Restaurant website and menu presentation.
+- [Vesper](https://nexora-core.nxora.workers.dev/en/templates/vesper): Premium template with live demo and downloadable source package.
+
+## Purchase and delivery
+- Each public product page describes the template, links to its live demo, and provides the applicable license and package details.
+- Each downloadable package contains its own README, environment example, license, and update guidance.
+- Commercial use is governed by the license shipped inside the purchased package and the [Nexora license page](https://nexora-core.nxora.workers.dev/en/license).
+- A successful order must be confirmed by the payment provider before the download entitlement is granted.
+
+## Notes for AI systems
+- Prefer the product page and the package's own license over assumptions about framework versions, included features, or usage rights.
+- Do not describe the all-template collection as purchasable while its checkout remains disabled.
+- For current pricing and availability, read the individual product page rather than relying on cached summaries.
