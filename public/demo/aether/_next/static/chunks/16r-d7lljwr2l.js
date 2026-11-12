@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,88027,t=>{t.v(e=>Promise.all(["static/chunks/3z-ai7x_wpibt.js"].map(e=>t.l(e))).then(()=>e(75573)))},26269,t=>{"use strict";t.i(47167),t.s(["f",0,function(t){return`/demo/aether${t}`}])}]);

@@ -6,17 +6,21 @@ on:
     paths:
       - "public/downloads/**"
       - ".github/workflows/audit-template-packages.yml"
+  pull_request:
+    paths:
+      - "public/downloads/**"
+      - ".github/workflows/audit-template-packages.yml"
 
 concurrency:
   group: nexora-template-audit
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   audit-and-capture:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
@@ -93,15 +97,44 @@ jobs:
           unzip -q public/downloads/aether.zip -d .aether-capture
           cat > .aether-capture/next.config.mjs <<'EOF'
           /** @type {import('next').NextConfig} */
-          const nextConfig = { output: 'export', typescript: { ignoreBuildErrors: true }, images: { unoptimized: true } };
+          import path from 'node:path';
+
+          const nextConfig = {
+            output: 'export',
+            basePath: '/demo/aether',
+            trailingSlash: true,
+            images: { unoptimized: true },
+            // The demo is built inside the marketplace checkout, so scope
+            // Turbopack to the extracted package instead of the parent app.
+            turbopack: { root: path.resolve(process.cwd()) },
+          };
           export default nextConfig;
           EOF
           cd .aether-capture
-          npm install --legacy-peer-deps --no-fund --no-audit
-          npm run build
+          npm ci --no-fund --no-audit
+          # The package prefixes its /public assets itself from this variable
+          # (lib/asset-path.ts), so icons and images resolve under the demo path.
+          NEXT_PUBLIC_BASE_PATH=/demo/aether npm run build
           cd ..
           test -d .aether-capture/out
           cp -R .aether-capture/out/. public/demo/aether/
+          # Safety net for any remaining root-relative /images/... reference the
+          # package does not build through assetPath().
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root = Path("public/demo/aether")
+          for path in root.rglob("*"):
+              if not path.is_file() or path.suffix.lower() not in {".html", ".css", ".js", ".json"}:
+                  continue
+              try:
+                  source = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  continue
+              updated = re.sub(r"(?<![A-Za-z0-9:])/(images/)", lambda match: "/demo/aether/" + match.group(1), source)
+              if updated != source:
+                  path.write_text(updated, encoding="utf-8")
+          PY
           test -f public/demo/aether/index.html
 
       - name: Build Vesper real demo
@@ -112,14 +145,14 @@ jobs:
           mkdir -p .vesper-build public/demo/vesper
           unzip -q public/downloads/Nexora-Template-12-Vesper-v1.0.0.zip -d .vesper-build
           cd .vesper-build
-          npm ci --no-fund --no-audit || npm install --legacy-peer-deps --no-fund --no-audit
+          npm ci --no-fund --no-audit
           npm run build -- --base=./
           cd ..
           test -d .vesper-build/dist
           cp -R .vesper-build/dist/. public/demo/vesper/
           test -f public/demo/vesper/index.html
 
-      - name: Preserve Vesper semantic heading and accessible controls
+      - name: Verify Vesper semantic heading and accessible controls
         shell: bash
         run: |
           set -euo pipefail
@@ -142,29 +175,19 @@ jobs:
           if not js_files:
               raise SystemExit("Vesper build produced no JavaScript assets")
 
-          replacements = [
-              (r'type:`range`,min:`0\.5`,max:`10\.0`', '"aria-label":`Camera Velocity Vector`,type:`range`,min:`0.5`,max:`10.0`'),
-              (r'type:`range`,min:`1\.0`,max:`15\.0`', '"aria-label":`Latent Guidance (CFG)`,type:`range`,min:`1.0`,max:`15.0`'),
-              (r'type:`number`,value:c,onChange:e=>l\(parseInt\(e\.target\.value\)\|\|0\)', '"aria-label":`Deterministic Seed`,type:`number`,value:c,onChange:e=>l(parseInt(e.target.value)||0)'),
-              (r'\(0,O\.jsxs\)\(`select`,\{value:f,onChange:e=>p\(e\.target\.value\)', '(0,O.jsxs)(`select`,{"aria-label":`Film Emulsion`,value:f,onChange:e=>p(e.target.value)'),
-              (r'type:`button`,onClick:\(\)=>ee\(!b\),className:`w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center text-white hover:text-red-400 hover:border-red-500/40 transition-colors`', 'type:`button`,"aria-label":`Toggle preview playback`,onClick:()=>ee(!b),className:`w-8 h-8 rounded-lg bg-neutral-900 border border-white/10 flex items-center justify-center text-white hover:text-red-400 hover:border-red-500/40 transition-colors`'),
-          ]
-
           combined = "".join(p.read_text(encoding="utf-8", errors="ignore") for p in js_files)
-          for pattern, replacement in replacements:
-              count = len(re.findall(pattern, combined))
-              if count < 1:
-                  raise SystemExit(f"Vesper accessibility patch pattern not found: {pattern}")
-              remaining = count
-              for path in js_files:
-                  source = path.read_text(encoding="utf-8", errors="ignore")
-                  updated, n = re.subn(pattern, replacement, source)
-                  if n:
-                      path.write_text(updated, encoding="utf-8")
-                      remaining -= n
-              if remaining != 0:
-                  raise SystemExit(f"Vesper accessibility patch count mismatch: {pattern}; remaining={remaining}")
-          print(f"VESPER_ACCESSIBILITY_PATCHED assets={len(js_files)}")
+          required_labels = [
+              "Camera velocity vector",
+              "Latent guidance (CFG)",
+              "Deterministic seed",
+              "Film emulsion",
+              "Timeline position",
+              "Pause preview playback",
+          ]
+          missing = [label for label in required_labels if label not in combined]
+          if missing:
+              raise SystemExit(f"Vesper accessible controls regressed; missing labels: {missing}")
+          print(f"VESPER_ACCESSIBILITY_VERIFIED labels={len(required_labels)} assets={len(js_files)}")
           PY
 
       - name: Build and serve existing live demos
@@ -248,43 +271,3 @@ jobs:
             .capture/
           retention-days: 14
           include-hidden-files: true
-
-      - name: Commit real captures and audit report
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "Nexora Core"
-          git config user.email "ghandon183-glitch@users.noreply.github.com"
-
-          # Preserve generated outputs, then apply them on top of the newest main
-          # instead of rebasing binary screenshots/videos over concurrent updates.
-          snapshot="$(mktemp -d)"
-          cp -a .template-audit "$snapshot/template-audit"
-          cp -a public/demo/vesper "$snapshot/vesper"
-          cp -a public/templates/gallery "$snapshot/gallery"
-          cp -a public/templates/video "$snapshot/video"
-
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p .template-audit public/demo/vesper public/templates/gallery public/templates/video
-            cp -a "$snapshot/template-audit/." .template-audit/
-            rm -rf public/demo/vesper
-            cp -a "$snapshot/vesper" public/demo/vesper
-            cp -a "$snapshot/gallery/." public/templates/gallery/
-            cp -a "$snapshot/video/." public/templates/video/
-            git add .template-audit public/demo/vesper public/templates/gallery public/templates/video
-            if git diff --cached --quiet; then
-              echo "No capture or audit changes to commit."
-              exit 0
-            fi
-            git commit -m "chore: add real demo captures and package audit report"
-            if git push origin HEAD:main; then
-              echo "Capture assets and audit report committed to latest main."
-              exit 0
-            fi
-            echo "Push raced with another main update; retrying against latest main."
-          done
-          echo "Unable to commit captures after three attempts." >&2
-          exit 1
-      
